@@ -21,7 +21,7 @@ class Sidebar extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: Text('Ana Sayfa'),
+            title: Text('Ana Sayfaa'),
             onTap: () {
               Navigator.pop(context); 
               Navigator.pushNamed(context, '/'); 
