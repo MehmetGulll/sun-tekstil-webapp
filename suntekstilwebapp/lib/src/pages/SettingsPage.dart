@@ -5,7 +5,6 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
-      pageTitle: 'Ayarlar',
       body: Center(
         child: Text('Ayarlar Sayfası İçeriği'),
       ),

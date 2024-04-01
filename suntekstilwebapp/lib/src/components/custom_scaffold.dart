@@ -3,19 +3,24 @@ import 'package:suntekstilwebapp/src/components/sidebar.dart';
 
 class CustomScaffold extends StatelessWidget {
   final Widget body;
-  final String pageTitle;
 
   const CustomScaffold({
-    Key? key, 
-    required this.body, 
-    this.pageTitle = 'Page Title',
+    Key? key,
+    required this.body,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageTitle),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text("Jimmy Key Denetleme Sistemine Hoş Geldiniz..!"),
+            Image.network('https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png',fit:BoxFit.fill, width: 250, height: 50,),
+            
+          ],
+        )
       ),
       drawer: Drawer(
         child: Sidebar(),
