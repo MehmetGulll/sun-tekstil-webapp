@@ -32,6 +32,40 @@ class Sidebar extends StatelessWidget {
                 }
               },
             ),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Ana Sayfaaaaaa'),
+            onTap: () {
+              Navigator.pop(context); 
+              Navigator.pushNamed(context, '/'); 
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('Ayarlar'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+          ExpansionTile(
+            leading: Icon(Icons.folder),
+            title: Text('Dosyalar'),
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.picture_as_pdf),
+                title: Text('PDF Dosyaları'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.image),
+                title: Text('Resim Dosyaları'),
+                onTap: () {
+                  Navigator.pop(context); 
+                },
             ListTile(
               leading: Icon(Icons.settings),
               title: Text(
