@@ -13,15 +13,18 @@ class CustomScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text("Jimmy Key Denetleme Sistemine Hoş Geldiniz..!"),
-            Image.network('https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png',fit:BoxFit.fill, width: 250, height: 50,),
-            
-          ],
-        )
-      ),
+          title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text("Jimmy Key Denetleme Sistemine Hoş Geldiniz..!"),
+          Image.network(
+            'https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png',
+            fit: BoxFit.fill,
+            width: 250,
+            height: 50,
+          ),
+        ],
+      )),
       drawer: Drawer(
         child: Sidebar(),
       ),

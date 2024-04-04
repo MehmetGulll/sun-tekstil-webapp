@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/components/sidebar.dart'; 
 import 'package:suntekstilwebapp/src/pages/HomePage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
 
@@ -17,7 +16,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(),
+        '/': (context) => Home(),
         '/settings': (context) => SettingsPage(),
       },
     );
