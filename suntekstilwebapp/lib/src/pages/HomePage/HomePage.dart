@@ -35,7 +35,9 @@ class Home extends StatelessWidget {
                   child: Container(
                       margin: EdgeInsets.only(top: 45),
                       child: Container(
+                        margin: EdgeInsets.only(left: 20),
                         child: Row(
+                        
                           children: [
                             CustomCard(
                               color: Themes.secondaryColor,
@@ -50,9 +52,10 @@ class Home extends StatelessWidget {
                                         fontWeight: Tokens.fontWeight[7]),
                                   ),
                                 ),
+                                
                               ],
                             ),
-                            SizedBox(width: 15),
+                           SizedBox(width: 20,),
                             Expanded(
                               child: Container(
                                   decoration: BoxDecoration(
@@ -62,9 +65,11 @@ class Home extends StatelessWidget {
                                   child: Align(
                                     alignment: Alignment.topCenter,
                                     child: Container(
+                                     
                                       margin: EdgeInsets.only(top: 25),
                                       child: Column(
                                         children: [
+                                          
                                           CustomCard(
                                               color: Themes.blueColor,
                                               children: [
@@ -81,6 +86,7 @@ class Home extends StatelessWidget {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
+                                                    
                                                     Container(
                                                       child: Column(
                                                         children: [
@@ -159,16 +165,16 @@ class Home extends StatelessWidget {
                   child: Row(
                     children: [
                       CustomCard(
-                        color: Colors.green,
+                        color: Themes.greenColor,
                         children: [
                           Icon(
-                            Icons.home,
+                            Icons.bar_chart,
                             size: 50,
                             color: Themes.whiteColor,
                           ),
                           Flexible(
                             child: Text(
-                              "En Çok Aksiyon Olan Lokasyonlar",
+                              "En Çok Aksiyonu Olan Lokasyonlar",
                               maxLines: 1,
                               style: TextStyle(
                                   color: Themes.whiteColor,
@@ -181,29 +187,39 @@ class Home extends StatelessWidget {
                       SizedBox(
                         width: 20,
                       ),
-                      CustomCard(
-                        color: Themes.secondaryColor,
-                        children: [
-                          Icon(
-                            Icons.home,
-                            size: 50,
-                            color: Themes.whiteColor,
-                          ),
-                          Flexible(
-                            child: Text(
-                              "En Az Aksiyonu Olan Lokasyonlar",
-                              maxLines: 1,
-                              style: TextStyle(
+                      Expanded(
+                        child: Row(
+                          children: [
+                            CustomCard(
+                              color: Themes.secondaryColor,
+                              children: [
+                                Icon(
+                                  Icons.bar_chart,
+                                  size: 50,
                                   color: Themes.whiteColor,
-                                  fontSize: Tokens.fontSize[2],
-                                  fontWeight: Tokens.fontWeight[7]),
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    "En Az Aksiyonu Olan Sorular",
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                        color: Themes.whiteColor,
+                                        fontSize: Tokens.fontSize[2],
+                                        fontWeight: Tokens.fontWeight[7]),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      )
+                            SizedBox(
+                              width: 20,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                
                 SizedBox(
                   height: 20,
                 ),
