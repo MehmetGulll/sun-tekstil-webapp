@@ -65,6 +65,16 @@ class Sidebar extends StatelessWidget {
         ),
       ],
     );
+    final QuestionsExpansionTile = ListTile(
+      leading: Icon(Icons.question_mark),
+      title: Text('Denetim Soruları', style: TextStyle(color: Themes.whiteColor)),
+       onTap: () {
+        Navigator.pop(context);
+        if (ModalRoute.of(context)?.settings.name != '/questions') {
+          Navigator.pushReplacementNamed(context, '/questions');
+        }
+      },
+    );
 
     return Drawer(
       child: Container(
@@ -76,6 +86,7 @@ class Sidebar extends StatelessWidget {
             homeTile,
             settingsTile,
             filesExpansionTile,
+            QuestionsExpansionTile
           ],
         ),
       ),
