@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/components/custom_scaffold.dart';
+import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 
 class HomePage extends StatelessWidget {
   @override

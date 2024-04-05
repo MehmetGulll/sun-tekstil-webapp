@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/components/sidebar.dart';
+import 'package:suntekstilwebapp/src/components/Sidebar/sidebar.dart';
 
 class CustomScaffold extends StatelessWidget {
   final Widget body;
