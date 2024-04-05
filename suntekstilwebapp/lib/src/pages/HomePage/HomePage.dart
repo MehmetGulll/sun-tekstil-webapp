@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:suntekstilwebapp/src/components/custom_scaffold.dart';
+import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Card/Card.dart';

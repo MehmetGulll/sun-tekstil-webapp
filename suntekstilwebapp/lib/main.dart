@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/pages/HomePage.dart'; 
+import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
 
 void main() {
