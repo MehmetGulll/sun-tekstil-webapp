@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/constants/theme.dart';
-import 'package:suntekstilwebapp/src/constants/tokens.dart';
 
 class CustomInput extends StatelessWidget {
   final TextEditingController controller;
