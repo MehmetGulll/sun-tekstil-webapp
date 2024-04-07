@@ -51,6 +51,14 @@ class QuestionsPage extends StatelessWidget {
                   controller: controller,
                   hintText: "SORU TİPİ",
                   keyboardType: keyboardType),
+                  SizedBox(height: 15),
+              CustomButton(
+                  buttonText: 'Ara',
+                  textColor: Themes.whiteColor,
+                  buttonColor: Themes.blueColor,
+                  onPressed: () {
+                    print("Arama kısmı çalıştı");
+                  }),
               Padding(
                 padding: EdgeInsets.only(top: 20),
                 child: Table(
@@ -138,6 +146,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
@@ -179,6 +188,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
@@ -219,6 +229,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
@@ -260,6 +271,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
@@ -300,6 +312,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
@@ -340,6 +353,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
@@ -380,6 +394,7 @@ class QuestionsPage extends StatelessWidget {
                         child: CustomButton(
                           buttonText: 'Düzenle',
                           textColor: Themes.blueColor,
+                          buttonColor: Themes.whiteColor,
                           onPressed: () {
                             print("Düzenleme ekranı açıldı");
                           },
