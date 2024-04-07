@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart'; 
+import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
+import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
 
 void main() {
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => Home(),
         '/settings': (context) => SettingsPage(),
+        '/questions': (context) => QuestionsPage()
       },
     );
   }
