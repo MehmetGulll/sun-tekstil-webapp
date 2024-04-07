@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
@@ -10,6 +11,18 @@ import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 class QuestionsPage extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
+  void showModal(BuildContext context, Color backgroundColor, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomModal(
+          backgroundColor: backgroundColor,
+          text: text,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -51,7 +64,7 @@ class QuestionsPage extends StatelessWidget {
                   controller: controller,
                   hintText: "SORU TİPİ",
                   keyboardType: keyboardType),
-                  SizedBox(height: 15),
+              SizedBox(height: 15),
               CustomButton(
                   buttonText: 'Ara',
                   textColor: Themes.whiteColor,
@@ -148,7 +161,8 @@ class QuestionsPage extends StatelessWidget {
                           textColor: Themes.blueColor,
                           buttonColor: Themes.whiteColor,
                           onPressed: () {
-                            print("Düzenleme ekranı açıldı");
+                            showModal(
+                                context, Themes.yellowColor, "Modal Açıldı");
                           },
                         ),
                       )
