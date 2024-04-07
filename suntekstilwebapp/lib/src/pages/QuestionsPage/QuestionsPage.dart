@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,6 +5,7 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
+import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 
 class QuestionsPage extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
@@ -97,13 +96,13 @@ class QuestionsPage extends StatelessWidget {
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                         ),
                       ),
-                      // Container(
-                      //     padding: EdgeInsets.all(8.0),
-                      //     color: Themes.yellowColor,
-                      //     child: Text(
-                      //       "DÜZENLE",
-                      //       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                      //     ))
+                      Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DÜZENLE",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ))
                     ]),
                     TableRow(children: [
                       Container(
@@ -132,6 +131,16 @@ class QuestionsPage extends StatelessWidget {
                         child: Text(
                           "5",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
                         ),
                       )
                     ]),
@@ -164,6 +173,16 @@ class QuestionsPage extends StatelessWidget {
                           "5",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                         ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
+                        ),
                       )
                     ]),
                     TableRow(children: [
@@ -193,6 +212,16 @@ class QuestionsPage extends StatelessWidget {
                         child: Text(
                           "5",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
                         ),
                       )
                     ]),
@@ -225,35 +254,15 @@ class QuestionsPage extends StatelessWidget {
                           "5",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                         ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "DG 3",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
                       ),
                       Container(
                         padding: EdgeInsets.all(8.0),
-                        child: Text("Tüm modeller reyona çıkarılmış mı?",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Evet/Hayır",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "5",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
                         ),
                       )
                     ]),
@@ -285,6 +294,16 @@ class QuestionsPage extends StatelessWidget {
                           "5",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                         ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
+                        ),
                       )
                     ]),
                     TableRow(children: [
@@ -314,6 +333,56 @@ class QuestionsPage extends StatelessWidget {
                         child: Text(
                           "5",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
+                        ),
+                      )
+                    ]),
+                    TableRow(children: [
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "DG 3",
+                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text("Tüm modeller reyona çıkarılmış mı?",
+                            style: TextStyle(
+                              fontWeight: Tokens.fontWeight[2],
+                            )),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "Evet/Hayır",
+                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "5",
+                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        child: CustomButton(
+                          buttonText: 'Düzenle',
+                          textColor: Themes.blueColor,
+                          onPressed: () {
+                            print("Düzenleme ekranı açıldı");
+                          },
                         ),
                       )
                     ])
