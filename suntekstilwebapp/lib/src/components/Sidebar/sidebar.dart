@@ -75,6 +75,16 @@ class Sidebar extends StatelessWidget {
         }
       },
     );
+    final RegionsTile = ListTile(
+      leading : Icon(Icons.map),
+      title:Text('Bölgeler', style:TextStyle(color:Themes.whiteColor)),
+      onTap: (){
+        Navigator.pop(context);
+        if(ModalRoute.of(context)?.settings.name!='/regions'){
+          Navigator.pushReplacementNamed(context, '/regions');
+        }
+      },
+    );
 
     return Drawer(
       child: Container(
@@ -86,7 +96,8 @@ class Sidebar extends StatelessWidget {
             homeTile,
             settingsTile,
             filesExpansionTile,
-            QuestionsExpansionTile
+            QuestionsExpansionTile,
+            RegionsTile
           ],
         ),
       ),
