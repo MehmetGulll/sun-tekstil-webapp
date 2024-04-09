@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
+import 'package:suntekstilwebapp/src/pages/Regions/Regions.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,7 +20,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => Home(),
         '/settings': (context) => SettingsPage(),
-        '/questions': (context) => QuestionsPage()
+        '/questions': (context) => QuestionsPage(),
+        '/regions':(context) => Regions()
       },
     );
   }
