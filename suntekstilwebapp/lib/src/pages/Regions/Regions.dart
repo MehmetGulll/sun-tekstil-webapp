@@ -88,56 +88,33 @@ class _RegionsState extends State<Regions> {
         buildRow("Lokasyon Tipi", _locationTypeList,
             (value) => setState(() => _chosenLocationType = value)),
         SizedBox(height: 10),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   children: [
-        //     Expanded(
-        //       child: CustomButton(
-        //         buttonText: "Ara",
-        //         onPressed: () {
-        //           print("Butona basıldı");
-        //         },
-        //       ),
-        //     ),
-        //     SizedBox(
-        //       width: 20,
-        //     ),
-        //     Expanded(
-        //       child: CustomButton(
-        //         buttonText: "Lokasyon Ekle",
-        //         onPressed: () {
-        //           print("Butona basıldı");
-        //         },
-        //       ),
-        //     )
-        //   ],
-        // ),
         Padding(
-  padding: EdgeInsets.symmetric(horizontal: 350), 
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Expanded(
-        child: CustomButton(
-          buttonText: "Ara",
-          onPressed: () {
-            print("Butona basıldı");
-          },
+          padding: EdgeInsets.symmetric(horizontal: 350),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: CustomButton(
+                  buttonText: "Ara",
+                  onPressed: () {
+                    print("Butona basıldı");
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 20,
+              ),
+              Expanded(
+                child: CustomButton(
+                  buttonText: "Lokasyon Ekle",
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/addLocation');
+                  },
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-      SizedBox(width: 20,),
-      Expanded(
-        child: CustomButton(
-          buttonText: "Lokasyon Ekle",
-          onPressed: () {
-            print("Butona basıldı");
-          },
-        ),
-      )
-    ],
-  ),
-),
-
         Container(
             margin: EdgeInsets.all(30),
             child: Text(

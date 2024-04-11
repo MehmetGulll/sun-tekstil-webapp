@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
@@ -37,9 +38,9 @@ class QuestionsPage extends StatelessWidget {
                     color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
               ),
               CustomInput(
-                  controller: controller,
+                  controller: TextEditingController(),
                   hintText: "SORU KODU",
-                  keyboardType: keyboardType),
+                  keyboardType: TextInputType.text),
               SizedBox(
                 height: 50,
               ),
@@ -49,9 +50,9 @@ class QuestionsPage extends StatelessWidget {
                     color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
               ),
               CustomInput(
-                  controller: controller,
+                  controller: TextEditingController(),
                   hintText: "SORU ADI",
-                  keyboardType: keyboardType),
+                  keyboardType: TextInputType.text),
               SizedBox(
                 height: 50,
               ),
@@ -61,9 +62,9 @@ class QuestionsPage extends StatelessWidget {
                     color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
               ),
               CustomInput(
-                  controller: controller,
+                  controller: TextEditingController(),
                   hintText: "SORU TİPİ",
-                  keyboardType: keyboardType),
+                  keyboardType: TextInputType.text),
               SizedBox(height: 15),
               CustomButton(
                   buttonText: 'Ara',

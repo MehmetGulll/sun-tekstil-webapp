@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
 import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
@@ -21,7 +22,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => Home(),
         '/settings': (context) => SettingsPage(),
         '/questions': (context) => QuestionsPage(),
-        '/regions':(context) => Regions()
+        '/regions':(context) => Regions(),
+        '/addLocation':(context) => AddLocation()
       },
     );
   }
