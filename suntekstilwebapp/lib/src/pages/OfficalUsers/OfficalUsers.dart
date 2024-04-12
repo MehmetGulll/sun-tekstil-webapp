@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
+import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
+import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 
@@ -13,6 +15,80 @@ class OfficalUsers extends StatelessWidget {
         return CustomModal(
           backgroundColor: backgroundColor,
           text: text,
+          child: Column(
+            children: [
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Ad',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Soyad',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Email',
+                keyboardType: TextInputType.emailAddress,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Kullanıcı Adı',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              ...[
+                'Operasyon Direktörü',
+                'Operasyon Müdürü',
+                'Bölge Müdürü',
+                'Lokasyon Müdürü',
+                'Denetçi',
+                'Marka Yöneticisi'
+              ]
+                  .map((role) => CheckboxListTile(
+                        title: Text(role),
+                        value: false,
+                        onChanged: (bool? value) {},
+                      ))
+                  .toList(),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Durum",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      items: ['Aktif', 'Pasif'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomButton(
+                  buttonText: "Düzenle",
+                  onPressed: () {
+                    print("Düzenlendi ");
+                  })
+            ],
+          ),
         );
       },
     );
@@ -155,8 +231,7 @@ class OfficalUsers extends StatelessWidget {
                           textColor: Themes.blueColor,
                           buttonColor: Themes.whiteColor,
                           onPressed: () {
-                            showModal(
-                                context, Themes.yellowColor, "Modal Açıldı");
+                            showModal(context, Themes.whiteColor, "");
                           },
                         ),
                       )

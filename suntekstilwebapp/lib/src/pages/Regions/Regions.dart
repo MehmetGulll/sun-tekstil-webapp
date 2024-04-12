@@ -61,6 +61,7 @@ class _RegionsState extends State<Regions> {
         return CustomModal(
           backgroundColor: backgroundColor,
           text: text,
+          child: Container(),
         );
       },
     );

@@ -19,6 +19,8 @@ class QuestionsPage extends StatelessWidget {
         return CustomModal(
           backgroundColor: backgroundColor,
           text: text,
+          child: Container(),
+          
         );
       },
     );
