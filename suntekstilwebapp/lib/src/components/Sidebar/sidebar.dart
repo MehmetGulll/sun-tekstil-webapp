@@ -67,8 +67,9 @@ class Sidebar extends StatelessWidget {
     );
     final QuestionsExpansionTile = ListTile(
       leading: Icon(Icons.question_mark),
-      title: Text('Denetim Soruları', style: TextStyle(color: Themes.whiteColor)),
-       onTap: () {
+      title:
+          Text('Denetim Soruları', style: TextStyle(color: Themes.whiteColor)),
+      onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/questions') {
           Navigator.pushReplacementNamed(context, '/questions');
@@ -76,14 +77,42 @@ class Sidebar extends StatelessWidget {
       },
     );
     final RegionsTile = ListTile(
-      leading : Icon(Icons.map),
-      title:Text('Bölgeler', style:TextStyle(color:Themes.whiteColor)),
-      onTap: (){
+      leading: Icon(Icons.map),
+      title: Text('Bölgeler', style: TextStyle(color: Themes.whiteColor)),
+      onTap: () {
         Navigator.pop(context);
-        if(ModalRoute.of(context)?.settings.name!='/regions'){
+        if (ModalRoute.of(context)?.settings.name != '/regions') {
           Navigator.pushReplacementNamed(context, '/regions');
         }
       },
+    );
+    final UserManagementTile = ExpansionTile(
+      leading: Icon(Icons.supervised_user_circle),
+      title: Text('Kullanıcı Yönetimi',
+          style: TextStyle(color: Themes.whiteColor)),
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.password),
+          title: Text(
+            'Şifre Değiştir',
+            style: TextStyle(color: Themes.whiteColor),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.verified_user_rounded),
+          title: Text('Yetkili Kullanıcılar',
+              style: TextStyle(color: Themes.whiteColor)),
+          onTap: () {
+            Navigator.pop(context);
+            if (ModalRoute.of(context)?.settings.name != '/officalUsers') {
+              Navigator.pushReplacementNamed(context, '/officalUsers');
+            }
+          },
+        ),
+      ],
     );
 
     return Drawer(
@@ -97,7 +126,8 @@ class Sidebar extends StatelessWidget {
             settingsTile,
             filesExpansionTile,
             QuestionsExpansionTile,
-            RegionsTile
+            RegionsTile,
+            UserManagementTile
           ],
         ),
       ),
