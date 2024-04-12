@@ -4,6 +4,7 @@ import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
+import 'package:suntekstilwebapp/src/components/Checkbox/Checkbox.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 
@@ -17,6 +18,13 @@ class OfficalUsers extends StatelessWidget {
           text: text,
           child: Column(
             children: [
+         Text(
+              "Yetkili Düzenle",
+              style: TextStyle(
+                  fontSize: Tokens.fontSize[9],
+                  fontWeight: Tokens.fontWeight[6]),
+            ),
+            SizedBox(height: 20,),
               CustomInput(
                 controller: TextEditingController(),
                 hintText: 'Ad',
@@ -49,20 +57,7 @@ class OfficalUsers extends StatelessWidget {
               SizedBox(
                 height: 20,
               ),
-              ...[
-                'Operasyon Direktörü',
-                'Operasyon Müdürü',
-                'Bölge Müdürü',
-                'Lokasyon Müdürü',
-                'Denetçi',
-                'Marka Yöneticisi'
-              ]
-                  .map((role) => CheckboxListTile(
-                        title: Text(role),
-                        value: false,
-                        onChanged: (bool? value) {},
-                      ))
-                  .toList(),
+              ...['Operasyon Direktörü', 'Operasyon Müdürü', 'Bölge Müdürü', 'Lokasyon Müdürü', 'Denetçi', 'Marka Yöneticisi'].map((role) => CustomCheckbox(title: role)).toList(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
