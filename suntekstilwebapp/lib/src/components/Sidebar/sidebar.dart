@@ -98,7 +98,9 @@ class Sidebar extends StatelessWidget {
             style: TextStyle(color: Themes.whiteColor),
           ),
           onTap: () {
-            Navigator.pop(context);
+            if(ModalRoute.of(context)?.settings.name !='/changePassword'){
+              Navigator.pushReplacementNamed(context, '/changePassword');
+            }
           },
         ),
         ListTile(
