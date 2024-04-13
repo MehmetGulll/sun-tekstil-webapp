@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
+import 'package:suntekstilwebapp/src/pages/ChangePassword/ChangePassword.dart';
 import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
 import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
         '/questions': (context) => QuestionsPage(),
         '/regions':(context) => Regions(),
         '/addLocation':(context) => AddLocation(),
-        '/officalUsers':(context) => OfficalUsers()
+        '/officalUsers':(context) => OfficalUsers(),
+        '/changePassword':(context) => ChangePassword()
       },
     );
   }
