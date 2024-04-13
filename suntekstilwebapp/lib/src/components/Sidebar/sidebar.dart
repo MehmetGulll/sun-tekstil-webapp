@@ -115,6 +115,17 @@ class Sidebar extends StatelessWidget {
       ],
     );
 
+    final LogOutTile = ListTile(
+      leading: Icon(Icons.logout),
+      title: Text(
+        "Çıkış Yap",
+        style: TextStyle(color: Themes.whiteColor),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+      },
+    );
+
     return Drawer(
       child: Container(
         color: Themes.blackColor,
@@ -127,7 +138,8 @@ class Sidebar extends StatelessWidget {
             filesExpansionTile,
             QuestionsExpansionTile,
             RegionsTile,
-            UserManagementTile
+            UserManagementTile,
+            LogOutTile
           ],
         ),
       ),
