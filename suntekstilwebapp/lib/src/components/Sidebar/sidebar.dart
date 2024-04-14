@@ -112,7 +112,18 @@ class Sidebar extends StatelessWidget {
             }
           },
         ),
+        
       ],
+    );
+     final ReportsTile = ListTile(
+      leading: Icon(Icons.report),
+      title: Text('Raporlar', style: TextStyle(color: Themes.whiteColor)),
+      onTap: () {
+        Navigator.pop(context);
+        if (ModalRoute.of(context)?.settings.name != '/reports') {
+          Navigator.pushReplacementNamed(context, '/reports');
+        }
+      },
     );
 
     return Drawer(
@@ -127,7 +138,8 @@ class Sidebar extends StatelessWidget {
             filesExpansionTile,
             QuestionsExpansionTile,
             RegionsTile,
-            UserManagementTile
+            UserManagementTile,
+            ReportsTile
           ],
         ),
       ),
