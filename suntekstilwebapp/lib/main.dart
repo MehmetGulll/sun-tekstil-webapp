@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
 import 'package:suntekstilwebapp/src/pages/ChangePassword/ChangePassword.dart';
 import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
+import 'package:suntekstilwebapp/src/pages/Login/Login.dart';
 import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => Home(),
+        '/' : (context) => Login(),
+        '/home': (context) => Home(),
         '/settings': (context) => SettingsPage(),
         '/questions': (context) => QuestionsPage(),
         '/regions':(context) => Regions(),
