@@ -8,6 +8,7 @@ import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
+import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 
 class QuestionsPage extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
@@ -19,8 +20,103 @@ class QuestionsPage extends StatelessWidget {
         return CustomModal(
           backgroundColor: backgroundColor,
           text: text,
-          child: Container(),
-          
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Soru Düzenle",
+                    style: TextStyle(
+                        fontSize: Tokens.fontSize[9],
+                        fontWeight: Tokens.fontWeight[6]),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.close))
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Soru Kodu',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Soru',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Puan',
+                keyboardType: TextInputType.text,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Tipi",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      items: ['Evet', 'Hayır'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+             Padding(
+                padding: EdgeInsets.symmetric(horizontal: 600),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Düzenle",
+                      onPressed: () {
+                        print("Butona basıldı");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Sil",
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () {
+                        print("Silindi");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ]),
+              )
+            ],
+          ),
         );
       },
     );
@@ -164,8 +260,7 @@ class QuestionsPage extends StatelessWidget {
                           textColor: Themes.blueColor,
                           buttonColor: Themes.whiteColor,
                           onPressed: () {
-                            showModal(
-                                context, Themes.yellowColor, "Modal Açıldı");
+                            showModal(context, Themes.whiteColor, "");
                           },
                         ),
                       )
