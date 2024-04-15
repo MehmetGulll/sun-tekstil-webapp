@@ -52,67 +52,67 @@ router.post("/getAllStore", authenticateToken, async (req, res) => {
 });
 
 router.post("/addStore", authenticateToken, async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      magaza_adi: Joi.string().required(),
-      magaza_kodu: Joi.string().required(),
-      bolge_id: Joi.number().required(),
-      sehir: Joi.string().required(),
-      adres: Joi.string().required(),
-      telefon: Joi.string().required(),
-      email: Joi.string().required(),
-      magaza_muduru: Joi.number().required(),
-      status: Joi.number().required(),
-    }).validate(req.body);
-
-    if (error) {
-      return res.status(400).send(error.details[0].message);
-    }
-
-    const {
-      magaza_adi,
-      magaza_kodu,
-      bolge_id,
-      sehir,
-      adres,
-      telefon,
-      email,
-      magaza_muduru,
-      status,
-    } = value;
-
-    const sequelize = await initializeSequelize();
-    const magazaModel = sequelize.define("magaza", magaza, {
-      timestamps: false,
-      freezeTableName: true,
-    });
-
-    const store = await magazaModel.findOne({
-      where: {
+    try {
+      const { error, value } = Joi.object({
+        magaza_adi: Joi.string().required(),
+        magaza_kodu: Joi.string().required(),
+        bolge_id: Joi.number().required(),
+        sehir: Joi.string().required(),
+        adres: Joi.string().required(),
+        telefon: Joi.string().required(),
+        email: Joi.string().required(),
+        magaza_muduru: Joi.number().required(),
+        status: Joi.number().required(),
+      }).validate(req.body);
+  
+      if (error) {
+        return res.status(400).send(error.details[0].message);
+      }
+  
+      const {
+        magaza_adi,
         magaza_kodu,
-        status: 1,
-      },
-    });
-
-    if (store) return res.status(400).send("Bu magaza kodu zaten mevcut!");
-
-    const newStore = await magazaModel.create({
-      magaza_adi,
-      magaza_kodu,
-      bolge_id,
-      sehir,
-      adres,
-      telefon,
-      email,
-      magaza_muduru,
-      status,
-    });
-
-    return res.status(201).send(newStore);
-  } catch (error) {
-    console.error("Add Store Error:", error);
-    return res.status(500).send;
-  }
-});
+        bolge_id,
+        sehir,
+        adres,
+        telefon,
+        email,
+        magaza_muduru,
+        status,
+      } = value;
+  
+      const sequelize = await initializeSequelize();
+      const magazaModel = sequelize.define("magaza", magaza, {
+        timestamps: false,
+        freezeTableName: true,
+      });
+  
+      const store = await magazaModel.findOne({
+        where: {
+          magaza_kodu,
+          status: 1,
+        },
+      });
+  
+      if (store) return res.status(400).send("Bu mağaza kodu zaten mevcut!");
+  
+      const newStore = await magazaModel.create({
+        magaza_adi,
+        magaza_kodu,
+        bolge_id,
+        sehir,
+        adres,
+        telefon,
+        email,
+        magaza_muduru,
+        status,
+      });
+  
+      return res.status(201).send(newStore);
+    } catch (error) {
+      console.error("Add Store Error:", error);
+      return res.status(500).send;
+    }
+  });
 
 module.exports = router;
