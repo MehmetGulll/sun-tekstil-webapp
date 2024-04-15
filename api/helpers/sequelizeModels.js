@@ -1,49 +1,283 @@
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
+const sequelize = require('./sequelize'); 
 
-const users = {
-    user_id: {
+const bolge = {
+    bolge_id: {
         type: DataTypes.INTEGER,
-        autoIncrement: true,
         primaryKey: true,
+        allowNull: false
     },
-    user_name: {
+    bolge_adi: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
     },
-    user_surname: {
+    bolge_muduru: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    bolge_kodu: {
         type: DataTypes.STRING,
-        allowNull: false,
-    },
-    user_email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    user_password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    user_role: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        referances: {
-            model: 'roles',
-            key: 'role_id',
-        },
-    },
-}
+        allowNull: false
+    }
+};
 
-const roles = {
-    role_id: {
+const denetim =  {
+    denetim_id: {
         type: DataTypes.INTEGER,
-        autoIncrement: true,
         primaryKey: true,
+        allowNull: false
     },
-    role_name: {
-        type: DataTypes.STRING,
+    denetim_tipi_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'denetim_tipi',
+            key: 'denetim_tip_id'
+        }
     },
-}
+    magaza_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'magaza',
+            key: 'magaza_id'
+        }
+    },
+    denetci_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    alinan_puan: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+};
+
+const denetim_sorulari = {
+    ds_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    denetim_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'denetim',
+            key: 'denetim_id'
+        }
+    },
+    soru_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'soru',
+            key: 'soru_id'
+        }
+    },
+    cevap: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+};
+
+const denetim_tipi ={
+    denetim_tip_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    denetim_tipi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    denetim_tipi_kodu: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+};
+
+const kullanici ={
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    ad: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    soyad: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    kullanici_adi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    eposta: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    sifre: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    rol: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'rol',
+            key: 'rol_id'
+        }
+    }
+};
+
+const magaza =  {
+    magaza_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    magaza_kodu: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    magaza_adi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    magaza_tipi: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'magaza_tipi',
+            key: 'magaza_tip_id'
+        }
+    },
+    bolge_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'bolge',
+            key: 'bolge_id'
+        }
+    },
+    sehir: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    magaza_telefon: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    magaza_metre: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    magaza_muduru: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    acilis_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+};
+
+const magaza_tipi = {
+    magaza_tip_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    magaza_tipi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+};
+
+const rol ={
+    rol_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    rol_adi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    yetki_id: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+};
+
+const soru ={
+    soru_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    soru_adi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    soru_cevap: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    soru_puan: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    denetim_tip_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'denetim_tipi',
+            key: 'denetim_tip_id'
+        }
+    }
+};
+
+const yetki = {
+    yetki_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false
+    },
+    yetki_adi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+};
 
 module.exports = {
-    users
+    bolge,
+    denetim,
+    denetim_sorulari,
+    denetim_tipi,
+    kullanici,
+    magaza,
+    magaza_tipi,
+    rol,
+    soru,
+    yetki
 };
