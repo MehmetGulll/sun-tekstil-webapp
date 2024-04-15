@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
+import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
@@ -53,7 +52,6 @@ class _RegionsState extends State<Regions> {
     'Location Type 2',
     'Location Type 3'
   ];
-
   void showModal(BuildContext context, Color backgroundColor, String text) {
     showDialog(
       context: context,
@@ -61,7 +59,81 @@ class _RegionsState extends State<Regions> {
         return CustomModal(
           backgroundColor: backgroundColor,
           text: text,
-          child: Container(),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Bölge Düzenle",
+                    style: TextStyle(
+                        fontSize: Tokens.fontSize[9],
+                        fontWeight: Tokens.fontWeight[6]),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.close))
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Lokasyon',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Lokasyon Tipi',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Şehir',
+                keyboardType: TextInputType.text,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 600),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Düzenle",
+                      onPressed: () {
+                        print("Butona basıldı");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Sil",
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () {
+                        print("Silindi");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ]),
+              )
+            ],
+          ),
         );
       },
     );
@@ -201,8 +273,7 @@ class _RegionsState extends State<Regions> {
                             textColor: Themes.blueColor,
                             buttonColor: Themes.whiteColor,
                             onPressed: () {
-                              showModal(
-                                  context, Themes.yellowColor, "Modal Açıldı");
+                              showModal(context, Themes.whiteColor, "");
                             },
                           ),
                         )
