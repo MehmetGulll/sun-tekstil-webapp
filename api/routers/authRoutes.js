@@ -62,7 +62,11 @@ router.post("/login", async (req, res) => {
       sifre: Joi.string().min(5).required(),
     }).validate(req.body);
 
-    if (error) {return res.status(400).send("Kullanici adi ve şifre boş olamaz! Lütfen kontrol ediniz.");}
+    if (error) {
+      return res
+        .status(400)
+        .send("Kullanici adi ve şifre boş olamaz! Lütfen kontrol ediniz.");
+    }
 
     const { kullanici_adi, sifre } = value;
 
@@ -95,6 +99,10 @@ router.post("/login", async (req, res) => {
       ],
     });
 
+    if (user.status === 0) {
+      return res.status(400).send("Kullanici hesabi aktif degil!");
+    }
+
     if (!user) {
       return res.status(404).send("Kullanici bulunamadi!");
     }
@@ -123,7 +131,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
 router.post("/addUser", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -135,7 +142,10 @@ router.post("/addUser", authenticateToken, async (req, res) => {
       rol: Joi.number().required(),
     }).validate(req.body);
 
-    if (error) {return res.status(400).send("Kullanici bilgileri eksik veya hatali! Lütfen kontrol ediniz.");
+    if (error) {
+      return res
+        .status(400)
+        .send("Kullanici bilgileri eksik veya hatali! Lütfen kontrol ediniz.");
     }
 
     const { ad, soyad, kullanici_adi, eposta, sifre, rol } = value;
@@ -145,25 +155,29 @@ router.post("/addUser", authenticateToken, async (req, res) => {
       timestamps: false,
       freezeTableName: true,
     });
-    
+
     const user = await kullaniciModel.findOne({
-      where: [Op.or] = [
-        { kullanici_adi },
-        { eposta },
-      ],
+      where: ([Op.or] = [{ kullanici_adi }, { eposta }]),
     });
 
     if (user) {
-      return res.status(400).send("Bu kullanici adi veya eposta zaten kullaniliyor! Lütfen farkli bir kullanici adi veya eposta giriniz.");
+      return res
+        .status(400)
+        .send(
+          "Bu kullanici adi veya eposta zaten kullaniliyor! Lütfen farkli bir kullanici adi veya eposta giriniz."
+        );
     }
-  
+
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
     if (!passwordRegex.test(sifre)) {
-      return res.status(400).send("Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir!");
+      return res
+        .status(400)
+        .send(
+          "Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir!"
+        );
     }
 
     const hashedPassword = await bcrypt.hash(sifre, 10);
-
 
     const newUser = await kullaniciModel.create({
       ad,
@@ -177,6 +191,183 @@ router.post("/addUser", authenticateToken, async (req, res) => {
     return res.status(201).send(newUser);
   } catch (error) {
     console.error("Add User Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
+router.post("/updateUserStatus/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error, value } = Joi.object({
+      status: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { status } = value;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const user = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).send("Kullanıcı bulunamadı!");
+    }
+
+    await kullaniciModel.update(
+      { status },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    return res.status(200).send("Kullanıcı durumu başarıyla güncellendi.");
+  } catch (error) {
+    console.error("Update User Status Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
+
+router.get("/user/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+    const rolModel = sequelize.define("rol", rol, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    kullaniciModel.belongsTo(rolModel, {
+      as: "userRole",
+      foreignKey: "rol",
+      targetKey: "rol_id",
+    });
+
+    const user = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+      attributes: { exclude: ["id"] },
+      include: [
+        {
+          model: rolModel,
+          as: "userRole",
+          attributes: ["rol_adi"],
+        },
+      ],
+    });
+
+    if (!user) {
+      return res.status(404).send("Kullanici bulunamadi!");
+    }
+
+    const modifiedUser = {
+      id: user.id,
+      ad: user.ad,
+      soyad: user.soyad,
+      kullanici_adi: user.kullanici_adi,
+      eposta: user.eposta,
+      sifre: user.sifre,
+      rol_adi: user.userRole ? user.userRole.rol_adi : "default kullanici",
+    };
+
+    return res.status(200).send(modifiedUser);
+  } catch (error) {
+    console.error("Get User Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
+router.post("/updateUser", authenticateToken, async (req, res) => {
+  try {
+    const id = req.user.id;
+    const { error, value } = Joi.object({
+      kullanici_adi: Joi.string(),
+      eposta: Joi.string().email(),
+      sifre: Joi.string().min(5),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send(error);
+    }
+
+    const { kullanici_adi, eposta, sifre } = value;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const user = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).send("Kullanici bulunamadi!");
+    }
+
+    let updatedFields = {};
+
+    if (kullanici_adi) updatedFields.kullanici_adi = kullanici_adi;
+    if (eposta) updatedFields.eposta = eposta;
+    if (sifre) {
+      const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+      if (!passwordRegex.test(sifre)) {
+        return res
+          .status(400)
+          .send(
+            "Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir!"
+          );
+      }
+      updatedFields.sifre = await bcrypt.hash(sifre, 10);
+    }
+
+    await kullaniciModel.update(updatedFields, {
+      where: {
+        id,
+      },
+    });
+
+    const updatedUser = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    const updatedFieldsMsg = Object.entries(updatedFields)
+      .map(
+        ([key, value]) => `${key}:\n  Eski: ${user[key]}\n  Yeni: ${value}\n`
+      )
+      .join("\n");
+
+    return res
+      .status(200)
+      .send(
+        `Kullanıcı adı ${req.user.kullanici_adi} bilgilerini başarıyla güncelledi.\n\nGüncellenen Alanlar:\n${updatedFieldsMsg}`
+      );
+  } catch (error) {
+    console.error("Update User Error:", error);
     return res.status(500).send(error);
   }
 });

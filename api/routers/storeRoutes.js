@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
+const { Op } = require("sequelize");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { magaza } = require("../helpers/sequelizemodels");
@@ -52,34 +53,96 @@ router.post("/getAllStore", authenticateToken, async (req, res) => {
 });
 
 router.post("/addStore", authenticateToken, async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      magaza_adi: Joi.string().required(),
+      magaza_kodu: Joi.string().required(),
+      magaza_tipi: Joi.number().required(),
+      bolge_id: Joi.number().required(),
+      sehir: Joi.string().required(),
+      magaza_telefon: Joi.string().required(),
+      magaza_metre: Joi.number().required(),
+      magaza_muduru: Joi.number().required(),
+      acilis_tarihi: Joi.string().required(),
+      status: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const {
+      magaza_adi,
+      magaza_kodu,
+      magaza_tipi,
+      bolge_id,
+      sehir,
+      magaza_telefon,
+      magaza_metre,
+      magaza_muduru,
+      acilis_tarihi,
+      status,
+    } = value;
+
+    const sequelize = await initializeSequelize();
+    const magazaModel = sequelize.define("magaza", magaza, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const existingStore = await magazaModel.findOne({
+      where: {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { magaza_kodu: magaza_kodu },
+              { magaza_telefon: magaza_telefon },
+            ],
+          },
+          { status: 1 },
+        ],
+      },
+    });
+
+    if (existingStore) {
+      return res
+        .status(400)
+        .send(
+          "Telefon numarası veya mağaza kodu zaten kullanılmakta! Lütfen farklı bir telefon numarası veya mağaza kodu giriniz."
+        );
+    }
+
+    const newStore = await magazaModel.create({
+      magaza_adi,
+      magaza_kodu,
+      magaza_tipi,
+      bolge_id,
+      sehir,
+      magaza_telefon,
+      magaza_metre,
+      magaza_muduru,
+      acilis_tarihi,
+      status,
+      ekleyen_id: req.user.id,
+    });
+
+    return res.status(201).send(newStore);
+  } catch (error) {
+    console.error("Add Store Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
+router.post("/updateStoreStatus", authenticateToken, async (req, res) => {
     try {
       const { error, value } = Joi.object({
-        magaza_adi: Joi.string().required(),
-        magaza_kodu: Joi.string().required(),
-        bolge_id: Joi.number().required(),
-        sehir: Joi.string().required(),
-        adres: Joi.string().required(),
-        telefon: Joi.string().required(),
-        email: Joi.string().required(),
-        magaza_muduru: Joi.number().required(),
+        magaza_id: Joi.number().required(),
         status: Joi.number().required(),
       }).validate(req.body);
   
       if (error) {
         return res.status(400).send(error.details[0].message);
       }
-  
-      const {
-        magaza_adi,
-        magaza_kodu,
-        bolge_id,
-        sehir,
-        adres,
-        telefon,
-        email,
-        magaza_muduru,
-        status,
-      } = value;
   
       const sequelize = await initializeSequelize();
       const magazaModel = sequelize.define("magaza", magaza, {
@@ -89,30 +152,37 @@ router.post("/addStore", authenticateToken, async (req, res) => {
   
       const store = await magazaModel.findOne({
         where: {
-          magaza_kodu,
-          status: 1,
+          magaza_id: value.magaza_id,
         },
       });
   
-      if (store) return res.status(400).send("Bu mağaza kodu zaten mevcut!");
+      if (!store) {
+        return res.status(404).send("Mağaza Bulunamadı!");
+      }
+      await magazaModel.update(
+        { 
+          status: value.status,
+          ekleyen_id: req.user.id,
+        },
+        {
+          where: {
+            magaza_id: value.magaza_id,
+          },
+        }
+      );
   
-      const newStore = await magazaModel.create({
-        magaza_adi,
-        magaza_kodu,
-        bolge_id,
-        sehir,
-        adres,
-        telefon,
-        email,
-        magaza_muduru,
-        status,
+      const updatedStore = await magazaModel.findOne({
+        where: {
+          magaza_id: value.magaza_id,
+        },
       });
   
-      return res.status(201).send(newStore);
+      return res.status(200).send(`${updatedStore.magaza_adi} Mağazası ${value.status === 1 ? "Aktif" : "Pasif"} Olarak Güncellendi. ${req.user.ad} ${req.user.soyad} tarafından güncellendi.`);
     } catch (error) {
-      console.error("Add Store Error:", error);
-      return res.status(500).send;
+      console.error("Mağaza Durumu Güncelleme Hatası:", error);
+      return res.status(500).send(error);
     }
   });
+  
 
 module.exports = router;

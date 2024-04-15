@@ -151,6 +151,10 @@ const kullanici ={
             model: 'rol',
             key: 'rol_id'
         }
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 };
 
@@ -213,7 +217,16 @@ const magaza =  {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 1 
-    }
+    },
+    ekleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+
 };
 
 const magaza_tipi = {
