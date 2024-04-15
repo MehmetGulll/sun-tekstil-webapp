@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
@@ -37,6 +37,167 @@ Widget buildRow(
 }
 
 class _ReportsState extends State<Reports> {
+  void showModal(BuildContext context, Color backgroundColor, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomModal(
+          backgroundColor: backgroundColor,
+          text: text,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Yetkili Düzenle",
+                    style: TextStyle(
+                        fontSize: Tokens.fontSize[9],
+                        fontWeight: Tokens.fontWeight[6]),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.close))
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Lokasyon Müdürü',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Lokasyon',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Lokasyon Kodu',
+                keyboardType: TextInputType.emailAddress,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Lokasyon Tipi',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Denetçi',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: TextEditingController(),
+                hintText: 'Alınan Puan',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Ziyaret Tipi",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      items: ['Tip1', 'Tip2'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Mail Durumu",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      items: ['Gönderildi', 'Gönderilmedi'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  Text('Tarih:'),
+                  SizedBox(width: 8),
+                  Text("${_startDate.toLocal()}".split(' ')[0]),
+                  SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => _selectDate(context, true),
+                    child: Text('Seç'),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 600),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Düzenle",
+                      onPressed: () {
+                        print("Butona basıldı");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Sil",
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () {
+                        print("Silindi");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ]),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   String? _chosenOperation;
   String? _chosenRegion;
   String? _chosenLocation;
@@ -58,18 +219,6 @@ class _ReportsState extends State<Reports> {
   List<String> _centerTeamList = ['Team 1', 'Team 2', 'Team 3'];
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
-  void showModal(BuildContext context, Color backgroundColor, String text) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CustomModal(
-          backgroundColor: backgroundColor,
-          text: text,
-          child: Container(),
-        );
-      },
-    );
-  }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final DateTime? picked = await showDatePicker(
@@ -168,10 +317,10 @@ class _ReportsState extends State<Reports> {
                           2: FlexColumnWidth(2),
                           3: FlexColumnWidth(2),
                           4: FlexColumnWidth(2),
-                          5:FlexColumnWidth(2),
+                          5: FlexColumnWidth(2),
                           7: FlexColumnWidth(4),
                           8: FlexColumnWidth(2),
-                          9:FlexColumnWidth(2)
+                          9: FlexColumnWidth(2)
                         },
                         border: TableBorder.all(color: Themes.blackColor),
                         children: [
@@ -344,8 +493,7 @@ class _ReportsState extends State<Reports> {
                                 textColor: Themes.blueColor,
                                 buttonColor: Themes.whiteColor,
                                 onPressed: () {
-                                  showModal(context, Themes.yellowColor,
-                                      "Modal Açıldı");
+                                  showModal(context, Themes.whiteColor, "");
                                 },
                               ),
                             )
@@ -776,7 +924,9 @@ class _ReportsState extends State<Reports> {
                             )
                           ]),
                         ]))),
-                        SizedBox(height: 20,)
+            SizedBox(
+              height: 20,
+            )
           ],
         ),
       ),
