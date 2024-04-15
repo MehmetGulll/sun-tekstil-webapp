@@ -34,5 +34,4 @@ class Tokens{
     8:FontWeight.w800,
     9:FontWeight.w900
   };
-  
 }
