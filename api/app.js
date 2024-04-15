@@ -10,8 +10,13 @@ app.use(express.json());
 const port = 5000;
 
 const authRoutes = require("./routers/authRoutes");
+const regionRoutes = require("./routers/regionRoutes");
+const storeRoutes = require("./routers/storeRoutes");
 
 app.use(authRoutes);
+app.use(regionRoutes);
+app.use(storeRoutes);
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
