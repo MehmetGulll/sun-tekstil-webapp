@@ -163,10 +163,15 @@ class _ReportsState extends State<Reports> {
                     child: Table(
                         defaultColumnWidth: FlexColumnWidth(1),
                         columnWidths: {
-                          0: FlexColumnWidth(1),
-                          1: FlexColumnWidth(1),
-                          2: FlexColumnWidth(1),
-                          3: FlexColumnWidth(1),
+                          0: FlexColumnWidth(3),
+                          1: FlexColumnWidth(3),
+                          2: FlexColumnWidth(2),
+                          3: FlexColumnWidth(2),
+                          4: FlexColumnWidth(2),
+                          5:FlexColumnWidth(2),
+                          7: FlexColumnWidth(4),
+                          8: FlexColumnWidth(2),
+                          9:FlexColumnWidth(2)
                         },
                         border: TableBorder.all(color: Themes.blackColor),
                         children: [
@@ -771,6 +776,7 @@ class _ReportsState extends State<Reports> {
                             )
                           ]),
                         ]))),
+                        SizedBox(height: 20,)
           ],
         ),
       ),
