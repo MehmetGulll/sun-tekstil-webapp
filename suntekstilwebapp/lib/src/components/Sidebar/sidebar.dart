@@ -21,8 +21,8 @@ class Sidebar extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/') {
-          Navigator.pushReplacementNamed(context, '/');
+        if (ModalRoute.of(context)?.settings.name != '/home') {
+          Navigator.pushReplacementNamed(context, '/home');
         }
       },
     );

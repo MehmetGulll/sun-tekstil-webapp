@@ -8,4 +8,5 @@ class Themes {
   static const Color purpleColor = Color.fromRGBO(99, 62,213, 1);
   static const Color blueColor = Color.fromRGBO(30, 11, 255, 1);
   static const Color yellowColor = Color.fromRGBO(255, 255, 43, 1);
+  static const Color greyColor = Color.fromRGBO(229, 228, 226,1);
 }
