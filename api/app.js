@@ -4,6 +4,7 @@ const sql = require("mssql");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config({ path: "./config/.env" });
+const questionsRoutes = require('./routers/questionsRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -12,6 +13,7 @@ const port = 5000;
 const authRoutes = require("./routers/authRoutes");
 
 app.use(authRoutes);
+app.use(questionsRoutes);
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
