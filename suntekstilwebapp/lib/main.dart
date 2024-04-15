@@ -6,6 +6,7 @@ import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
 import 'package:suntekstilwebapp/src/pages/Regions/Regions.dart';
+import 'package:suntekstilwebapp/src/pages/Reports/Reports.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Sidebar Örneği',
+      title: 'Jimmy Key Denetleme',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -27,7 +28,9 @@ class MyApp extends StatelessWidget {
         '/regions':(context) => Regions(),
         '/addLocation':(context) => AddLocation(),
         '/officalUsers':(context) => OfficalUsers(),
-        '/changePassword':(context) => ChangePassword()
+        '/changePassword':(context)=>ChangePassword(),
+        '/reports': (context) => Reports()
+        
       },
     );
   }
