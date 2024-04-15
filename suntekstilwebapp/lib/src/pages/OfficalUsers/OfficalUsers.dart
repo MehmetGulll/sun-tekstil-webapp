@@ -18,13 +18,25 @@ class OfficalUsers extends StatelessWidget {
           text: text,
           child: Column(
             children: [
-         Text(
-              "Yetkili Düzenle",
-              style: TextStyle(
-                  fontSize: Tokens.fontSize[9],
-                  fontWeight: Tokens.fontWeight[6]),
-            ),
-            SizedBox(height: 20,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Yetkili Düzenle",
+                    style: TextStyle(
+                        fontSize: Tokens.fontSize[9],
+                        fontWeight: Tokens.fontWeight[6]),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.close))
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
               CustomInput(
                 controller: TextEditingController(),
                 hintText: 'Ad',
@@ -57,7 +69,14 @@ class OfficalUsers extends StatelessWidget {
               SizedBox(
                 height: 20,
               ),
-              ...['Operasyon Direktörü', 'Operasyon Müdürü', 'Bölge Müdürü', 'Lokasyon Müdürü', 'Denetçi', 'Marka Yöneticisi'].map((role) => CustomCheckbox(title: role)).toList(),
+              ...[
+                'Operasyon Direktörü',
+                'Operasyon Müdürü',
+                'Bölge Müdürü',
+                'Lokasyon Müdürü',
+                'Denetçi',
+                'Marka Yöneticisi'
+              ].map((role) => CustomCheckbox(title: role)).toList(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -77,11 +96,34 @@ class OfficalUsers extends StatelessWidget {
               SizedBox(
                 height: 20,
               ),
-              CustomButton(
-                  buttonText: "Düzenle",
-                  onPressed: () {
-                    print("Düzenlendi ");
-                  })
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 600),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Düzenle",
+                      onPressed: () {
+                        print("Butona basıldı");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: CustomButton(
+                      buttonText: "Sil",
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () {
+                        print("Silindi");
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ]),
+              )
             ],
           ),
         );

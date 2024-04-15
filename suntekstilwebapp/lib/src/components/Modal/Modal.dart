@@ -4,9 +4,10 @@ class CustomModal extends StatelessWidget {
   final Color backgroundColor;
   final String text;
   final Widget child;
+  final Map? question;
 
   CustomModal(
-      {required this.backgroundColor, required this.text, required this.child});
+      {required this.backgroundColor, required this.text, required this.child, this.question});
 
   @override
   Widget build(BuildContext context) {
