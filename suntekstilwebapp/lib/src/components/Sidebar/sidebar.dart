@@ -98,7 +98,9 @@ class Sidebar extends StatelessWidget {
             style: TextStyle(color: Themes.whiteColor),
           ),
           onTap: () {
-            Navigator.pop(context);
+            if(ModalRoute.of(context)?.settings.name !='/changePassword'){
+              Navigator.pushReplacementNamed(context, '/changePassword');
+            }
           },
         ),
         ListTile(
@@ -112,17 +114,17 @@ class Sidebar extends StatelessWidget {
             }
           },
         ),
-        
       ],
     );
-     final ReportsTile = ListTile(
-      leading: Icon(Icons.report),
-      title: Text('Raporlar', style: TextStyle(color: Themes.whiteColor)),
+
+    final LogOutTile = ListTile(
+      leading: Icon(Icons.logout),
+      title: Text(
+        "Çıkış Yap",
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       onTap: () {
         Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/reports') {
-          Navigator.pushReplacementNamed(context, '/reports');
-        }
       },
     );
 
@@ -139,7 +141,7 @@ class Sidebar extends StatelessWidget {
             QuestionsExpansionTile,
             RegionsTile,
             UserManagementTile,
-            ReportsTile
+            LogOutTile
           ],
         ),
       ),
