@@ -5,6 +5,7 @@ const bolge = {
     bolge_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     bolge_adi: {
@@ -22,6 +23,10 @@ const bolge = {
     bolge_kodu: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    status : {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 };
 
@@ -29,6 +34,7 @@ const denetim =  {
     denetim_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     denetim_tipi_id: {
@@ -65,6 +71,7 @@ const denetim_sorulari = {
     ds_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     denetim_id: {
@@ -93,6 +100,7 @@ const denetim_tipi ={
     denetim_tip_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     denetim_tipi: {
@@ -113,6 +121,7 @@ const kullanici ={
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     ad: {
@@ -149,6 +158,7 @@ const magaza =  {
     magaza_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     magaza_kodu: {
@@ -198,6 +208,11 @@ const magaza =  {
     acilis_tarihi: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1 
     }
 };
 
@@ -205,6 +220,7 @@ const magaza_tipi = {
     magaza_tip_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     magaza_tipi: {
@@ -217,6 +233,7 @@ const rol ={
     rol_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     rol_adi: {
@@ -233,6 +250,7 @@ const soru ={
     soru_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     soru_adi: {
@@ -261,6 +279,7 @@ const yetki = {
     yetki_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         allowNull: false
     },
     yetki_adi: {
