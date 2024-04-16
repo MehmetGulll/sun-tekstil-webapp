@@ -1,12 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
+import 'package:suntekstilwebapp/src/API/url.dart';
 
 class Login extends StatelessWidget {
-  final TextEditingController controller = TextEditingController();
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  Future<void>login(BuildContext context) async{
+    final response = await http.post(
+      Uri.parse(ApiUrls.loginUrl),
+      body:{
+        'user_name' :usernameController.text,
+        'userPassword' : passwordController.text
+      }
+    );
+    print(usernameController.text);
+    print(passwordController.text);
+    print(response.statusCode);
+    print(response);
+
+    if(response.statusCode == 200){
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+    else{
+      print("Access Failed ");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +65,7 @@ class Login extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 1, 
+                  flex: 1,
                   child: Text(
                     "Kullanıcı Adı",
                     style: TextStyle(
@@ -48,9 +74,9 @@ class Login extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                    flex: 3, 
+                    flex: 3,
                     child: CustomInput(
-                        controller: TextEditingController(),
+                        controller: usernameController,
                         hintText: "Kullanıcı Adı",
                         keyboardType: TextInputType.text)),
               ],
@@ -59,16 +85,16 @@ class Login extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 1, // Text widget'ının genişliği
+                  flex: 1,
                   child: Text("Şifre",
                       style: TextStyle(
                           fontSize: Tokens.fontSize[4],
                           fontWeight: Tokens.fontWeight[6])),
                 ),
                 Expanded(
-                    flex: 3, // CustomInput widget'ının genişliği
+                    flex: 3,
                     child: CustomInput(
-                      controller: TextEditingController(),
+                      controller: passwordController,
                       hintText: "Şifre",
                       keyboardType: TextInputType.visiblePassword,
                     )),
@@ -79,9 +105,7 @@ class Login extends StatelessWidget {
             ),
             CustomButton(
                 buttonText: "Giriş",
-                onPressed: () {
-                  print("Giriş");
-                }),
+                onPressed:() =>login(context)),
             SizedBox(
               height: 20,
             )
