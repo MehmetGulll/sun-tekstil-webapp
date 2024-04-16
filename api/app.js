@@ -13,11 +13,13 @@ const port = 5000;
 const authRoutes = require("./routers/authRoutes");
 const regionRoutes = require("./routers/regionRoutes");
 const storeRoutes = require("./routers/storeRoutes");
+const inspectationRoutes = require("./routers/inspectationRoutes");
 
 app.use(authRoutes);
 app.use(regionRoutes);
 app.use(storeRoutes);
 app.use(questionsRoutes);
+app.use(inspectationRoutes);
 
 // Start the server
 app.listen(port, () => {
