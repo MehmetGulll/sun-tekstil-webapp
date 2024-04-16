@@ -120,6 +120,7 @@ router.post("/login", async (req, res) => {
       ad: user.ad,
       soyad: user.soyad,
       eposta: user.eposta,
+      rol: user.rol,
       rol_adi: user.userRole ? user.userRole.rol_adi : "default kullanici",
     };
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET_KEY);
