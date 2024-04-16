@@ -88,7 +88,7 @@ router.post("/login", async (req, res) => {
 
     const user = await kullaniciModel.findOne({
       where: {
-        kullanici_adi,
+        kullanici_adi : kullanici_adi,
       },
       include: [
         {

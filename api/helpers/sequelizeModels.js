@@ -215,8 +215,7 @@ const magaza =  {
     },
     status: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 1 
+        allowNull: false, 
     },
     ekleyen_id: {
         type: DataTypes.INTEGER,
