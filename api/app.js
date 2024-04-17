@@ -15,6 +15,7 @@ const regionRoutes = require("./routers/regionRoutes");
 const storeRoutes = require("./routers/storeRoutes");
 const inspectationRoutes = require("./routers/inspectationRoutes");
 const actionRoutes = require("./routers/actionRoutes");
+const questionRoutes = require("./routers/questionRoutes");
 
 app.use(authRoutes);
 app.use(regionRoutes);
@@ -22,6 +23,7 @@ app.use(storeRoutes);
 app.use(questionsRoutes);
 app.use(inspectationRoutes);
 app.use(actionRoutes);
+app.use(questionRoutes);
 
 // Start the server
 app.listen(port, () => {

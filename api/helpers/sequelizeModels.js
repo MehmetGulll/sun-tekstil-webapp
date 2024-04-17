@@ -277,6 +277,10 @@ const soru ={
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    soru_sira_no: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     denetim_tip_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -284,6 +288,26 @@ const soru ={
             model: 'denetim_tipi',
             key: 'denetim_tip_id'
         }
+    },
+    ekleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    güncelleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 };
 

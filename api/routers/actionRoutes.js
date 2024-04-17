@@ -128,7 +128,7 @@ router.post("/closeAction", authenticateToken, async (req, res) => {
 
     if (!isActionExist) return res.status(400).send("Aksiyon Bulunamadı!");
 
-    if (isActionExist.aksiyon_olusturan_id !== req.user.id && req.user.rol !== 1) return res.status(400).send("Aksiyonu Sadece Oluşturan veya Marka Yöneticisi Kapatabilir!");
+    if (isActionExist.aksiyon_olusturan_id !== req.user.id && req.user.rol_id !== 1) return res.status(400).send("Aksiyonu Sadece Oluşturan veya Marka Yöneticisi Kapatabilir!");
     
     if (new Date(aksiyon_bitis_tarihi) < new Date(isActionExist.aksiyon_acilis_tarihi)) {
       return res.status(400).send("Aksiyon Bitiş Tarihi Açılış Tarihinden Önce Olamaz! Lütfen Bilgileri Kontrol Ediniz");
