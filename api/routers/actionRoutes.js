@@ -6,6 +6,7 @@ const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { aksiyon } = require("../helpers/sequelizemodels");
 
+// TÜM AKSİYONLARI LİSTELER
 router.post("/getAllAction", authenticateToken, async (req, res) => {
   try {
     const paginationSchema = Joi.object({
@@ -52,6 +53,7 @@ router.post("/getAllAction", authenticateToken, async (req, res) => {
   }
 });
 
+// YENİ BİR AKSİYON OLUŞTURUR
 router.post("/createAction", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -100,14 +102,16 @@ router.post("/createAction", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/closeAction/:aksiyon_id", authenticateToken, async (req, res) => {
+// AKTİF OLAN İDSİ VERİLEN AKSİYONU KAPATIR 
+router.post("/closeAction", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
+      aksiyon_id: Joi.number().required(),
       aksiyon_bitis_tarihi: Joi.string().optional(),
     }).validate(req.body);
 
     if (error) return res.status(400).send(error);
-    const { aksiyon_bitis_tarihi } = value;
+    const { aksiyon_id, aksiyon_bitis_tarihi } = value;
 
     const sequelize = await initializeSequelize();
     const aksiyonModel = sequelize.define("aksiyon", aksiyon, {
@@ -117,7 +121,7 @@ router.post("/closeAction/:aksiyon_id", authenticateToken, async (req, res) => {
 
     const isActionExist = await aksiyonModel.findOne({
       where: {
-        aksiyon_id: req.params.aksiyon_id,
+        aksiyon_id: aksiyon_id,
         status: 1,
       },
     });
@@ -125,16 +129,21 @@ router.post("/closeAction/:aksiyon_id", authenticateToken, async (req, res) => {
     if (!isActionExist) return res.status(400).send("Aksiyon Bulunamadı!");
 
     if (isActionExist.aksiyon_olusturan_id !== req.user.id && req.user.rol !== 1) return res.status(400).send("Aksiyonu Sadece Oluşturan veya Marka Yöneticisi Kapatabilir!");
+    
+    if (new Date(aksiyon_bitis_tarihi) < new Date(isActionExist.aksiyon_acilis_tarihi)) {
+      return res.status(400).send("Aksiyon Bitiş Tarihi Açılış Tarihinden Önce Olamaz! Lütfen Bilgileri Kontrol Ediniz");
+    }
 
     const isActionClosed = await aksiyonModel.findOne({
       where: {
-        aksiyon_id: req.params.aksiyon_id,
+        aksiyon_id: aksiyon_id,
         status: 0,
       },
     });
 
     if (isActionClosed)
       return res.status(400).send("Aksiyon Zaten Kapatılmış!");
+
 
     const updatedAction = await aksiyonModel.update(
       {
@@ -146,16 +155,16 @@ router.post("/closeAction/:aksiyon_id", authenticateToken, async (req, res) => {
       },
       {
         where: {
-          aksiyon_id: req.params.aksiyon_id,
+          aksiyon_id: aksiyon_id, 
         },
       }
     );
-
     return res.status(200).send("Aksiyon Başarıyla Kapatıldı!");
   } catch (error) {
     console.error("Close Action Error:", error);
     return res.status(500).send(error);
   }
 });
+
 
 module.exports = router;

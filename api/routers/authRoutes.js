@@ -7,7 +7,7 @@ const { Op } = require("sequelize");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { kullanici, rol } = require("../helpers/sequelizemodels");
-
+// DENEMEYDİ SİLİNCEK
 router.get("/kullanicilar", async (req, res) => {
   try {
     const sequelize = await initializeSequelize();
@@ -55,6 +55,7 @@ router.get("/kullanicilar", async (req, res) => {
   }
 });
 
+// KULLANICI GİRİŞİ İÇİN
 router.post("/login", async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -132,6 +133,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// YENİ KULLANICI EKLEMEK İÇİN
 router.post("/addUser", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -195,7 +197,7 @@ router.post("/addUser", authenticateToken, async (req, res) => {
     return res.status(500).send(error);
   }
 });
-
+//  KULLANICI STATUS AKTİF PASİF YAPMAK İÇİN
 router.post("/updateUserStatus/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -241,7 +243,7 @@ router.post("/updateUserStatus/:id", authenticateToken, async (req, res) => {
   }
 });
 
-
+// KULLANICI BİLGİLERİNİ GÖRÜNTÜLEMEK İÇİN
 router.get("/user/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -297,6 +299,7 @@ router.get("/user/:id", authenticateToken, async (req, res) => {
   }
 });
 
+// KULLANICI KENDİ BİLGİLERİNİ GÜNCELLEYEBİLİR
 router.post("/updateUser", authenticateToken, async (req, res) => {
   try {
     const id = req.user.id;
