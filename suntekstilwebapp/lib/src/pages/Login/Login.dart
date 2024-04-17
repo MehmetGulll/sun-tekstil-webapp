@@ -12,23 +12,15 @@ class Login extends StatelessWidget {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<void>login(BuildContext context) async{
-    final response = await http.post(
-      Uri.parse(ApiUrls.loginUrl),
-      body:{
-        'user_name' :usernameController.text,
-        'userPassword' : passwordController.text
-      }
-    );
-    print(usernameController.text);
-    print(passwordController.text);
-    print(response.statusCode);
-    print(response);
+  Future<void> login(BuildContext context) async {
+    final response = await http.post(Uri.parse(ApiUrls.loginUrl), body: {
+      'user_name': usernameController.text,
+      'userPassword': passwordController.text
+    });
 
-    if(response.statusCode == 200){
+    if (response.statusCode == 200) {
       Navigator.pushReplacementNamed(context, '/home');
-    }
-    else{
+    } else {
       print("Access Failed ");
     }
   }
@@ -103,9 +95,7 @@ class Login extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
-            CustomButton(
-                buttonText: "Giriş",
-                onPressed:() =>login(context)),
+            CustomButton(buttonText: "Giriş", onPressed: () => login(context)),
             SizedBox(
               height: 20,
             )
