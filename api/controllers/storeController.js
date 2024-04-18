@@ -53,7 +53,7 @@ exports.addStore = async (req, res) => {
       .input("storeName", sql.NVarChar, storeName)
       .input("storeType", sql.Int, storeType)
       .input("city", sql.NVarChar, city)
-      .input("regionId",sql.NVarChar,"1")
+      .input("regionId", sql.NVarChar, "1")
       .input("storePhone", sql.NVarChar, storePhone)
       .input("storeWidth", sql.Int, storeWidth)
       .input("storeManager", sql.Int, storeManager)
@@ -67,15 +67,43 @@ exports.addStore = async (req, res) => {
     res.status(500).send({ message: "Sunucu Hatası" });
   }
 };
-exports.deleteStore = async(req,res)=>{
+exports.deleteStore = async (req, res) => {
   try {
     const pool = await sql.connect(config);
-    const result = await pool.request().input('storeId',sql.Int, req.params.storeId)
-    .query('DELETE FROM magaza WHERE magaza_id = @storeId');
-    res.status(200).send({message:'Mağaza başarıyla silindi'});
+    const result = await pool
+      .request()
+      .input("storeId", sql.Int, req.params.storeId)
+      .query("DELETE FROM magaza WHERE magaza_id = @storeId");
+    res.status(200).send({ message: "Mağaza başarıyla silindi" });
   } catch (error) {
-    console.log("Error",error);
-    res.status(500).send({message:'Sunucu hatası'});
+    console.log("Error", error);
+    res.status(500).send({ message: "Sunucu hatası" });
   }
-}
-
+};
+exports.updateStore = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool
+      .request()
+      .input("storeId", sql.Int, req.body.storeId)
+      .input("storeCode", sql.NVarChar, req.body.storeCode)
+      .input("storeName", sql.NVarChar, req.body.storeName)
+      .input("storeType", sql.NVarChar, req.body.storeType)
+      .input("city", sql.NVarChar, req.body.city)
+      .input("storePhone", sql.NVarChar, req.body.storePhone)
+      .query(
+        "UPDATE magaza SET magaza_kodu = @storeCode, magaza_adi = @storeName, magaza_tipi = @storeType, sehir = @city, magaza_telefon = @storePhone WHERE magaza_id =@storeId "
+      );
+      console.log(result);
+      console.log(req.body.storeId);
+      console.log(req.body.storeCode);
+      console.log(req.body.storeName);
+      console.log(req.body.storeType);
+      console.log(req.body.city);
+      console.log(req.body.storePhone);
+      res.status(200).send({message:"Mağaza başarıyla güncellendi"});
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Sunucu hatası:", error });
+  }
+};

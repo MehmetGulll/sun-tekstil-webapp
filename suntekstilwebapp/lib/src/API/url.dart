@@ -6,4 +6,5 @@ class ApiUrls{
   static const String storesUrl = 'http://localhost:5000/getStores';
   static const String addStore = 'http://localhost:5000/addStore';
   static const String deleteStore = 'http://localhost:5000/deleteStore';
+  static const String updateStore = 'http://localhost:5000/updateStore';
 }

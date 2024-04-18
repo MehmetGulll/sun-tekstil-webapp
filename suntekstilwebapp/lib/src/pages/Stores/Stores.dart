@@ -40,6 +40,11 @@ Widget buildRow(
 }
 
 class _StoresState extends State<Stores> {
+  TextEditingController storeCodeController = TextEditingController();
+  TextEditingController storeNameController = TextEditingController();
+  TextEditingController storeTypeController = TextEditingController();
+  TextEditingController storeCityController = TextEditingController();
+  TextEditingController storePhoneController = TextEditingController();
   Map<String, String?> selectedValues = {
     'storeCode': '',
     'storeName': '',
@@ -67,6 +72,40 @@ class _StoresState extends State<Stores> {
       setState(() {
         _stores.removeWhere((store) => store['id'] == id);
       });
+    } else {
+      print("Bir hata oluştu");
+    }
+  }
+
+  Future<void> updateStore(int id) async {
+    print(id);
+    final response = await http.put(
+      Uri.parse('${ApiUrls.updateStore}/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'storeId': id.toString(),
+        'storeCode': storeCodeController.text,
+        'storeName': storeNameController.text,
+        'storeType': storeTypeController.text,
+        'city': storeCityController.text,
+        'storePhone': storePhoneController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print("Mağaza başarıyla güncellendi");
+      if (mounted) {
+        await Future.delayed(Duration.zero);
+        setState(() {
+          int index = _stores.indexWhere((store) => store['id'] == id);
+          List<Map<String, dynamic>> newStores = List.from(_stores);
+          newStores[index] =
+              Map<String, dynamic>.from(jsonDecode(response.body));
+          _stores = newStores;
+        });
+      }
     } else {
       print("Bir hata oluştu");
     }
@@ -106,16 +145,12 @@ class _StoresState extends State<Stores> {
 
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map store) {
-    TextEditingController storeCodeController =
-        TextEditingController(text: store['storeCode'].toString());
-    TextEditingController storeNameController =
-        TextEditingController(text: store['storeName']);
-    TextEditingController storeTypeController =
-        TextEditingController(text: store['storeType'].toString());
-    TextEditingController storeCityController =
-        TextEditingController(text: store['city']);
-    TextEditingController storePhoneController =
-        TextEditingController(text: store['storePhone']);
+    storeCodeController.text = store['storeCode'].toString();
+    storeNameController.text = store['storeName'];
+    storeTypeController.text = store['storeType'].toString();
+    storeCityController.text = store['city'];
+    storePhoneController.text = store['storePhone'];
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -190,8 +225,8 @@ class _StoresState extends State<Stores> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
-                      onPressed: () {
-                        print("Butona basıldı");
+                      onPressed: () async {
+                        await updateStore(store['storeId']);
                         Navigator.of(context).pop();
                       },
                     ),
