@@ -95,7 +95,15 @@ class Login extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
-            CustomButton(buttonText: "Giriş", onPressed: () => login(context)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CustomButton(buttonText: "Giriş", onPressed: () => login(context)),
+                SizedBox(width: 20,),
+                CustomButton(buttonText: "Kayıt Ol", onPressed:()=>  Navigator.pushReplacementNamed(context, '/register'))
+              ],
+            ),
+            
             SizedBox(
               height: 20,
             )

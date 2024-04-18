@@ -21,7 +21,7 @@ const storeRoutes = require("./routers/storeRoutes");
 
 // app.use(authRoutes);
 app.use(regionRoutes);
-app.use(storeRoutes);
+// app.use(storeRoutes);
 
 
 

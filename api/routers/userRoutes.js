@@ -4,5 +4,5 @@ const loginMiddleware = require('../middlewares/loginmiddleware');
 const router = express.Router();
 
 router.post('/login',loginMiddleware,userController.login);
-
+router.post('/register', userController.register);
 module.exports = router;
