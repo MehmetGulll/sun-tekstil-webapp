@@ -297,7 +297,7 @@ const soru ={
             key: 'id'
         }
     },
-    güncelleyen_id: {
+    guncelleyen_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
