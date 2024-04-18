@@ -40,7 +40,7 @@ Widget buildColumn(BuildContext context, String label, List<String> items,
   );
 }
 
-class _AddLocationState extends State<AddLocation> {
+class _AddLocationState extends State<AddLocation> { // burası dropdown değişince input içi değişmesin diye konuldu
   final TextEditingController storeCodeController = TextEditingController();
   final TextEditingController storeNameController = TextEditingController();
   final TextEditingController storeCityController = TextEditingController();

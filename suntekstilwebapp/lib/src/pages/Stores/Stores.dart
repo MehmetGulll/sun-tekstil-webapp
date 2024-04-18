@@ -10,9 +10,9 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class Regions extends StatefulWidget {
+class Stores extends StatefulWidget {
   @override
-  _RegionsState createState() => _RegionsState();
+  _StoresState createState() => _StoresState();
 }
 
 Widget buildRow(
@@ -39,7 +39,7 @@ Widget buildRow(
       ));
 }
 
-class _RegionsState extends State<Regions> {
+class _StoresState extends State<Stores> {
   Map<String, String?> selectedValues = {
     'storeCode': '',
     'storeName': '',
@@ -54,6 +54,16 @@ class _RegionsState extends State<Regions> {
     print(jsonData);
 
     return jsonData.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<void> deleteStore(int id) async {
+    print(id);
+    final response = await http.delete(Uri.parse('${ApiUrls.deleteStore}/$id'));
+    if (response.statusCode == 200) {
+      print("Mağaza başarıyla silindi");
+    } else {
+      print("Bir hata oluştu");
+    }
   }
 
   List<String> buildDropdownMenuItems(
@@ -112,7 +122,7 @@ class _RegionsState extends State<Regions> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Bölge Düzenle",
+                    "Mağaza Düzenle",
                     style: TextStyle(
                         fontSize: Tokens.fontSize[9],
                         fontWeight: Tokens.fontWeight[6]),
@@ -188,8 +198,15 @@ class _RegionsState extends State<Regions> {
                       buttonText: "Sil",
                       buttonColor: Themes.secondaryColor,
                       onPressed: () {
-                        print("Silindi");
-                        Navigator.of(context).pop();
+                        if (store.containsKey('storeId') &&
+                            store['storeId'] != null) {
+                              print(store['storeId']);
+                          deleteStore(store['storeId']);
+                          print("Silindi");
+                          Navigator.of(context).pop();
+                        } else {
+                          print("Mağaza id'si null veya bulunamadı");
+                        }
                       },
                     ),
                   ),
@@ -238,7 +255,9 @@ class _RegionsState extends State<Regions> {
                       "Mağaza Telefon",
                       buildDropdownMenuItems(stores, 'storePhone'),
                       (value) => setState(() => _chosenStorePhone = value)),
-                      SizedBox(height: 20,),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 350),
                     child: Row(
