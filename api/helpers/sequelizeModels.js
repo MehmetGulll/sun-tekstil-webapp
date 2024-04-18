@@ -63,8 +63,21 @@ const denetim =  {
     },
     alinan_puan: {
         type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    denetim_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    denetim_tamamlanma_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.INTEGER,
         allowNull: false
     }
+    
 };
 
 const denetim_sorulari = {

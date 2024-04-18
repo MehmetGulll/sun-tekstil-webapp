@@ -231,5 +231,37 @@ router.post("/updateQuestion", authenticateToken, async (req, res) => {
   }
 });
 
+//  DENETİM TİPİ SEÇİLEN SORULARI LİSTELER
+router.post("/getAllInspectionQuestionsByType", authenticateToken, async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      denetim_tip_id: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) return res.status(400).send(error);
+
+    const sequelize = await initializeSequelize();
+    const soruModel = sequelize.define("soru", soru, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const allInspectionQuestions = await soruModel.findAndCountAll({
+      where: {
+        denetim_tip_id: value.denetim_tip_id,
+      },
+    });
+
+    if (!allInspectionQuestions || allInspectionQuestions.length === 0) return res.status(404).send("Hiç Soru Bulunamadı!");
+    
+
+    return res
+      .status(200)
+      .send({ data: allInspectionQuestions.rows, count: allInspectionQuestions.count });
+  } catch (error) {
+    console.error("Get All Inspection Questions Error:", error);
+    return res.status(500).send(error);
+  }
+});
 
 module.exports = router;
