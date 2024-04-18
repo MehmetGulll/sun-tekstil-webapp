@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.get('/getStores',storeController.getStores);
 router.post('/addStore', storeController.addStore);
-router.delete('/deleteStore/:id',storeController.deleteStore);
+router.delete('/deleteStore/:storeId',storeController.deleteStore);
 
 module.exports = router;

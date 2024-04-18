@@ -47,11 +47,14 @@ class _StoresState extends State<Stores> {
     'city': '',
     'storePhone': '',
   };
+  List<Map<String, dynamic>> _stores = [];
   Future<List<Map<String, dynamic>>> _getStores() async {
     var url = Uri.parse(ApiUrls.storesUrl);
     var data = await http.get(url);
     var jsonData = json.decode(data.body) as List;
     print(jsonData);
+
+    _stores = jsonData.map((item) => item as Map<String, dynamic>).toList();
 
     return jsonData.map((item) => item as Map<String, dynamic>).toList();
   }
@@ -61,6 +64,9 @@ class _StoresState extends State<Stores> {
     final response = await http.delete(Uri.parse('${ApiUrls.deleteStore}/$id'));
     if (response.statusCode == 200) {
       print("Mağaza başarıyla silindi");
+      setState(() {
+        _stores.removeWhere((store) => store['id'] == id);
+      });
     } else {
       print("Bir hata oluştu");
     }
@@ -200,7 +206,7 @@ class _StoresState extends State<Stores> {
                       onPressed: () {
                         if (store.containsKey('storeId') &&
                             store['storeId'] != null) {
-                              print(store['storeId']);
+                          print(store['storeId']);
                           deleteStore(store['storeId']);
                           print("Silindi");
                           Navigator.of(context).pop();

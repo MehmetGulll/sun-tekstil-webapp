@@ -70,8 +70,8 @@ exports.addStore = async (req, res) => {
 exports.deleteStore = async(req,res)=>{
   try {
     const pool = await sql.connect(config);
-    const result = await pool.request().input('magaza_id',sql.Int, req.params.magaza_id)
-    .query('DELETE FROM magaza WHERE magaza_id = @magaza_id');
+    const result = await pool.request().input('storeId',sql.Int, req.params.storeId)
+    .query('DELETE FROM magaza WHERE magaza_id = @storeId');
     res.status(200).send({message:'Mağaza başarıyla silindi'});
   } catch (error) {
     console.log("Error",error);
