@@ -136,6 +136,9 @@ router.post("/login", async (req, res) => {
 // YENİ KULLANICI EKLEMEK İÇİN
 router.post("/addUser", authenticateToken, async (req, res) => {
   try {
+    if (req.user.rol_id !== 1 && req.user.rol_id !== 2) {
+      return res.status(403).send("Kullanici ekleme yetkiniz yok!");
+    }
     const { error, value } = Joi.object({
       ad: Joi.string().required(),
       soyad: Joi.string().required(),
@@ -189,6 +192,7 @@ router.post("/addUser", authenticateToken, async (req, res) => {
       eposta,
       sifre: hashedPassword,
       rol,
+      status: 1
     });
 
     return res.status(201).send(newUser);
