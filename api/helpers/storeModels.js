@@ -11,3 +11,4 @@ class Store{
         this.storeManager = storeManager
     }
 }
+module.exports = Store;

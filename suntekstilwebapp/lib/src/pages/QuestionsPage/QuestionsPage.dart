@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:suntekstilwebapp/src/API/url.dart';
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
@@ -13,11 +14,10 @@ class QuestionsPage extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
   Future<List> _getQuestions() async {
-    var url = Uri.parse('http://localhost:5000/getQuestions');
+    var url = Uri.parse(ApiUrls.questionsUrl);
     var data = await http.get(url);
 
     var jsonData = json.decode(data.body);
-    print("burası");
     print(jsonData);
     return jsonData;
   }
