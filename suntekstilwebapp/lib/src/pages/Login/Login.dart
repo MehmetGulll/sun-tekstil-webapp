@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
@@ -7,6 +8,7 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 
 class Login extends StatelessWidget {
   final usernameController = TextEditingController();
@@ -19,6 +21,10 @@ class Login extends StatelessWidget {
     });
 
     if (response.statusCode == 200) {
+      Map<String, dynamic> responseBody = jsonDecode(response.body);
+      String token = responseBody['token'];
+      print(responseBody['token']);
+      Provider.of<Auth>(context, listen:false).token = token;
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       print("Access Failed ");
@@ -89,6 +95,7 @@ class Login extends StatelessWidget {
                       controller: passwordController,
                       hintText: "Şifre",
                       keyboardType: TextInputType.visiblePassword,
+                      obscureText: true,
                     )),
               ],
             ),

@@ -158,7 +158,8 @@ class _RegisterState extends State<Register> {
                     child: CustomInput(
                       controller: passwordController,
                       hintText: "Şifre",
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText:true
                     )),
               ],
             ),

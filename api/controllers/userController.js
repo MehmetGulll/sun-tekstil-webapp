@@ -1,6 +1,7 @@
 const express = require("express");
 const sql = require("mssql");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 const User = require("../helpers/userModels");
 const config = require("../config/config");
 
@@ -17,9 +18,11 @@ exports.login = async (req, res) => {
       const match = await bcrypt.compare(userPassword, user.sifre);
 
       if (match) {
+        const token = jwt.sign({id:user.id}, 'yourToken',{expiresIn:'24h'})
         res.status(200).send({
           message: "Başarıyla giriş yapıldı.",
           user: user,
+          token:token
         });
       } else {
         res.status(401).send({ message: "Yanlış şifre." });
