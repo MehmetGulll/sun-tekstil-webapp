@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../../constants/theme.dart';
+import '../../API/url.dart';
 
 class Sidebar extends StatelessWidget {
+
+  Future<void>logout(BuildContext context) async{
+    final response = await http.post(Uri.parse(ApiUrls.logout));
+    if(response.statusCode ==200){
+      print("Çıkış işlemi başarılı");
+      Navigator.pushReplacementNamed(context, '/');
+    }else{
+      print("logout failed");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final drawerHeader = DrawerHeader(
@@ -134,7 +147,7 @@ class Sidebar extends StatelessWidget {
         style: TextStyle(color: Themes.whiteColor),
       ),
       onTap: () {
-        Navigator.pop(context);
+       logout(context);
       },
     );
 

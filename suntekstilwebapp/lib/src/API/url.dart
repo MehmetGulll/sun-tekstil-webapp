@@ -8,4 +8,5 @@ class ApiUrls{
   static const String deleteStore = 'http://localhost:5000/deleteStore';
   static const String updateStore = 'http://localhost:5000/updateStore';
   static const String deleteQuestion = 'http://localhost:5000/deleteQuestion';
+  static const String logout = 'http://localhost:5000/logout';
 }

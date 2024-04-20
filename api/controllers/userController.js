@@ -19,6 +19,7 @@ exports.login = async (req, res) => {
 
       if (match) {
         const token = jwt.sign({id:user.id}, 'yourToken',{expiresIn:'24h'})
+        req.session.token =token;
         res.status(200).send({
           message: "Başarıyla giriş yapıldı.",
           user: user,
@@ -74,3 +75,13 @@ exports.register = async (req, res) => {
     console.log("Error", error);
   }
 };
+
+exports.logOut = async(req,res)=>{
+  try {
+    req.session.token = null;
+    res.status(200).send({message:'Çıkış işlemi başarılı..'});
+  } catch (error) {
+    console.log("Error",error);
+    res.status(500).send({message:'Çıkış sağlanamadı:',error});
+  }
+}
