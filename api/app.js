@@ -8,6 +8,7 @@ require("dotenv").config({ path: "./config/.env" });
 const questionsRoutes = require('./routers/questionsRoutes');
 const userRoutes = require('./routers/userRoutes');
 const storesRoutes = require('./routers/storesRoutes');
+const reportsRoutes = require('./routers/reportsRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -29,6 +30,9 @@ app.use(regionRoutes);
 app.use(questionsRoutes);
 app.use(userRoutes);
 app.use(storesRoutes);
+app.use(reportsRoutes);
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
