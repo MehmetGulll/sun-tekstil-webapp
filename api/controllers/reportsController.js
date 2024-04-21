@@ -34,3 +34,20 @@ exports.getReports = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
+
+exports.deleteReport = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const { inspectionId } = req.params;
+    const result = await pool
+      .request()
+      .input("inspectionId", sql.Int, inspectionId)
+      .query("DELETE FROM denetim WHERE denetim_id = @inspectionId");
+    res.status(200).send({ message: "Report deleted successfully.!" });
+    console.log(result);
+    console.log(inspectionId);
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server Error", error });
+  }
+};

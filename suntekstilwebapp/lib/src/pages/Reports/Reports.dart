@@ -63,6 +63,18 @@ class _ReportsState extends State<Reports> {
     _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
     return _reports;
   }
+  Future<void>deleteReport(int id) async{
+    final response = await http.delete(Uri.parse('${ApiUrls.deleteReport}/$id'));
+    if(response.statusCode == 200){
+      print("Rapor başarıyla silindi");
+      setState(() {
+        _reports.removeWhere((report) => report['inspectionId'] == id);
+      });
+    }
+    else{
+      print("Bir hata oluştu");
+    }
+  }
 
   List<Map<String, dynamic>> _reports = [];
   void showModal(
@@ -179,8 +191,15 @@ class _ReportsState extends State<Reports> {
                       buttonText: "Sil",
                       buttonColor: Themes.secondaryColor,
                       onPressed: () {
-                        print("Silindi");
-                        Navigator.of(context).pop();
+                         if (report.containsKey('inspectionId') &&
+                            report['inspectionId'] != null) {
+                          print(report['inspectionId']);
+                          deleteReport(report['inspectionId']);
+                          print("Silindi");
+                          Navigator.of(context).pop();
+                        } else {
+                          print("Mağaza id'si null veya bulunamadı");
+                        }
                       },
                     ),
                   ),
