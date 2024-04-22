@@ -102,7 +102,7 @@ router.post("/createAction", authenticateToken, async (req, res) => {
   }
 });
 
-// AKTİF OLAN İDSİ VERİLEN AKSİYONU KAPATIR 
+// AKTİF OLAN İDSİ VERİLEN AKSİYONU KAPATIR
 router.post("/closeAction", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -128,10 +128,24 @@ router.post("/closeAction", authenticateToken, async (req, res) => {
 
     if (!isActionExist) return res.status(400).send("Aksiyon Bulunamadı!");
 
-    if (isActionExist.aksiyon_olusturan_id !== req.user.id && req.user.rol_id !== 1 && req.user.rol_id !== 2) return res.status(400).send("Aksiyonu Sadece Oluşturan veya Admin Kapatabilir!");
-    
-    if (new Date(aksiyon_bitis_tarihi) < new Date(isActionExist.aksiyon_acilis_tarihi)) {
-      return res.status(400).send("Aksiyon Bitiş Tarihi Açılış Tarihinden Önce Olamaz! Lütfen Bilgileri Kontrol Ediniz");
+    if (
+      isActionExist.aksiyon_olusturan_id !== req.user.id &&
+      req.user.rol_id !== 1 &&
+      req.user.rol_id !== 2
+    )
+      return res
+        .status(400)
+        .send("Aksiyonu Sadece Oluşturan veya Admin Kapatabilir!");
+
+    if (
+      new Date(aksiyon_bitis_tarihi) <
+      new Date(isActionExist.aksiyon_acilis_tarihi)
+    ) {
+      return res
+        .status(400)
+        .send(
+          "Aksiyon Bitiş Tarihi Açılış Tarihinden Önce Olamaz! Lütfen Bilgileri Kontrol Ediniz"
+        );
     }
 
     const isActionClosed = await aksiyonModel.findOne({
@@ -144,7 +158,6 @@ router.post("/closeAction", authenticateToken, async (req, res) => {
     if (isActionClosed)
       return res.status(400).send("Aksiyon Zaten Kapatılmış!");
 
-
     const updatedAction = await aksiyonModel.update(
       {
         aksiyon_kapatan_id: req.user.id,
@@ -155,7 +168,7 @@ router.post("/closeAction", authenticateToken, async (req, res) => {
       },
       {
         where: {
-          aksiyon_id: aksiyon_id, 
+          aksiyon_id: aksiyon_id,
         },
       }
     );
@@ -165,6 +178,5 @@ router.post("/closeAction", authenticateToken, async (req, res) => {
     return res.status(500).send(error);
   }
 });
-
 
 module.exports = router;
