@@ -160,6 +160,24 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Durum",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      selectedItem:
+                          question['status'] == 1 ? 'Aktif' : 'Pasif',
+                      items: ['Aktif', 'Pasif'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 600),
                 child:
@@ -167,25 +185,25 @@ class _QuestionsState extends State<Questions> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
-                      onPressed: () {
+                      onPressed: ()async {
                         print("Butona basıldı");
-                        Navigator.of(context).pop();
+                        await updateQuestion(context, question['questionId'], Map<String, dynamic>.from(question));
                       },
                     ),
                   ),
                   SizedBox(
                     width: 20,
                   ),
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Status",
-                      buttonColor: Themes.secondaryColor,
-                      onPressed: () async {
-                        await updateQuestion(context, question['questionId'],
-                            Map<String, dynamic>.from(question));
-                      },
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: CustomButton(
+                  //     buttonText: "Status",
+                  //     buttonColor: Themes.secondaryColor,
+                  //     onPressed: () async {
+                  //       await updateQuestion(context, question['questionId'],
+                  //           Map<String, dynamic>.from(question));
+                  //     },
+                  //   ),
+                  // ),
                 ]),
               )
             ],
