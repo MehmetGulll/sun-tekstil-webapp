@@ -23,4 +23,5 @@ class Themes {
   static const Color cardTextColor = Color.fromRGBO(33, 33, 33, 1); // Kart metin rengi
   static const Color accentTextColor = Color.fromRGBO(255, 152, 0, 1); // Vurgu metin rengi
   static const Color dividerColor = Color.fromRGBO(189, 189, 189, 1); // Ayırıcı çizgi rengi
+  static const Color borderColor = Color.fromRGBO(189, 189, 189, 1); // Sınır rengi
 }
