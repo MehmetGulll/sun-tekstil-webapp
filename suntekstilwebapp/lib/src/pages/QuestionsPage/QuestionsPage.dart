@@ -20,16 +20,15 @@ class _QuestionsState extends State<Questions> {
   final TextEditingController questionNameController = TextEditingController();
   final TextEditingController questionPointController = TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
- Future<List<Map<String, dynamic>>> _getQuestions() async {
-  var url = Uri.parse(ApiUrls.questionsUrl);
-  var data = await http.get(url);
+  Future<List<Map<String, dynamic>>> _getQuestions() async {
+    var url = Uri.parse(ApiUrls.questionsUrl);
+    var data = await http.get(url);
 
-  var jsonData = json.decode(data.body) as List;
-  print(jsonData);
-  _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
-  return _questions;
-}
-
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
+    _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    return _questions;
+  }
 
   List<Map<String, dynamic>> _questions = [];
   Future<void> deleteQuestion(int id) async {
@@ -43,6 +42,23 @@ class _QuestionsState extends State<Questions> {
       });
     } else {
       print("Bir hata oluştu");
+    }
+  }
+
+  Future<void> updateQuestion(int id, Map<String, dynamic> question) async {
+    print(id);
+    var currentStatus = question['status'];
+    var newStatus = currentStatus == 0 ? 1 : 0;
+
+    final response = await http.post(Uri.parse('${ApiUrls.updateQuestion}'),
+        body: jsonEncode(<String, String>{
+          'soru_id': question['questionId'].toString(),
+          'status': newStatus.toString()
+        }));
+    if (response.statusCode == 200) {
+      print("Başarıyla güncellendi");
+    } else {
+      print("Hata");
     }
   }
 
@@ -145,18 +161,11 @@ class _QuestionsState extends State<Questions> {
                   ),
                   Expanded(
                     child: CustomButton(
-                      buttonText: "Sil",
+                      buttonText: "Status",
                       buttonColor: Themes.secondaryColor,
-                      onPressed: () {
-                        if (question.containsKey('questionId') &&
-                            question['questionId'] != null) {
-                          print(question['questionId']);
-                          deleteQuestion(question['questionId']);
-                          print("Silindi");
-                          Navigator.of(context).pop();
-                        } else {
-                          print("Mağaza id'si null veya bulunamadı");
-                        }
+                      onPressed: () async {
+                        await updateQuestion(question['questionId'],
+                            Map<String, dynamic>.from(question));
                       },
                     ),
                   ),
