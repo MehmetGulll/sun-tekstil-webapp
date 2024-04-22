@@ -18,15 +18,16 @@ class Login extends StatelessWidget {
     print(usernameController);
     print(passwordController);
     final response = await http.post(Uri.parse(ApiUrls.loginUrl), body: {
-      'user_name': usernameController.text,
-      'userPassword': passwordController.text
+      'kullanici_adi': usernameController.text,
+      'sifre': passwordController.text
     });
-
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
       String token = responseBody['token'];
       print(responseBody['token']);
-      Provider.of<Auth>(context, listen:false).token = token;
+     Auth auth = Provider.of<Auth>(context, listen:false);
+     auth.token = token;
+     auth.notifyListeners();
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       print("Access Failed ");

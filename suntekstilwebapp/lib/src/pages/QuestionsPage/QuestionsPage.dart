@@ -9,6 +9,8 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
+import 'package:provider/provider.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 
 class Questions extends StatefulWidget {
   @override
@@ -38,25 +40,40 @@ class _QuestionsState extends State<Questions> {
     if (response.statusCode == 200) {
       print("Mağaza başarıyla silindi");
       setState(() {
-        _questions.removeWhere((store) => store['id'] == id);
+        _questions.removeWhere((question) => question['id'] == id);
       });
     } else {
       print("Bir hata oluştu");
     }
   }
 
-  Future<void> updateQuestion(int id, Map<String, dynamic> question) async {
-    print(id);
+  Future<void> updateQuestion(
+      BuildContext context, int id, Map<String, dynamic> question) async {
     var currentStatus = question['status'];
     var newStatus = currentStatus == 0 ? 1 : 0;
-
-    final response = await http.post(Uri.parse('${ApiUrls.updateQuestion}'),
-        body: jsonEncode(<String, String>{
-          'soru_id': question['questionId'].toString(),
-          'status': newStatus.toString()
-        }));
+    question['status'] = newStatus;
+    print(id);
+    print("status");
+    print(question['status']);
+    Auth auth = Provider.of<Auth>(context, listen: false);
+    print(auth.token);
+    String? token = auth.token;
+    final response = await http.post(
+      Uri.parse('${ApiUrls.updateQuestion}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, String>{
+        'soru_id': question['questionId'].toString(),
+        'status': newStatus.toString()
+      }),
+    );
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
+      Navigator.pop(context);
+      var updatedQuestion = _questions.firstWhere((q) => q['questionId'] == question['questionId']);
+      updatedQuestion['status'] = newStatus;
     } else {
       print("Hata");
     }
@@ -164,7 +181,7 @@ class _QuestionsState extends State<Questions> {
                       buttonText: "Status",
                       buttonColor: Themes.secondaryColor,
                       onPressed: () async {
-                        await updateQuestion(question['questionId'],
+                        await updateQuestion(context, question['questionId'],
                             Map<String, dynamic>.from(question));
                       },
                     ),
