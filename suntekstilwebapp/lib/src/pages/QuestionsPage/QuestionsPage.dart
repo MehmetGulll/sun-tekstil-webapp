@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:suntekstilwebapp/src/API/url.dart';
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
@@ -9,27 +10,48 @@ import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 
-class QuestionsPage extends StatelessWidget {
-  final TextEditingController controller = TextEditingController();
-  final TextInputType keyboardType = TextInputType.text;
-  Future<List> _getQuestions() async {
-    var url = Uri.parse('http://localhost:5000/getQuestions');
-    var data = await http.get(url);
+class Questions extends StatefulWidget {
+  @override
+  _QuestionsState createState() => _QuestionsState();
+}
 
-    var jsonData = json.decode(data.body);
-    print("burası");
-    print(jsonData);
-    return jsonData;
+class _QuestionsState extends State<Questions> {
+  final TextEditingController questionIdController = TextEditingController();
+  final TextEditingController questionNameController = TextEditingController();
+  final TextEditingController questionPointController = TextEditingController();
+  final TextInputType keyboardType = TextInputType.text;
+ Future<List<Map<String, dynamic>>> _getQuestions() async {
+  var url = Uri.parse(ApiUrls.questionsUrl);
+  var data = await http.get(url);
+
+  var jsonData = json.decode(data.body) as List;
+  print(jsonData);
+  _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
+  return _questions;
+}
+
+
+  List<Map<String, dynamic>> _questions = [];
+  Future<void> deleteQuestion(int id) async {
+    print(id);
+    final response =
+        await http.delete(Uri.parse('${ApiUrls.deleteQuestion}/$id'));
+    if (response.statusCode == 200) {
+      print("Mağaza başarıyla silindi");
+      setState(() {
+        _questions.removeWhere((store) => store['id'] == id);
+      });
+    } else {
+      print("Bir hata oluştu");
+    }
   }
 
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map question) {
-    TextEditingController questionIdController =
-        TextEditingController(text: question['questionId'].toString());
-    TextEditingController questionNameController =
-        TextEditingController(text: question['questionName']);
-    TextEditingController questionPointController =
-        TextEditingController(text: question['questionPoint'].toString());
+    questionIdController.text = question['questionId'].toString();
+    questionNameController.text = question['questionName'].toString();
+    questionPointController.text = question['questionPoint'].toString();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -94,7 +116,8 @@ class QuestionsPage extends StatelessWidget {
                       style: TextStyle(fontSize: Tokens.fontSize[2]),
                     ),
                     CustomDropdown(
-                      selectedItem: question['questionAnswer'] == 1 ? 'Evet' : 'Hayır',
+                      selectedItem:
+                          question['questionAnswer'] == 1 ? 'Evet' : 'Hayır',
                       items: ['Evet', 'Hayır'],
                       onChanged: (String? value) {},
                     ),
@@ -125,8 +148,15 @@ class QuestionsPage extends StatelessWidget {
                       buttonText: "Sil",
                       buttonColor: Themes.secondaryColor,
                       onPressed: () {
-                        print("Silindi");
-                        Navigator.of(context).pop();
+                        if (question.containsKey('questionId') &&
+                            question['questionId'] != null) {
+                          print(question['questionId']);
+                          deleteQuestion(question['questionId']);
+                          print("Silindi");
+                          Navigator.of(context).pop();
+                        } else {
+                          print("Mağaza id'si null veya bulunamadı");
+                        }
                       },
                     ),
                   ),

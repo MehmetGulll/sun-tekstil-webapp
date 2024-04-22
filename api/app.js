@@ -3,11 +3,18 @@ const express = require("express");
 const sql = require("mssql");
 const cors = require("cors");
 const path = require("path");
+const bodyParser = require('body-parser');
 require("dotenv").config({ path: "./config/.env" });
 const questionsRoutes = require('./routers/questionsRoutes');
+const userRoutes = require('./routers/userRoutes');
+const storesRoutes = require('./routers/storesRoutes');
+const reportsRoutes = require('./routers/reportsRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
 const port = 5000;
 
 const authRoutes = require("./routers/authRoutes");
@@ -17,13 +24,23 @@ const inspectationRoutes = require("./routers/inspectationRoutes");
 const actionRoutes = require("./routers/actionRoutes");
 const questionRoutes = require("./routers/questionRoutes");
 
-app.use(authRoutes);
+// app.use(authRoutes);
 app.use(regionRoutes);
-app.use(storeRoutes);
+// app.use(storeRoutes);
+
+
+
 app.use(questionsRoutes);
+
+app.use(userRoutes);
+app.use(storesRoutes);
+app.use(reportsRoutes);
+
+
 app.use(inspectationRoutes);
 app.use(actionRoutes);
 app.use(questionRoutes);
+
 
 // Start the server
 app.listen(port, () => {

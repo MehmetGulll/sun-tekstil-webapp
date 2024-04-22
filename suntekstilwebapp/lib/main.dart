@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart'; //
 import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
 import 'package:suntekstilwebapp/src/pages/ChangePassword/ChangePassword.dart';
 import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
 import 'package:suntekstilwebapp/src/pages/Login/Login.dart';
 import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
-import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart'; 
+import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart';
+import 'package:suntekstilwebapp/src/pages/Register/Register.dart'; 
 import 'package:suntekstilwebapp/src/pages/SettingsPage.dart'; 
-import 'package:suntekstilwebapp/src/pages/Regions/Regions.dart';
+import 'package:suntekstilwebapp/src/pages/Stores/Stores.dart';
 import 'package:suntekstilwebapp/src/pages/Reports/Reports.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => Auth(), 
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -25,9 +33,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/' : (context) => Login(),
         '/home': (context) => Home(),
+        '/register':(context) => Register(),
         '/settings': (context) => SettingsPage(),
-        '/questions': (context) => QuestionsPage(),
-        '/regions':(context) => Regions(),
+        '/questions': (context) => Questions(),
+        '/stores':(context) => Stores(),
         '/addLocation':(context) => AddLocation(),
         '/officalUsers':(context) => OfficalUsers(),
         '/changePassword':(context)=>ChangePassword(),
