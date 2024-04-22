@@ -1,12 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Card/Card.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 
 class Home extends StatelessWidget {
+
+   Future<void> fetchData(BuildContext context,String id) async {
+    Auth auth = Provider.of<Auth>(context, listen: false);
+    String? token = auth.token;
+  final intId = int.parse(id);
+  final url = Uri.parse('${ApiUrls.getLastFiveInspections}/$intId');
+    
+  print(token);
+  try {
+    print("ATAKAN2");
+    final response = await http.get(url, headers: {
+      'Authorization':
+          'Bearer $token',
+    });
+  
+    if (response.statusCode == 200) {
+      print("ATAKAN3");
+      final data = json.decode(response.body);
+      print('ATAKAN4 Response data: $data');
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+    }
+  } catch (error) {
+    print('Error occurred: $error');
+  }
+}
+
   @override
   Widget build(BuildContext context) {
+    fetchData(context,"5");
     return CustomScaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -14,7 +47,7 @@ class Home extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 3,
+              flex: 2,
               child: Column(
                 children: [
                   AspectRatio(
@@ -29,80 +62,129 @@ class Home extends StatelessWidget {
                   ),
                   SizedBox(height: 24),
                   Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: CustomCard(
-                            color: Themes.secondaryColor,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Themes.greyColor.withOpacity(0.5),
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: CustomCard(
+                        color: Themes.cardBackgroundColor,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Icon(
+                                Icons.announcement_outlined,
+                                size: 30,
+                                color: Themes.cardTextColor,
+                              ),
+                              SizedBox(width: 8),
                               Text(
                                 'Duyurular',
                                 style: TextStyle(
-                                  color: Themes.whiteColor,
-                                  fontSize: Tokens.fontSize[2],
+                                  color: Themes.cardTextColor,
+                                  fontSize: Tokens.fontSize[3],
                                   fontWeight: Tokens.fontWeight[7],
                                 ),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Themes.greyColor.withOpacity(0.5),
+                          width: 1,
                         ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          flex: 2,
-                          child: CustomCard(
-                            color: Themes.blueColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: CustomCard(
+                        color: Themes.cardBackgroundColor,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                "Ziyaret Sayısı",
-                                style: TextStyle(
-                                  color: Themes.whiteColor,
-                                  fontSize: Tokens.fontSize[2],
-                                  fontWeight: Tokens.fontWeight[7],
-                                ),
-                              ),
-                              Column(
+                              Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  SizedBox(height: 16),
+                                  Icon(
+                                    Icons.analytics_outlined,
+                                    size: 30,
+                                    color: Themes.cardTextColor,
+                                  ),
+                                  SizedBox(width: 8),
                                   Text(
-                                    '0/4',
+                                    "Ziyaret Sayısı",
                                     style: TextStyle(
-                                      color: Themes.whiteColor,
-                                      fontSize: Tokens.fontSize[9],
+                                      color: Themes.cardTextColor,
+                                      fontSize: Tokens.fontSize[3],
+                                      fontWeight: Tokens.fontWeight[7],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                     Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '1/4',
+                                    style: TextStyle(
+                                      color: Themes.cardTextColor,
+                                      fontSize: Tokens.fontSize[6],
                                       fontWeight: Tokens.fontWeight[5],
                                     ),
                                   ),
                                   Text(
                                     'Ziyaret Tamamlama Durumu',
                                     style: TextStyle(
-                                      color: Themes.whiteColor,
-                                      fontSize: Tokens.fontSize[1],
-                                      fontWeight: Tokens.fontWeight[4],
-                                    ),
-                                  ),
-                                  SizedBox(height: 24),
-                                  Text(
-                                    '0%',
-                                    style: TextStyle(
-                                      color: Themes.whiteColor,
-                                      fontSize: Tokens.fontSize[9],
-                                      fontWeight: Tokens.fontWeight[5],
-                                    ),
-                                  ),
-                                  Text(
-                                    'Ziyaret Tamamlama Yüzdesi',
-                                    style: TextStyle(
-                                      color: Themes.whiteColor,
+                                      color: Themes.cardTextColor,
                                       fontSize: Tokens.fontSize[1],
                                       fontWeight: Tokens.fontWeight[4],
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
+                              SizedBox(width: 20),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '25%',
+                                    style: TextStyle(
+                                      color: Themes.cardTextColor,
+                                      fontSize: Tokens.fontSize[6],
+                                      fontWeight: Tokens.fontWeight[5],
+                                    ),
+                                  ),
+                                  Text(
+                                    'Ziyaret Tamamlama Yüzdesi',
+                                    style: TextStyle(
+                                      color: Themes.cardTextColor,
+                                      fontSize: Tokens.fontSize[1],
+                                      fontWeight: Tokens.fontWeight[4],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                           
+                                  ]
+                              )
+                              ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -110,26 +192,86 @@ class Home extends StatelessWidget {
             ),
             SizedBox(width: 16),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Column(
                 children: [
                   Expanded(
-                    child: CustomCard(
-                      color: Themes.greenColor,
+                    child: Row(
                       children: [
-                        Icon(
-                          Icons.bar_chart,
-                          size: 50,
-                          color: Themes.whiteColor,
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Themes.greyColor.withOpacity(0.5),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: CustomCard(
+                              color: Themes.cardBackgroundColor,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      size: 30,
+                                      color: Themes.cardTextColor,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "En Çok Aksiyonu Olan Lokasyonlar",
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Themes.cardTextColor,
+                                        fontSize: Tokens.fontSize[3],
+                                        fontWeight: Tokens.fontWeight[7],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 16),
-                        Text(
-                          "En Çok Aksiyonu Olan Lokasyonlar",
-                          maxLines: 2,
-                          style: TextStyle(
-                            color: Themes.whiteColor,
-                            fontSize: Tokens.fontSize[2],
-                            fontWeight: Tokens.fontWeight[7],
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.only(left: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Themes.greyColor.withOpacity(0.5),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: CustomCard(
+                              color: Themes.cardBackgroundColor,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.question_answer_outlined,
+                                      size: 30,
+                                      color: Themes.cardTextColor,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "En Az Aksiyonu Olan Sorular",
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Themes.cardTextColor,
+                                        fontSize: Tokens.fontSize[3],
+                                        fontWeight: Tokens.fontWeight[7],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -137,68 +279,82 @@ class Home extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Expanded(
-                    child: CustomCard(
-                      color: Themes.secondaryColor,
+                    child: Row(
                       children: [
-                        Icon(
-                          Icons.bar_chart,
-                          size: 50,
-                          color: Themes.whiteColor,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          "En Az Aksiyonu Olan Sorular",
-                          maxLines: 2,
-                          style: TextStyle(
-                            color: Themes.whiteColor,
-                            fontSize: Tokens.fontSize[2],
-                            fontWeight: Tokens.fontWeight[7],
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Themes.greyColor.withOpacity(0.5),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: CustomCard(
+                              color: Themes.cardBackgroundColor,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.dashboard_outlined,
+                                      size: 30,
+                                      color: Themes.cardTextColor,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Lokasyon Bazlı Kronik Hale Gelen Sorular",
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Themes.cardTextColor,
+                                        fontSize: Tokens.fontSize[3],
+                                        fontWeight: Tokens.fontWeight[7],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: CustomCard(
-                      color: Themes.purpleColor,
-                      children: [
-                        Icon(
-                          Icons.bar_chart,
-                          size: 50,
-                          color: Themes.whiteColor,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          "Lokasyon Bazlı Kronik Hale Gelen Sorular",
-                          maxLines: 2,
-                          style: TextStyle(
-                            color: Themes.whiteColor,
-                            fontSize: Tokens.fontSize[2],
-                            fontWeight: Tokens.fontWeight[7],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: CustomCard(
-                      color: Themes.blueColor,
-                      children: [
-                        Icon(
-                          Icons.bar_chart,
-                          size: 50,
-                          color: Themes.whiteColor,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          "En Çok Aksiyon Başlatılan Sorular",
-                          maxLines: 2,
-                          style: TextStyle(
-                            color: Themes.whiteColor,
-                            fontSize: Tokens.fontSize[2],
-                            fontWeight: Tokens.fontWeight[7],
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.only(left: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Themes.greyColor.withOpacity(0.5),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: CustomCard(
+                              color: Themes.cardBackgroundColor,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.assignment_outlined,
+                                      size: 30,
+                                      color: Themes.cardTextColor,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "En Çok Aksiyon Başlatılan Sorular",
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Themes.cardTextColor,
+                                        fontSize: Tokens.fontSize[3],
+                                        fontWeight: Tokens.fontWeight[7],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
