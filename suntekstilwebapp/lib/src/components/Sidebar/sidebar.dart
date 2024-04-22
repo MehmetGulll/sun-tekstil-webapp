@@ -78,11 +78,11 @@ class Sidebar extends StatelessWidget {
     );
     final RegionsTile = ListTile(
       leading: Icon(Icons.map),
-      title: Text('Bölgeler', style: TextStyle(color: Themes.whiteColor)),
+      title: Text('Mağazalar', style: TextStyle(color: Themes.whiteColor)),
       onTap: () {
         Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/regions') {
-          Navigator.pushReplacementNamed(context, '/regions');
+        if (ModalRoute.of(context)?.settings.name != '/stores') {
+          Navigator.pushReplacementNamed(context, '/stores');
         }
       },
     );
