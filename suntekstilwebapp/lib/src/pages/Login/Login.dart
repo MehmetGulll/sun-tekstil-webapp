@@ -15,6 +15,8 @@ class Login extends StatelessWidget {
   final passwordController = TextEditingController();
 
   Future<void> login(BuildContext context) async {
+    print(usernameController);
+    print(passwordController);
     final response = await http.post(Uri.parse(ApiUrls.loginUrl), body: {
       'user_name': usernameController.text,
       'userPassword': passwordController.text
