@@ -9,6 +9,7 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
+import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Questions extends StatefulWidget {
   @override
@@ -21,11 +22,14 @@ class _QuestionsState extends State<Questions> {
   final TextEditingController questionPointController = TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
  Future<List<Map<String, dynamic>>> _getQuestions() async {
+  String? token = await TokenHelper.getToken();
+  print(token);
   var url = Uri.parse(ApiUrls.questionsUrl);
   var data = await http.get(url);
 
   var jsonData = json.decode(data.body) as List;
   print(jsonData);
+
   _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
   return _questions;
 }

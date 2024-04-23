@@ -9,6 +9,7 @@ import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatelessWidget {
   final usernameController = TextEditingController();
@@ -18,8 +19,8 @@ class Login extends StatelessWidget {
     print(usernameController);
     print(passwordController);
     final response = await http.post(Uri.parse(ApiUrls.loginUrl), body: {
-      'user_name': usernameController.text,
-      'userPassword': passwordController.text
+      'kullanici_adi': usernameController.text,
+      'sifre': passwordController.text
     });
 
     if (response.statusCode == 200) {
@@ -27,6 +28,8 @@ class Login extends StatelessWidget {
       String token = responseBody['token'];
       print(responseBody['token']);
       Provider.of<Auth>(context, listen:false).token = token;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("token", token);
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       print("Access Failed ");
