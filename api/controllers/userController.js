@@ -157,3 +157,13 @@ exports.register = async (req, res) => {
     console.log("Error", error);
   }
 };
+
+exports.logout = async(req,res)=>{
+  try {
+    res.cookie = ('token','', {maxAge:1});
+    res.status(200).send({message:'Logout success'});
+  } catch (error) {
+    res.status(500).send({message:'logout failed', error});
+    
+  }
+}
