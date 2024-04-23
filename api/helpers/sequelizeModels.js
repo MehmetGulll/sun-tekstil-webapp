@@ -63,8 +63,21 @@ const denetim =  {
     },
     alinan_puan: {
         type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    denetim_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    denetim_tamamlanma_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.INTEGER,
         allowNull: false
     }
+    
 };
 
 const denetim_sorulari = {
@@ -151,6 +164,10 @@ const kullanici ={
             model: 'rol',
             key: 'rol_id'
         }
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 };
 
@@ -211,9 +228,17 @@ const magaza =  {
     },
     status: {
         type: DataTypes.INTEGER,
+        allowNull: false, 
+    },
+    ekleyen_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 1 
-    }
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+
 };
 
 const magaza_tipi = {
@@ -265,6 +290,10 @@ const soru ={
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    soru_sira_no: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     denetim_tip_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -272,6 +301,26 @@ const soru ={
             model: 'denetim_tipi',
             key: 'denetim_tip_id'
         }
+    },
+    ekleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    guncelleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 };
 
@@ -288,6 +337,68 @@ const yetki = {
     }
 };
 
+const aksiyon = {
+    aksiyon_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false
+    },
+    aksiyon_konu: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    aksiyon_gorsel: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    aksiyon_acilis_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    aksiyon_bitis_tarihi: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    aksiyon_sure: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    aksiyon_oncelik: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    denetim_tip_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'denetim_tipi',
+            key: 'denetim_tip_id'
+        }
+    },
+    aksiyon_olusturan_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    aksiyon_kapatan_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+};
+
+
 module.exports = {
     bolge,
     denetim,
@@ -298,5 +409,6 @@ module.exports = {
     magaza_tipi,
     rol,
     soru,
-    yetki
+    yetki,
+    aksiyon
 };

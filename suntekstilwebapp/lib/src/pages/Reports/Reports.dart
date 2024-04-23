@@ -6,6 +6,9 @@ import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
+import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Reports extends StatefulWidget {
   @override
@@ -37,7 +40,53 @@ Widget buildRow(
 }
 
 class _ReportsState extends State<Reports> {
-  void showModal(BuildContext context, Color backgroundColor, String text) {
+  final TextEditingController inspectionTypeController =
+      TextEditingController();
+  final TextEditingController storeNameController = TextEditingController();
+  final TextEditingController inspectionRoleController =
+      TextEditingController();
+  final TextEditingController inspectionerNameController =
+      TextEditingController();
+  final TextEditingController inspectionPointController =
+      TextEditingController();
+  final TextEditingController inspectionDateController =
+      TextEditingController();
+  final TextEditingController inspectionCompletionDateController =
+      TextEditingController();
+
+  Future<List<Map<String, dynamic>>> _getReports() async {
+    var url = Uri.parse(ApiUrls.reportsUrl);
+    var data = await http.get(url);
+
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
+    _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    return _reports;
+  }
+  Future<void>deleteReport(int id) async{
+    final response = await http.delete(Uri.parse('${ApiUrls.deleteReport}/$id'));
+    if(response.statusCode == 200){
+      print("Rapor başarıyla silindi");
+      setState(() {
+        _reports.removeWhere((report) => report['inspectionId'] == id);
+      });
+    }
+    else{
+      print("Bir hata oluştu");
+    }
+  }
+
+  List<Map<String, dynamic>> _reports = [];
+  void showModal(
+      BuildContext context, Color backgroundColor, String text, Map report) {
+    inspectionTypeController.text = report['inspectionTypeId'].toString();
+    storeNameController.text = report['storeId'].toString();
+    inspectionRoleController.text = report['inspectorRole'].toString();
+    inspectionerNameController.text = report['inspectorName'].toString();
+    inspectionPointController.text = report['pointsReceived'].toString();
+    inspectionDateController.text = report['inspectionDate'].toString();
+    inspectionCompletionDateController.text =
+        report['inspectionCompletionDate'].toString();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -66,39 +115,31 @@ class _ReportsState extends State<Reports> {
                 height: 20,
               ),
               CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Lokasyon Müdürü',
+                controller: inspectionTypeController,
+                hintText: 'Denetim Tipi',
                 keyboardType: TextInputType.name,
               ),
               SizedBox(
                 height: 20,
               ),
               CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Lokasyon',
+                controller: storeNameController,
+                hintText: 'Mağaza Adı',
                 keyboardType: TextInputType.name,
               ),
               SizedBox(
                 height: 20,
               ),
               CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Lokasyon Kodu',
+                controller: inspectionRoleController,
+                hintText: 'Denetimci Rol',
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(
                 height: 20,
               ),
               CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Lokasyon Tipi',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: TextEditingController(),
+                controller: inspectionerNameController,
                 hintText: 'Denetçi',
                 keyboardType: TextInputType.name,
               ),
@@ -106,59 +147,25 @@ class _ReportsState extends State<Reports> {
                 height: 20,
               ),
               CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Alınan Puan',
+                controller: inspectionPointController,
+                hintText: 'Puan',
                 keyboardType: TextInputType.name,
               ),
               SizedBox(
                 height: 20,
               ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Ziyaret Tipi",
-                      style: TextStyle(fontSize: Tokens.fontSize[2]),
-                    ),
-                    CustomDropdown(
-                      items: ['Tip1', 'Tip2'],
-                      onChanged: (String? value) {},
-                    ),
-                  ],
-                ),
+              CustomInput(
+                controller: inspectionDateController,
+                hintText: 'Denetim Tarihi',
+                keyboardType: TextInputType.name,
               ),
               SizedBox(
                 height: 20,
               ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Mail Durumu",
-                      style: TextStyle(fontSize: Tokens.fontSize[2]),
-                    ),
-                    CustomDropdown(
-                      items: ['Gönderildi', 'Gönderilmedi'],
-                      onChanged: (String? value) {},
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                children: [
-                  Text('Tarih:'),
-                  SizedBox(width: 8),
-                  Text("${_startDate.toLocal()}".split(' ')[0]),
-                  SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context, true),
-                    child: Text('Seç'),
-                  ),
-                ],
+              CustomInput(
+                controller: inspectionCompletionDateController,
+                hintText: 'Denetim Tamamlanma Tarihi',
+                keyboardType: TextInputType.name,
               ),
               SizedBox(
                 height: 20,
@@ -184,8 +191,15 @@ class _ReportsState extends State<Reports> {
                       buttonText: "Sil",
                       buttonColor: Themes.secondaryColor,
                       onPressed: () {
-                        print("Silindi");
-                        Navigator.of(context).pop();
+                         if (report.containsKey('inspectionId') &&
+                            report['inspectionId'] != null) {
+                          print(report['inspectionId']);
+                          deleteReport(report['inspectionId']);
+                          print("Silindi");
+                          Navigator.of(context).pop();
+                        } else {
+                          print("Mağaza id'si null veya bulunamadı");
+                        }
                       },
                     ),
                   ),
@@ -305,625 +319,173 @@ class _ReportsState extends State<Reports> {
                 onPressed: () {
                   print("Filtrelendi");
                 }),
-            Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: Table(
-                        defaultColumnWidth: FlexColumnWidth(1),
-                        columnWidths: {
-                          0: FlexColumnWidth(3),
-                          1: FlexColumnWidth(3),
-                          2: FlexColumnWidth(2),
-                          3: FlexColumnWidth(2),
-                          4: FlexColumnWidth(2),
-                          5: FlexColumnWidth(2),
-                          7: FlexColumnWidth(4),
-                          8: FlexColumnWidth(2),
-                          9: FlexColumnWidth(2)
-                        },
-                        border: TableBorder.all(color: Themes.blackColor),
-                        children: [
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "LOKASYON MÜDÜRÜ",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: FutureBuilder<List>(
+                future: _getReports(),
+                builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    List<TableRow> rows = snapshot.data!.map((report) {
+                      return TableRow(children: [
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['inspectionTypeId'],
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['storeId'],
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['inspectorRole'],
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['inspectorName'],
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['pointsReceived'].toString(),
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['inspectionDate'],
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            report['inspectionCompletionDate'],
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: CustomButton(
+                            buttonText: 'Düzenle',
+                            textColor: Themes.blueColor,
+                            buttonColor: Themes.whiteColor,
+                            onPressed: () {
+                              showModal(context, Themes.whiteColor, "", report);
+                            },
+                          ),
+                        ),
+                      ]);
+                    }).toList();
+
+                    return Table(
+                      defaultColumnWidth: FlexColumnWidth(1),
+                      columnWidths: {
+                        0: FlexColumnWidth(2),
+                        1: FlexColumnWidth(1),
+                        2: FlexColumnWidth(1),
+                        3: FlexColumnWidth(1),
+                        4: FlexColumnWidth(1),
+                        5: FlexColumnWidth(1),
+                        6: FlexColumnWidth(2),
+                        7: FlexColumnWidth(1)
+                      },
+                      border: TableBorder.all(color: Themes.blackColor),
+                      children: [
+                        TableRow(children: [
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text(
+                              "DENETİM TİPİ",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text("LOKASYON",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "LOKASYON KODU",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                                padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
-                                child: Text(
-                                  "LOKASYON TİPİ",
-                                  style: TextStyle(
-                                      fontWeight: Tokens.fontWeight[2]),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text("MAĞAZA ADI",
+                                style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[2],
                                 )),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "ZİYARET TİPİ",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text(
+                              "DENETİMCİ ROLÜ",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "DENETÇİ",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text(
+                              "DENETÇİ",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "TARİH",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text(
+                              "PUAN",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "MAİL GÖNDERİLME DURUMU",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text(
+                              "DENETİM TARİHİ",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "ALINAN PUAN",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Themes.yellowColor,
+                            child: Text(
+                              "DENETİM TAMAMLANMA GÜNÜ",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                            Container(
+                          ),
+                          Container(
                               padding: EdgeInsets.all(8.0),
                               color: Themes.yellowColor,
                               child: Text(
                                 "DÜZENLE",
                                 style:
                                     TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                          ]),
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Emre Suaklier",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Mersin Forum AVM",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "1038",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "AVM",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Görsel CheckList- Puanlı",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Çağrı Yiğit",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "28.03.2024",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Gönderildi",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "95,00",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: CustomButton(
-                                buttonText: 'Düzenle',
-                                textColor: Themes.blueColor,
-                                buttonColor: Themes.whiteColor,
-                                onPressed: () {
-                                  showModal(context, Themes.whiteColor, "");
-                                },
-                              ),
-                            )
-                          ]),
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Emre Suaklier",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Mersin Forum AVM",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "1038",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "AVM",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Görsel CheckList- Puanlı",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Çağrı Yiğit",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "28.03.2024",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Gönderildi",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "95,00",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: CustomButton(
-                                buttonText: 'Düzenle',
-                                textColor: Themes.blueColor,
-                                buttonColor: Themes.whiteColor,
-                                onPressed: () {
-                                  showModal(context, Themes.yellowColor,
-                                      "Modal Açıldı");
-                                },
-                              ),
-                            )
-                          ]),
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Emre Suaklier",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Mersin Forum AVM",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "1038",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "AVM",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Görsel CheckList- Puanlı",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Çağrı Yiğit",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "28.03.2024",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Gönderildi",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "95,00",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: CustomButton(
-                                buttonText: 'Düzenle',
-                                textColor: Themes.blueColor,
-                                buttonColor: Themes.whiteColor,
-                                onPressed: () {
-                                  showModal(context, Themes.yellowColor,
-                                      "Modal Açıldı");
-                                },
-                              ),
-                            )
-                          ]),
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Emre Suaklier",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Mersin Forum AVM",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "1038",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "AVM",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Görsel CheckList- Puanlı",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Çağrı Yiğit",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "28.03.2024",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Gönderildi",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "95,00",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: CustomButton(
-                                buttonText: 'Düzenle',
-                                textColor: Themes.blueColor,
-                                buttonColor: Themes.whiteColor,
-                                onPressed: () {
-                                  showModal(context, Themes.yellowColor,
-                                      "Modal Açıldı");
-                                },
-                              ),
-                            )
-                          ]),
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Emre Suaklier",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Mersin Forum AVM",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "1038",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "AVM",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Görsel CheckList- Puanlı",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Çağrı Yiğit",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "28.03.2024",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Gönderildi",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "95,00",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: CustomButton(
-                                buttonText: 'Düzenle',
-                                textColor: Themes.blueColor,
-                                buttonColor: Themes.whiteColor,
-                                onPressed: () {
-                                  showModal(context, Themes.yellowColor,
-                                      "Modal Açıldı");
-                                },
-                              ),
-                            )
-                          ]),
-                          TableRow(children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Emre Suaklier",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Mersin Forum AVM",
-                                  style: TextStyle(
-                                    fontWeight: Tokens.fontWeight[2],
-                                  )),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "1038",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "AVM",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Görsel CheckList- Puanlı",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Çağrı Yiğit",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "28.03.2024",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Gönderildi",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "95,00",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: CustomButton(
-                                buttonText: 'Düzenle',
-                                textColor: Themes.blueColor,
-                                buttonColor: Themes.whiteColor,
-                                onPressed: () {
-                                  showModal(context, Themes.yellowColor,
-                                      "Modal Açıldı");
-                                },
-                              ),
-                            )
-                          ]),
-                        ]))),
+                              ))
+                        ]),
+                        ...rows,
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return CircularProgressIndicator();
+                },
+              ),
+            ),
             SizedBox(
               height: 20,
             )

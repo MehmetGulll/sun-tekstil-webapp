@@ -5,6 +5,8 @@ const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { bolge, kullanici } = require("../helpers/sequelizemodels");
 
+
+// TÜM MAĞAZA BÖLGE LİSTESİNİ LİSTELER
 router.get("/getAllRegion", authenticateToken, async (req, res) => {
   try {
     const sequelize = await initializeSequelize();
@@ -53,6 +55,7 @@ router.get("/getAllRegion", authenticateToken, async (req, res) => {
   }
 });
 
+// YENİ BÖLGE EKLER 
 router.post("/addRegion", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -97,6 +100,7 @@ router.post("/addRegion", authenticateToken, async (req, res) => {
   }
 });
 
+// BÖLGE BİLGİLERİNİ GÜNCELLER
 router.post("/updateRegionStatus", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
