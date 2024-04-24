@@ -194,16 +194,6 @@ class _QuestionsState extends State<Questions> {
                   SizedBox(
                     width: 20,
                   ),
-                  // Expanded(
-                  //   child: CustomButton(
-                  //     buttonText: "Status",
-                  //     buttonColor: Themes.secondaryColor,
-                  //     onPressed: () async {
-                  //       await updateQuestion(context, question['questionId'],
-                  //           Map<String, dynamic>.from(question));
-                  //     },
-                  //   ),
-                  // ),
                 ]),
               )
             ],

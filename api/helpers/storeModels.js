@@ -1,5 +1,5 @@
 class Store{
-    constructor(storeId,storeCode,storeName,storeType,regionId, city, storePhone, storeWidth, storeManager){
+    constructor(storeId,storeCode,storeName,storeType,regionId, city, storePhone, storeWidth, storeManager, status){
         this.storeId = storeId,
         this.storeCode = storeCode,
         this.storeName = storeName,
@@ -9,6 +9,7 @@ class Store{
         this.storePhone = storePhone,
         this.storeWidth = storeWidth,
         this.storeManager = storeManager
+        this.status = status;
     }
 }
 module.exports = Store;
