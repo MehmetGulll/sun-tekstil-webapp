@@ -11,4 +11,5 @@ class ApiUrls{
   static const String reportsUrl = 'http://localhost:5000/getReports';
   static const String deleteReport = 'http://localhost:5000/deleteReport';
   static const String updateQuestion = 'http://localhost:5000/updateQuestion';
+  static const String updateReport = 'http://localhost:5000/updateReport';
 }

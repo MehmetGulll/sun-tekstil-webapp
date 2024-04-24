@@ -34,4 +34,24 @@ exports.getReports = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
-
+exports.updateReport = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const { inspectionId, status } = req.body;
+    const result = await pool
+      .request()
+      .input("inspectionId", sql.Int, inspectionId)
+      .input("status", sql.Int, status)
+      .query(
+        `UPDATE denetim SET status = @status WHERE denetim_id = @inspectionId`
+      );
+    if (result.rowsAffected[0] > 0) {
+      res.status(200).send({ message: "Report status updated success" });
+    } else {
+      res.status(404).send({ message: "Report is not found" });
+    }
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server error", error });
+  }
+};
