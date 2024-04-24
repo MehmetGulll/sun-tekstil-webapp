@@ -9,6 +9,8 @@ import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 
 class Stores extends StatefulWidget {
   @override
@@ -77,39 +79,48 @@ class _StoresState extends State<Stores> {
     }
   }
 
-  Future<void> updateStore(int id) async {
-    print(id);
-    final response = await http.put(
-      Uri.parse('${ApiUrls.updateStore}/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'storeId': id.toString(),
-        'storeCode': storeCodeController.text,
-        'storeName': storeNameController.text,
-        'storeType': storeTypeController.text,
-        'city': storeCityController.text,
-        'storePhone': storePhoneController.text,
-      }),
-    );
+Future<void> updateStore(
+      BuildContext context, int id, Map<String, dynamic> store) async {
+    try {
+      var currentStatus = store['status'];
+      var newStatus = currentStatus == 0 ? 1 : 0;
+      store['status'] = newStatus;
+      print(id);
+      print("status no");
+      print(store['status']);
+      Auth auth = Provider.of<Auth>(context, listen: false);
+      print(auth.token);
+      String? token = auth.token;
+      final response = await http.put(
+        Uri.parse('${ApiUrls.updateStore}/$id'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': '$token'
+        },
+        body: jsonEncode(<String, String>{
+          'storeId': id.toString(),
+          'storeCode': storeCodeController.text,
+          'storeName': storeNameController.text,
+          'storeType': storeTypeController.text,
+          'city': storeCityController.text,
+          'storePhone': storePhoneController.text,
+          'status': newStatus.toString()
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      print("Mağaza başarıyla güncellendi");
-      if (mounted) {
-        await Future.delayed(Duration.zero);
-        setState(() {
-          int index = _stores.indexWhere((store) => store['id'] == id);
-          List<Map<String, dynamic>> newStores = List.from(_stores);
-          newStores[index] =
-              Map<String, dynamic>.from(jsonDecode(response.body));
-          _stores = newStores;
-        });
+      if (response.statusCode == 200) {
+        print("Mağaza başarıyla güncellendi");
+        var updatedStores =
+            _stores.firstWhere((q) => q['storesId'] == store['storesId']);
+        updatedStores['status'] = newStatus;
+      } else {
+        print("Bir hata oluştu");
       }
-    } else {
-      print("Bir hata oluştu");
+    } catch (e) {
+      print('Bir hata oluştu: $e');
     }
   }
+
 
   List<String> buildDropdownMenuItems(
       List<Map<String, dynamic>>? stores, String key) {
@@ -218,6 +229,23 @@ class _StoresState extends State<Stores> {
               SizedBox(
                 height: 20,
               ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Durum",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      selectedItem: store['status'] == 1 ? 'Aktif' : 'Pasif',
+                      items: ['Aktif', 'Pasif'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 600),
                 child:
@@ -226,7 +254,8 @@ class _StoresState extends State<Stores> {
                     child: CustomButton(
                       buttonText: "Düzenle",
                       onPressed: () async {
-                        await updateStore(store['storeId']);
+                        await updateStore(context, store['storeId'],
+                            Map<String, dynamic>.from(store));
                         Navigator.of(context).pop();
                       },
                     ),
@@ -234,23 +263,7 @@ class _StoresState extends State<Stores> {
                   SizedBox(
                     width: 20,
                   ),
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Sil",
-                      buttonColor: Themes.secondaryColor,
-                      onPressed: () {
-                        if (store.containsKey('storeId') &&
-                            store['storeId'] != null) {
-                          print(store['storeId']);
-                          deleteStore(store['storeId']);
-                          print("Silindi");
-                          Navigator.of(context).pop();
-                        } else {
-                          print("Mağaza id'si null veya bulunamadı");
-                        }
-                      },
-                    ),
-                  ),
+               
                 ]),
               )
             ],

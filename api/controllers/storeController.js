@@ -18,7 +18,8 @@ exports.getStores = async (req, res) => {
           store.sehir,
           store.magaza_telefon,
           store.magaza_metre,
-          store.magaza_muduru
+          store.magaza_muduru,
+          store.status
         )
     );
     res.status(200).send(stores);
@@ -91,8 +92,9 @@ exports.updateStore = async (req, res) => {
       .input("storeType", sql.NVarChar, req.body.storeType)
       .input("city", sql.NVarChar, req.body.city)
       .input("storePhone", sql.NVarChar, req.body.storePhone)
+      .input("status", sql.Int, req.body.status)
       .query(
-        "UPDATE magaza SET magaza_kodu = @storeCode, magaza_adi = @storeName, magaza_tipi = @storeType, sehir = @city, magaza_telefon = @storePhone WHERE magaza_id =@storeId "
+        "UPDATE magaza SET magaza_kodu = @storeCode, magaza_adi = @storeName, magaza_tipi = @storeType, sehir = @city, magaza_telefon = @storePhone, status = @status WHERE magaza_id =@storeId "
       );
       console.log(result);
       console.log(req.body.storeId);

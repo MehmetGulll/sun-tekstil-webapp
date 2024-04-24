@@ -22,14 +22,19 @@ class Login extends StatelessWidget {
       'kullanici_adi': usernameController.text,
       'sifre': passwordController.text
     });
-
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
       String token = responseBody['token'];
       print(responseBody['token']);
+
+     Auth auth = Provider.of<Auth>(context, listen:false);
+     auth.token = token;
+     auth.notifyListeners();
+
       Provider.of<Auth>(context, listen:false).token = token;
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", token);
+
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       print("Access Failed ");

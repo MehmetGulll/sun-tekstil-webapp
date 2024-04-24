@@ -99,6 +99,11 @@ router.post("/updateInspectionType", authenticateToken, async (req, res) => {
       timestamps: false,
       freezeTableName: true,
     });
+    const inspectionType = await denetimTipiModel.findOne({
+      where: {
+        denetim_tipi: value.denetim_tipi,
+      },
+    });
 
     const existingInspectionType = await denetimTipiModel.findOne({
       where: {

@@ -9,7 +9,12 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
+
+import 'package:provider/provider.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+
 
 class Questions extends StatefulWidget {
   @override
@@ -21,6 +26,10 @@ class _QuestionsState extends State<Questions> {
   final TextEditingController questionNameController = TextEditingController();
   final TextEditingController questionPointController = TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
+  Future<List<Map<String, dynamic>>> _getQuestions() async {
+    var url = Uri.parse(ApiUrls.questionsUrl);
+    var data = await http.get(url);
+
  Future<List<Map<String, dynamic>>> _getQuestions() async {
   String? token = await TokenHelper.getToken();
   print(token);
@@ -35,6 +44,12 @@ class _QuestionsState extends State<Questions> {
 }
 
 
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
+    _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    return _questions;
+  }
+
   List<Map<String, dynamic>> _questions = [];
   Future<void> deleteQuestion(int id) async {
     print(id);
@@ -43,10 +58,42 @@ class _QuestionsState extends State<Questions> {
     if (response.statusCode == 200) {
       print("Mağaza başarıyla silindi");
       setState(() {
-        _questions.removeWhere((store) => store['id'] == id);
+        _questions.removeWhere((question) => question['id'] == id);
       });
     } else {
       print("Bir hata oluştu");
+    }
+  }
+
+  Future<void> updateQuestion(
+      BuildContext context, int id, Map<String, dynamic> question) async {
+    var currentStatus = question['status'];
+    var newStatus = currentStatus == 0 ? 1 : 0;
+    question['status'] = newStatus;
+    print(id);
+    print("status");
+    print(question['status']);
+    Auth auth = Provider.of<Auth>(context, listen: false);
+    print(auth.token);
+    String? token = auth.token;
+    final response = await http.post(
+      Uri.parse('${ApiUrls.updateQuestion}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, String>{
+        'soru_id': question['questionId'].toString(),
+        'status': newStatus.toString()
+      }),
+    );
+    if (response.statusCode == 200) {
+      print("Başarıyla güncellendi");
+      Navigator.pop(context);
+      var updatedQuestion = _questions.firstWhere((q) => q['questionId'] == question['questionId']);
+      updatedQuestion['status'] = newStatus;
+    } else {
+      print("Hata");
     }
   }
 
@@ -131,6 +178,24 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Durum",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      selectedItem:
+                          question['status'] == 1 ? 'Aktif' : 'Pasif',
+                      items: ['Aktif', 'Pasif'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 600),
                 child:
@@ -138,31 +203,14 @@ class _QuestionsState extends State<Questions> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
-                      onPressed: () {
+                      onPressed: ()async {
                         print("Butona basıldı");
-                        Navigator.of(context).pop();
+                        await updateQuestion(context, question['questionId'], Map<String, dynamic>.from(question));
                       },
                     ),
                   ),
                   SizedBox(
                     width: 20,
-                  ),
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Sil",
-                      buttonColor: Themes.secondaryColor,
-                      onPressed: () {
-                        if (question.containsKey('questionId') &&
-                            question['questionId'] != null) {
-                          print(question['questionId']);
-                          deleteQuestion(question['questionId']);
-                          print("Silindi");
-                          Navigator.of(context).pop();
-                        } else {
-                          print("Mağaza id'si null veya bulunamadı");
-                        }
-                      },
-                    ),
                   ),
                 ]),
               )

@@ -14,7 +14,8 @@ exports.getQuestions = async (req, res) => {
           item.soru_adi,
           item.soru_cevap,
           item.soru_puan,
-          item.denetim_tip_id
+          item.denetim_tip_id,
+          item.status
         )
     );
     res.json(questions);
