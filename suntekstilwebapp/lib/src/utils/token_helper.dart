@@ -8,10 +8,18 @@ class TokenHelper {
   }
 }
 
-class UsernameHelper{
-  static Future<String?> getUsername() async{
+class UsernameHelper {
+  static Future<String?> getUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
     return username;
+  }
+}
+
+class currentUserIdHelper {
+  static Future<int?> getCurrentUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? currentUserId = prefs.getInt('currentUserId');
+    return currentUserId;
   }
 }

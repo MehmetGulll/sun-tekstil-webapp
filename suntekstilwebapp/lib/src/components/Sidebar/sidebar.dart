@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../constants/theme.dart';
 import '../../API/url.dart';
+import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Sidebar extends StatelessWidget {
-  Future<void> logout(BuildContext context) async{
+  Future<void> logout(BuildContext context) async {
     final response = await http.post(Uri.parse(ApiUrls.logout));
-    if(response.statusCode == 200){
+    if (response.statusCode == 200) {
       print("Çıkış başarılı");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
       Navigator.pushReplacementNamed(context, '/');
-    }else{
+    } else {
       print("Çıkış işlemi başarısız.. ");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final drawerHeader = DrawerHeader(
@@ -38,44 +43,6 @@ class Sidebar extends StatelessWidget {
       },
     );
 
-    final settingsTile = ListTile(
-      leading: Icon(Icons.settings),
-      title: Text(
-        'Ayarlar',
-        style: TextStyle(color: Themes.whiteColor),
-      ),
-      onTap: () {
-        Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/settings') {
-          Navigator.pushReplacementNamed(context, '/settings');
-        }
-      },
-    );
-
-    final filesExpansionTile = ExpansionTile(
-      leading: Icon(Icons.folder),
-      title: Text('Dosyalar', style: TextStyle(color: Themes.whiteColor)),
-      children: <Widget>[
-        ListTile(
-          leading: Icon(Icons.picture_as_pdf),
-          title: Text(
-            'PDF Dosyaları',
-            style: TextStyle(color: Themes.whiteColor),
-          ),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.image),
-          title: Text('Resim Dosyaları',
-              style: TextStyle(color: Themes.whiteColor)),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-      ],
-    );
     final QuestionsExpansionTile = ListTile(
       leading: Icon(Icons.question_mark),
       title:
@@ -109,7 +76,7 @@ class Sidebar extends StatelessWidget {
             style: TextStyle(color: Themes.whiteColor),
           ),
           onTap: () {
-            if(ModalRoute.of(context)?.settings.name !='/changePassword'){
+            if (ModalRoute.of(context)?.settings.name != '/changePassword') {
               Navigator.pushReplacementNamed(context, '/changePassword');
             }
           },
@@ -127,7 +94,7 @@ class Sidebar extends StatelessWidget {
         ),
       ],
     );
-      final ReportsTile = ListTile(
+    final ReportsTile = ListTile(
       leading: Icon(Icons.report),
       title: Text('Raporlar', style: TextStyle(color: Themes.whiteColor)),
       onTap: () {
@@ -144,9 +111,8 @@ class Sidebar extends StatelessWidget {
         "Çıkış Yap",
         style: TextStyle(color: Themes.whiteColor),
       ),
-      onTap: ()async {
+      onTap: () async {
         await logout(context);
-
       },
     );
 
@@ -158,8 +124,6 @@ class Sidebar extends StatelessWidget {
           children: <Widget>[
             drawerHeader,
             homeTile,
-            settingsTile,
-            filesExpansionTile,
             QuestionsExpansionTile,
             RegionsTile,
             UserManagementTile,
