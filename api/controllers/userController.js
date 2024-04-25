@@ -9,36 +9,7 @@ const { Op } = require("sequelize");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { kullanici, rol } = require("../helpers/sequelizemodels");
-// exports.login = async (req, res) => {
-//   const { user_name, userPassword } = req.body;
-//   try {
-//     const pool = await sql.connect(config);
-//     const result = await pool
-//       .request()
-//       .input("input_param1", sql.VarChar, user_name)
-//       .query("SELECT * FROM kullanici WHERE kullanici_adi = @input_param1");
-//     if (result.recordset.length > 0) {
-//       const user = result.recordset[0];
-//       const match = await bcrypt.compare(userPassword, user.sifre);
 
-//       if (match) {
-//         const token = jwt.sign({id:user.id}, 'yourToken',{expiresIn:'24h'})
-//         res.status(200).send({
-//           message: "Başarıyla giriş yapıldı.",
-//           user: user,
-//           token:token
-//         });
-//       } else {
-//         res.status(401).send({ message: "Yanlış şifre." });
-//       }
-//     } else {
-//       res.status(404).send({ message: "Kullanıcı bulunamadı." });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ message: "Sunucu hatası." });
-//   }
-// };
 
 
 exports.login = async (req, res) => {
@@ -157,3 +128,13 @@ exports.register = async (req, res) => {
     console.log("Error", error);
   }
 };
+
+exports.logout = async(req,res)=>{
+  try {
+    res.cookie = ('token','', {maxAge:1});
+    res.status(200).send({message:'Logout success'});
+  } catch (error) {
+    res.status(500).send({message:'logout failed', error});
+    
+  }
+}

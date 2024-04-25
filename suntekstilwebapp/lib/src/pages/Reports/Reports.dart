@@ -9,6 +9,8 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 
 class Reports extends StatefulWidget {
   @override
@@ -63,15 +65,49 @@ class _ReportsState extends State<Reports> {
     _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
     return _reports;
   }
-  Future<void>deleteReport(int id) async{
-    final response = await http.delete(Uri.parse('${ApiUrls.deleteReport}/$id'));
-    if(response.statusCode == 200){
+
+  Future<void> deleteReport(int id) async {
+    final response =
+        await http.delete(Uri.parse('${ApiUrls.deleteReport}/$id'));
+    if (response.statusCode == 200) {
       print("Rapor başarıyla silindi");
       setState(() {
         _reports.removeWhere((report) => report['inspectionId'] == id);
       });
+    } else {
+      print("Bir hata oluştu");
     }
-    else{
+  }
+
+  Future<void> updateReport(
+      BuildContext context, int id, Map<String, dynamic> report) async {
+    var currentStatus = report['status'];
+    var newStatus = currentStatus == 0 ? 1 : 0;
+    report['status'] = newStatus;
+    print("status değeeri");
+    print(report['status']);
+    print("id değeri");
+    print(report['inspectionId']);
+    Auth auth = Provider.of<Auth>(context, listen: false);
+    print(auth.token);
+    String? token = auth.token;
+    final response = await http.put(
+      Uri.parse(ApiUrls.updateReport),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, String>{
+        'inspectionId': report['inspectionId'].toString(),
+        'status': newStatus.toString()
+      }),
+    );
+    if (response.statusCode == 200) {
+      print("Rapor başarıyla güncellendi");
+      var updatedReport =
+          _reports.firstWhere((r) => r['inspectionId'] == r['inspectionId']);
+      updatedReport['status'] = newStatus;
+    } else {
       print("Bir hata oluştu");
     }
   }
@@ -79,6 +115,12 @@ class _ReportsState extends State<Reports> {
   List<Map<String, dynamic>> _reports = [];
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map report) {
+    Map<String, int> items = {
+      'Bölge Müdürü Haftalık Kontrol': 1,
+      'Bölge Müdürü Aylık Kontrol': 2,
+      'Görsel Denetim': 3,
+      'Mağaza Denetim': 4,
+    };
     inspectionTypeController.text = report['inspectionTypeId'].toString();
     storeNameController.text = report['storeId'].toString();
     inspectionRoleController.text = report['inspectorRole'].toString();
@@ -99,7 +141,7 @@ class _ReportsState extends State<Reports> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Yetkili Düzenle",
+                    "Rapor Düzenle",
                     style: TextStyle(
                         fontSize: Tokens.fontSize[9],
                         fontWeight: Tokens.fontWeight[6]),
@@ -114,58 +156,22 @@ class _ReportsState extends State<Reports> {
               SizedBox(
                 height: 20,
               ),
-              CustomInput(
-                controller: inspectionTypeController,
-                hintText: 'Denetim Tipi',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: storeNameController,
-                hintText: 'Mağaza Adı',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: inspectionRoleController,
-                hintText: 'Denetimci Rol',
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: inspectionerNameController,
-                hintText: 'Denetçi',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: inspectionPointController,
-                hintText: 'Puan',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: inspectionDateController,
-                hintText: 'Denetim Tarihi',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: inspectionCompletionDateController,
-                hintText: 'Denetim Tamamlanma Tarihi',
-                keyboardType: TextInputType.name,
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Durum",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      selectedItem: report['status'] == 1 ? 'Aktif' : 'Pasif',
+                      items: ['Aktif', 'Pasif'],
+                      onChanged: (String? value) {},
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: 20,
@@ -177,31 +183,15 @@ class _ReportsState extends State<Reports> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
-                      onPressed: () {
-                        print("Butona basıldı");
+                      onPressed: () async {
+                        await updateReport(context, report['inspectionId'],
+                            Map<String, dynamic>.from(report));
                         Navigator.of(context).pop();
                       },
                     ),
                   ),
                   SizedBox(
                     width: 20,
-                  ),
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Sil",
-                      buttonColor: Themes.secondaryColor,
-                      onPressed: () {
-                         if (report.containsKey('inspectionId') &&
-                            report['inspectionId'] != null) {
-                          print(report['inspectionId']);
-                          deleteReport(report['inspectionId']);
-                          print("Silindi");
-                          Navigator.of(context).pop();
-                        } else {
-                          print("Mağaza id'si null veya bulunamadı");
-                        }
-                      },
-                    ),
                   ),
                 ]),
               )
