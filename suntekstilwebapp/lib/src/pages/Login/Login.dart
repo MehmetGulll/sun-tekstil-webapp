@@ -27,11 +27,11 @@ class Login extends StatelessWidget {
       String token = responseBody['token'];
       print(responseBody['token']);
 
-     Auth auth = Provider.of<Auth>(context, listen:false);
-     auth.token = token;
-     auth.notifyListeners();
+      Auth auth = Provider.of<Auth>(context, listen: false);
+      auth.token = token;
+      auth.notifyListeners();
 
-      Provider.of<Auth>(context, listen:false).token = token;
+      Provider.of<Auth>(context, listen: false).token = token;
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", token);
 
@@ -115,12 +115,17 @@ class Login extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CustomButton(buttonText: "Giriş", onPressed: () => login(context)),
-                SizedBox(width: 20,),
-                CustomButton(buttonText: "Kayıt Ol", onPressed:()=>  Navigator.pushReplacementNamed(context, '/register'))
+                CustomButton(
+                    buttonText: "Giriş", onPressed: () => login(context)),
+                SizedBox(
+                  width: 20,
+                ),
+                CustomButton(
+                    buttonText: "Kayıt Ol",
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, '/register'))
               ],
             ),
-            
             SizedBox(
               height: 20,
             )

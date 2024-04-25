@@ -40,14 +40,14 @@ Widget buildColumn(BuildContext context, String label, List<String> items,
   );
 }
 
-class _AddLocationState extends State<AddLocation> { // burası dropdown değişince input içi değişmesin diye konuldu
+class _AddLocationState extends State<AddLocation> { 
   final TextEditingController storeCodeController = TextEditingController();
   final TextEditingController storeNameController = TextEditingController();
   final TextEditingController storeCityController = TextEditingController();
   final TextEditingController storePhoneNumberController = TextEditingController();
   final TextEditingController storeWidthController = TextEditingController();
   @override
-  void dispose() {
+  void dispose() {// burası dropdown değişince input içi değişmesin diye konuldu
     storeCodeController.dispose();
     storeNameController.dispose();
     storeCityController.dispose();
@@ -129,6 +129,7 @@ class _AddLocationState extends State<AddLocation> { // burası dropdown değiş
                       keyboardType: TextInputType.text)
                 ],
               ),
+              SizedBox(height: 30,),
               buildColumn(context, "Mağaza Tipi", _storeTypeList,
                   (value) => setState(() => _chosenStoreType = value)),
               SizedBox(
