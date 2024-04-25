@@ -1,7 +1,7 @@
 const express = require("express");
 const sql = require("mssql");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const User = require("../helpers/userModels");
 const config = require("../config/config");
 const Joi = require("joi");
@@ -9,8 +9,6 @@ const { Op } = require("sequelize");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { kullanici, rol } = require("../helpers/sequelizemodels");
-
-
 
 exports.login = async (req, res) => {
   try {
@@ -45,7 +43,7 @@ exports.login = async (req, res) => {
 
     const user = await kullaniciModel.findOne({
       where: {
-        kullanici_adi : kullanici_adi,
+        kullanici_adi: kullanici_adi,
       },
       include: [
         {
@@ -89,7 +87,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
 exports.register = async (req, res) => {
   const { userName, userSurname, user_name, userEposta, userPassword } =
     req.body;
@@ -129,12 +126,44 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.logout = async(req,res)=>{
+exports.logout = async (req, res) => {
   try {
-    res.cookie = ('token','', {maxAge:1});
-    res.status(200).send({message:'Logout success'});
+    res.cookie = ("token", "", { maxAge: 1 });
+    res.status(200).send({ message: "Logout success" });
   } catch (error) {
-    res.status(500).send({message:'logout failed', error});
-    
+    res.status(500).send({ message: "logout failed", error });
   }
-}
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { kullanici_adi, eski_sifre, yeni_sifre } = req.body;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const user = await kullaniciModel.findOne({ where: { kullanici_adi } });
+    if (!user) {
+      return res.status(404).send("Kullanici bulunamadi!");
+    }
+
+    const isOldPasswordCorrect = await bcrypt.compare(eski_sifre, user.sifre);
+    if (!isOldPasswordCorrect) {
+      return res.status(401).send("Eski şifre yanlış");
+    }
+
+    const hashedPassword = await bcrypt.hash(yeni_sifre, 10);
+
+    user.sifre = hashedPassword;
+    await user.save();
+
+    return res.status(200).send("Şifre başarıyla değiştirildi");
+  } catch (error) {
+    console.error("Password Change Error:", error);
+    return res.status(500).send(error);
+  }
+};
+

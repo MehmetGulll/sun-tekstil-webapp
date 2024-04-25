@@ -7,3 +7,11 @@ class TokenHelper {
     return token;
   }
 }
+
+class UsernameHelper{
+  static Future<String?> getUsername() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString('username');
+    return username;
+  }
+}
