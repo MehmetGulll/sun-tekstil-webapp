@@ -80,7 +80,7 @@ class _StoresState extends State<Stores> {
     }
   }
 
-Future<void> updateStore(
+  Future<void> updateStore(
       BuildContext context, int id, Map<String, dynamic> store) async {
     try {
       var currentStatus = store['status'];
@@ -109,9 +109,11 @@ Future<void> updateStore(
 
       if (response.statusCode == 200) {
         print("Mağaza başarıyla güncellendi");
-        var updatedStores =
-            _stores.firstWhere((q) => q['storesId'] == store['storesId']);
-        updatedStores['status'] = newStatus;
+        setState(() {
+          var updatedStores =
+              _stores.firstWhere((q) => q['storesId'] == store['storesId']);
+          updatedStores['status'] = newStatus;
+        });
       } else {
         print("Bir hata oluştu");
       }
@@ -119,7 +121,6 @@ Future<void> updateStore(
       print('Bir hata oluştu: $e');
     }
   }
-
 
   List<String> buildDropdownMenuItems(
       List<Map<String, dynamic>>? stores, String key) {
@@ -262,7 +263,6 @@ Future<void> updateStore(
                   SizedBox(
                     width: 20,
                   ),
-               
                 ]),
               )
             ],
@@ -319,9 +319,7 @@ Future<void> updateStore(
                         Expanded(
                           child: CustomButton(
                             buttonText: "Ara",
-                            onPressed: () {
-                              print("Selam");
-                            },
+                            onPressed: () {},
                           ),
                         ),
                         SizedBox(
@@ -400,6 +398,13 @@ Future<void> updateStore(
                     ),
                     Container(
                       padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        store['status'] == 1 ? 'Aktif' : 'Pasif',
+                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(8.0),
                       child: CustomButton(
                         buttonText: 'Düzenle',
                         textColor: Themes.blueColor,
@@ -460,6 +465,14 @@ Future<void> updateStore(
                         color: Themes.yellowColor,
                         child: Text(
                           "MAĞAZA TELEFON",
+                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        color: Themes.yellowColor,
+                        child: Text(
+                          "DURUMU",
                           style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                         ),
                       ),

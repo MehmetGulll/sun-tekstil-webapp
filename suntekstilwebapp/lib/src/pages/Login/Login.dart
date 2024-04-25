@@ -4,8 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
-import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
-import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
@@ -26,6 +24,7 @@ class Login extends StatelessWidget {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
       String token = responseBody['token'];
       String username = responseBody['user']['kullanici_adi'];
+      int currentUserId = responseBody['user']['id'];
 
       print(responseBody['token']);
       print("username");
@@ -39,6 +38,7 @@ class Login extends StatelessWidget {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", token);
       await prefs.setString("username", username);
+      await prefs.setInt("currentUserId", currentUserId);
      
 
       Navigator.pushReplacementNamed(context, '/home');

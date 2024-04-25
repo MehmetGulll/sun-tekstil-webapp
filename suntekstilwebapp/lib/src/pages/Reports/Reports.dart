@@ -90,7 +90,7 @@ class _ReportsState extends State<Reports> {
     print("id değeri");
     print(report['inspectionId']);
     String? token = await TokenHelper.getToken();
- 
+
     final response = await http.put(
       Uri.parse(ApiUrls.updateReport),
       headers: <String, String>{
@@ -104,9 +104,11 @@ class _ReportsState extends State<Reports> {
     );
     if (response.statusCode == 200) {
       print("Rapor başarıyla güncellendi");
-      var updatedReport =
-          _reports.firstWhere((r) => r['inspectionId'] == r['inspectionId']);
-      updatedReport['status'] = newStatus;
+      setState(() {
+        var updatedReport =
+            _reports.firstWhere((r) => r['inspectionId'] == r['inspectionId']);
+        updatedReport['status'] = newStatus;
+      });
     } else {
       print("Bir hata oluştu");
     }

@@ -25,8 +25,13 @@ class _OfficalUsers extends State<OfficalUsers> {
 
     var jsonData = json.decode(data.body) as List;
     print(jsonData);
+    int? currentUserId = await currentUserIdHelper.getCurrentUserId();
 
-    _users = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    _users = jsonData
+        .map((item) => item as Map<String, dynamic>)
+        .where((user) => user['id'] != currentUserId)
+        .toList();
+
     return _users;
   }
 
