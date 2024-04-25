@@ -7,8 +7,28 @@ import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Checkbox/Checkbox.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
+import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class OfficalUsers extends StatelessWidget {
+class OfficalUsers extends StatefulWidget {
+  @override
+  _OfficalUsers createState() => _OfficalUsers();
+}
+
+class _OfficalUsers extends State<OfficalUsers> {
+  List<Map<String, dynamic>> _users = [];
+  Future<List<Map<String, dynamic>>> _getUsers() async {
+    var url = Uri.parse(ApiUrls.getUsers);
+    var data = await http.get(url);
+
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
+
+    _users = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    return _users;
+  }
+
   void showModal(BuildContext context, Color backgroundColor, String text) {
     showDialog(
       context: context,
@@ -153,459 +173,170 @@ class OfficalUsers extends StatelessWidget {
               ),
               Padding(
                 padding: EdgeInsets.only(top: 20),
-                child: Table(
-                  defaultColumnWidth: FlexColumnWidth(1),
-                  columnWidths: {
-                    0: FlexColumnWidth(1),
-                    1: FlexColumnWidth(1),
-                    2: FlexColumnWidth(1),
-                    3: FlexColumnWidth(1),
+                child: FutureBuilder<List>(
+                  future: _getUsers(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<List> snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      List<TableRow> user =
+                          snapshot.data!.map<TableRow>((user) {
+                        return TableRow(children: [
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              user['ad'],
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              user['soyad'],
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(user['eposta'],
+                                style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[2],
+                                )),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              user['kullanici_adi'],
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),
+                          
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Aktif",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              user['rol_adi'],
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Jimmy Key",
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            child: CustomButton(
+                              buttonText: 'Düzenle',
+                              textColor: Themes.blueColor,
+                              buttonColor: Themes.whiteColor,
+                              onPressed: () {
+                                print("Bekle");
+                              },
+                            ),
+                          ),
+                        ]);
+                      }).toList();
+                      return Table(
+                        defaultColumnWidth: FlexColumnWidth(1),
+                        columnWidths: {
+                          0: FlexColumnWidth(1),
+                          1: FlexColumnWidth(1),
+                          2: FlexColumnWidth(1),
+                          3: FlexColumnWidth(1),
+                        },
+                        border: TableBorder.all(color: Themes.blackColor),
+                        children: [
+                          TableRow(children: [
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.yellowColor,
+                              child: Text(
+                                "AD",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.yellowColor,
+                              child: Text(
+                                "SOYAD",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.yellowColor,
+                              child: Text("EMAİL",
+                                  style: TextStyle(
+                                    fontWeight: Tokens.fontWeight[2],
+                                  )),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.yellowColor,
+                              child: Text(
+                                "KULLANICI ADI ",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.yellowColor,
+                              child: Text(
+                                "DURUM",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                                padding: EdgeInsets.all(8.0),
+                                color: Themes.yellowColor,
+                                child: Text(
+                                  "UNVAN",
+                                  style: TextStyle(
+                                      fontWeight: Tokens.fontWeight[2]),
+                                )),
+                            Container(
+                                padding: EdgeInsets.all(8.0),
+                                color: Themes.yellowColor,
+                                child: Text(
+                                  "MARKA",
+                                  style: TextStyle(
+                                      fontWeight: Tokens.fontWeight[2]),
+                                )),
+                            Container(
+                                padding: EdgeInsets.all(8.0),
+                                color: Themes.yellowColor,
+                                child: Text(
+                                  "DÜZENLE",
+                                  style: TextStyle(
+                                      fontWeight: Tokens.fontWeight[2]),
+                                ))
+                          ]),
+                          ...user,
+                        ],
+                      );
+                    } else if (snapshot.hasError) {
+                      return Text("${snapshot.error}");
+                    }
+                    return CircularProgressIndicator();
                   },
-                  border: TableBorder.all(color: Themes.blackColor),
-                  children: [
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "AD SOYAD",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text("EMAİL",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "KULLANICI ADI ",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "DURUM",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "UNVAN",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          )),
-                      Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "MARKA",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          )),
-                      Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "DÜZENLE",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ))
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text("murat.gokcen@jimmykey.com",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            showModal(context, Themes.whiteColor, "");
-                          },
-                        ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                            "Depoda saklanana görsel malzemeler düzgün muhafaza ediliyor mu ??",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            print("Düzenleme ekranı açıldı");
-                          },
-                        ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text("Depo düzenli mi?",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            print("Düzenleme ekranı açıldı");
-                          },
-                        ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                            "Mağaza içerisindeki faceoutlarda uygun aksesuar kullanılmış mı?",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            print("Düzenleme ekranı açıldı");
-                          },
-                        ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text("murat.gokcen@jimmykey.com",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            print("Düzenleme ekranı açıldı");
-                          },
-                        ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text("murat.gokcen@jimmykey.com",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            print("Düzenleme ekranı açıldı");
-                          },
-                        ),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Murat Göçken",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text("murat.gokcen@jimmykey.com",
-                            style: TextStyle(
-                              fontWeight: Tokens.fontWeight[2],
-                            )),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "muratg",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Aktif",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Operasyon Direktörü",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Jimmy Key",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: CustomButton(
-                          buttonText: 'Düzenle',
-                          textColor: Themes.blueColor,
-                          buttonColor: Themes.whiteColor,
-                          onPressed: () {
-                            print("Düzenleme ekranı açıldı");
-                          },
-                        ),
-                      )
-                    ])
-                  ],
                 ),
               ),
             ],
