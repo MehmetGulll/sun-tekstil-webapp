@@ -16,4 +16,6 @@ class ApiUrls {
       'http://localhost:5000/getLastFiveInspections';
   static const String logout = 'http://localhost:5000/logout';
   static const String changePassword = 'http://localhost:5000/changePassword';
+  static const String getUsers = 'http://localhost:5000/getUsers';
+  static const String updateOfficalUser = 'http://localhost:5000/updateUserStatus';
 }

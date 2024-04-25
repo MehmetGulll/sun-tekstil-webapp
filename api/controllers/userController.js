@@ -166,4 +166,93 @@ exports.changePassword = async (req, res) => {
     return res.status(500).send(error);
   }
 };
+exports.getOfficalUsers = async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+    const rolModel = sequelize.define("rol", rol, {
+      timestamps: false,
+      freezeTableName: true,
+    });
 
+    kullaniciModel.belongsTo(rolModel, {
+      as: "userRole",
+      foreignKey: "rol",
+      targetKey: "rol_id",
+    });
+
+    const allUsers = await kullaniciModel.findAll({
+      include: [
+        {
+          model: rolModel,
+          as: "userRole",
+          attributes: ["rol_adi"],
+        },
+      ],
+    });
+
+    const modifiedUsers = allUsers.map((user) => {
+      return {
+        id: user.id,
+        ad: user.ad,
+        soyad: user.soyad,
+        kullanici_adi: user.kullanici_adi,
+        eposta: user.eposta,
+        sifre: user.sifre,
+        rol_adi: user.userRole ? user.userRole.rol_adi : "default kullanici",
+        status: user.status,
+      };
+    });
+
+    return res.status(200).send(modifiedUsers);
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    return res.status(500).send(error);
+  }
+};
+exports.updateOfficalUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error, value } = Joi.object({
+      status: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { status } = value;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const user = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).send("Kullanıcı bulunamadı!");
+    }
+
+    await kullaniciModel.update(
+      { status },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    return res.status(200).send("Kullanıcı durumu başarıyla güncellendi.");
+  } catch (error) {
+    console.log("Error", error);
+  }
+};
