@@ -12,6 +12,9 @@ class ApiUrls {
   static const String deleteReport = 'http://localhost:5000/deleteReport';
   static const String updateQuestion = 'http://localhost:5000/updateQuestion';
   static const String updateReport = 'http://localhost:5000/updateReport';
+  static const String getLastThreeInspections = 'http://localhost:5000/getLastThreeInspections';
+  static const String getInspectionCompletionStatus = 'http://localhost:5000/getInspectionCompletionStatus';
+  static const String getFrequentlyWrongQuestions = 'http://localhost:5000/getFrequentlyWrongQuestions';
   static const String getLastFiveInspections =
       'http://localhost:5000/getLastFiveInspections';
   static const String logout = 'http://localhost:5000/logout';

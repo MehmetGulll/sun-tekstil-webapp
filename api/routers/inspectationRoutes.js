@@ -277,6 +277,7 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
           denetim_id,
           soru_id: cevap.soru_id,
           cevap: cevap.cevap,
+          dogru_cevap: soru.dataValues.soru_cevap,
         });
       }
 
