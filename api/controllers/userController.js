@@ -14,6 +14,7 @@ exports.login = async (req, res) => {
   try {
     const { error, value } = Joi.object({
       kullanici_adi: Joi.string().required(),
+
       sifre: Joi.string().min(5).required(),
     }).validate(req.body);
 
@@ -54,18 +55,18 @@ exports.login = async (req, res) => {
       ],
     });
 
-    if (user.status === 0) {
-      return res.status(400).send("Kullanici hesabi aktif degil!");
-    }
-
     if (!user) {
       return res.status(404).send("Kullanici bulunamadi!");
+    }
+
+    if (user.status === 0) {
+      return res.status(400).send("Kullanici hesabi aktif degil!");
     }
 
     const isPasswordCorrect = await bcrypt.compare(sifre, user.sifre);
 
     if (!isPasswordCorrect) {
-      return res.status(401).send("Invalid username or password");
+      return res.status(401).send("Kullanıcı adı veya şifre hatalı");
     }
 
     // Generate JWT token

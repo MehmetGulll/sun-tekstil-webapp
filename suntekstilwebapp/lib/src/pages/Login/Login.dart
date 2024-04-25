@@ -4,7 +4,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
+import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,11 +41,18 @@ class Login extends StatelessWidget {
       await prefs.setString("token", token);
       await prefs.setString("username", username);
       await prefs.setInt("currentUserId", currentUserId);
-     
 
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      print("Access Failed ");
+      String errorMessage = "Bir hata oluştu!!";
+      if (response.body.isNotEmpty) {
+        errorMessage = response.body;
+      }
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(errorMessage: errorMessage, errorIcon: Icons.person_off,);
+          });
     }
   }
 
