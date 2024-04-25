@@ -10,6 +10,7 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class OfficalUsers extends StatefulWidget {
   @override
@@ -29,7 +30,34 @@ class _OfficalUsers extends State<OfficalUsers> {
     return _users;
   }
 
-  void showModal(BuildContext context, Color backgroundColor, String text) {
+  Future<void> updateUser(
+      BuildContext context, int id, Map<String, dynamic> user) async {
+    var currentStatus = user['status'];
+    var newStatus = currentStatus == 0 ? 1 : 0;
+    user['status'] = newStatus;
+    String? token = await TokenHelper.getToken();
+    final response = await http.post(
+      Uri.parse('${ApiUrls.updateOfficalUser}/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, String>{'status': newStatus.toString()}),
+    );
+    if (response.statusCode == 200) {
+      print("Başarıyla güncellendi");
+      Navigator.pop(context);
+      setState(() {
+        var updatedUser = _users.firstWhere((u) => u['id'] == user['id']);
+        updatedUser['status'] = newStatus;
+      });
+    } else {
+      print("Hata");
+    }
+  }
+
+  void showModal(
+      BuildContext context, Color backgroundColor, String text, Map user) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -57,46 +85,46 @@ class _OfficalUsers extends State<OfficalUsers> {
               SizedBox(
                 height: 20,
               ),
-              CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Ad',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Soyad',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Email',
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: TextEditingController(),
-                hintText: 'Kullanıcı Adı',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              ...[
-                'Operasyon Direktörü',
-                'Operasyon Müdürü',
-                'Bölge Müdürü',
-                'Lokasyon Müdürü',
-                'Denetçi',
-                'Marka Yöneticisi'
-              ].map((role) => CustomCheckbox(title: role)).toList(),
+              // CustomInput(
+              //   controller: TextEditingController(),
+              //   hintText: 'Ad',
+              //   keyboardType: TextInputType.name,
+              // ),
+              // SizedBox(
+              //   height: 20,
+              // ),
+              // CustomInput(
+              //   controller: TextEditingController(),
+              //   hintText: 'Soyad',
+              //   keyboardType: TextInputType.name,
+              // ),
+              // SizedBox(
+              //   height: 20,
+              // ),
+              // CustomInput(
+              //   controller: TextEditingController(),
+              //   hintText: 'Email',
+              //   keyboardType: TextInputType.emailAddress,
+              // ),
+              // SizedBox(
+              //   height: 20,
+              // ),
+              // CustomInput(
+              //   controller: TextEditingController(),
+              //   hintText: 'Kullanıcı Adı',
+              //   keyboardType: TextInputType.name,
+              // ),
+              // SizedBox(
+              //   height: 20,
+              // ),
+              // ...[
+              //   'Operasyon Direktörü',
+              //   'Operasyon Müdürü',
+              //   'Bölge Müdürü',
+              //   'Lokasyon Müdürü',
+              //   'Denetçi',
+              //   'Marka Yöneticisi'
+              // ].map((role) => CustomCheckbox(title: role)).toList(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -107,6 +135,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                       style: TextStyle(fontSize: Tokens.fontSize[2]),
                     ),
                     CustomDropdown(
+                      selectedItem: user['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
                       onChanged: (String? value) {},
                     ),
@@ -123,24 +152,15 @@ class _OfficalUsers extends State<OfficalUsers> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
-                      onPressed: () {
+                      onPressed: () async {
                         print("Butona basıldı");
-                        Navigator.of(context).pop();
+                        await updateUser(context, user['id'],
+                            Map<String, dynamic>.from(user));
                       },
                     ),
                   ),
                   SizedBox(
                     width: 20,
-                  ),
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Sil",
-                      buttonColor: Themes.secondaryColor,
-                      onPressed: () {
-                        print("Silindi");
-                        Navigator.of(context).pop();
-                      },
-                    ),
                   ),
                 ]),
               )
@@ -188,7 +208,8 @@ class _OfficalUsers extends State<OfficalUsers> {
                               style:
                                   TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
-                          ),Container(
+                          ),
+                          Container(
                             padding: EdgeInsets.all(8.0),
                             child: Text(
                               user['soyad'],
@@ -211,11 +232,10 @@ class _OfficalUsers extends State<OfficalUsers> {
                                   TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
                           ),
-                          
                           Container(
                             padding: EdgeInsets.all(8.0),
                             child: Text(
-                              "Aktif",
+                              user['status'] == 1 ? 'Aktif' : 'Pasif',
                               style:
                                   TextStyle(fontWeight: Tokens.fontWeight[2]),
                             ),
@@ -243,7 +263,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                               textColor: Themes.blueColor,
                               buttonColor: Themes.whiteColor,
                               onPressed: () {
-                                print("Bekle");
+                                showModal(context, Themes.whiteColor, "", user);
                               },
                             ),
                           ),

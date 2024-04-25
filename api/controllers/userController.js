@@ -166,7 +166,7 @@ exports.changePassword = async (req, res) => {
     return res.status(500).send(error);
   }
 };
-exports.getUsers = async (req, res) => {
+exports.getOfficalUsers = async (req, res) => {
   try {
     const sequelize = await initializeSequelize();
     const kullaniciModel = sequelize.define("kullanici", kullanici, {
@@ -203,6 +203,7 @@ exports.getUsers = async (req, res) => {
         eposta: user.eposta,
         sifre: user.sifre,
         rol_adi: user.userRole ? user.userRole.rol_adi : "default kullanici",
+        status: user.status,
       };
     });
 
@@ -210,5 +211,48 @@ exports.getUsers = async (req, res) => {
   } catch (error) {
     console.error("Get All Users Error:", error);
     return res.status(500).send(error);
+  }
+};
+exports.updateOfficalUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error, value } = Joi.object({
+      status: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { status } = value;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const user = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).send("Kullanıcı bulunamadı!");
+    }
+
+    await kullaniciModel.update(
+      { status },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    return res.status(200).send("Kullanıcı durumu başarıyla güncellendi.");
+  } catch (error) {
+    console.log("Error", error);
   }
 };
