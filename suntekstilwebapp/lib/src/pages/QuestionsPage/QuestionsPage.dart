@@ -25,19 +25,18 @@ class _QuestionsState extends State<Questions> {
   final TextEditingController questionNameController = TextEditingController();
   final TextEditingController questionPointController = TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
- Future<List<Map<String, dynamic>>> _getQuestions() async {
-  String? token = await TokenHelper.getToken();
-  print(token);
-  var url = Uri.parse(ApiUrls.questionsUrl);
-  var data = await http.get(url);
+  Future<List<Map<String, dynamic>>> _getQuestions() async {
+    String? token = await TokenHelper.getToken();
+    print(token);
+    var url = Uri.parse(ApiUrls.questionsUrl);
+    var data = await http.get(url);
 
-  var jsonData = json.decode(data.body) as List;
-  print(jsonData);
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
 
-  _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
-  return _questions;
-}
-
+    _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    return _questions;
+  }
 
   List<Map<String, dynamic>> _questions = [];
   Future<void> deleteQuestion(int id) async {
@@ -78,9 +77,11 @@ class _QuestionsState extends State<Questions> {
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
       Navigator.pop(context);
-      var updatedQuestion = _questions
-          .firstWhere((q) => q['questionId'] == question['questionId']);
-      updatedQuestion['status'] = newStatus;
+      setState(() {
+        var updatedQuestion = _questions
+            .firstWhere((q) => q['questionId'] == question['questionId']);
+        updatedQuestion['status'] = newStatus;
+      });
     } else {
       print("Hata");
     }
@@ -304,6 +305,14 @@ class _QuestionsState extends State<Questions> {
                           ),
                           Container(
                             padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              question['status'] == 1 ? 'Aktif' : 'Pasif',
+                              style:
+                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(8.0),
                             child: CustomButton(
                               buttonText: 'Düzenle',
                               textColor: Themes.blueColor,
@@ -359,6 +368,15 @@ class _QuestionsState extends State<Questions> {
                               color: Themes.yellowColor,
                               child: Text(
                                 "PUAN",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.yellowColor,
+                              child: Text(
+                                "DURUMU",
                                 style:
                                     TextStyle(fontWeight: Tokens.fontWeight[2]),
                               ),
