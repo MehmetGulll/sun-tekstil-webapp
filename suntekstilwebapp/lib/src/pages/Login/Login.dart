@@ -25,7 +25,11 @@ class Login extends StatelessWidget {
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
       String token = responseBody['token'];
+      String username = responseBody['user']['kullanici_adi'];
+
       print(responseBody['token']);
+      print("username");
+      print(username);
 
       Auth auth = Provider.of<Auth>(context, listen: false);
       auth.token = token;
@@ -34,6 +38,8 @@ class Login extends StatelessWidget {
       Provider.of<Auth>(context, listen: false).token = token;
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("token", token);
+      await prefs.setString("username", username);
+     
 
       Navigator.pushReplacementNamed(context, '/home');
     } else {
