@@ -106,7 +106,11 @@ const denetim_sorulari = {
     cevap: {
         type: DataTypes.INTEGER,
         allowNull: false
-    }
+    },
+    dogru_cevap: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
 };
 
 const denetim_tipi ={

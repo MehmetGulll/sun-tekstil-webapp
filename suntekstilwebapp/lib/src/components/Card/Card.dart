@@ -18,7 +18,7 @@ class CustomCard extends StatelessWidget {
         child: Align(
             alignment: Alignment.topCenter,
             child: Container(
-              margin: EdgeInsets.only(top: 25),
+              margin: EdgeInsets.only(top: 8),
               child: Column(
                 children: children,
               ),
