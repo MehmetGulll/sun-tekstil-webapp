@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Stores extends StatefulWidget {
   @override
@@ -88,9 +89,7 @@ Future<void> updateStore(
       print(id);
       print("status no");
       print(store['status']);
-      Auth auth = Provider.of<Auth>(context, listen: false);
-      print(auth.token);
-      String? token = auth.token;
+      String? token = await TokenHelper.getToken();
       final response = await http.put(
         Uri.parse('${ApiUrls.updateStore}/$id'),
         headers: <String, String>{

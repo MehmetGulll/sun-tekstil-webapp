@@ -71,7 +71,7 @@ class Home extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: CustomCard(
-                        color: Themes.cardBackgroundColor,
+                        color: Themes.secondaryColor,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -79,13 +79,13 @@ class Home extends StatelessWidget {
                               Icon(
                                 Icons.announcement_outlined,
                                 size: 30,
-                                color: Themes.cardTextColor,
+                                color: Themes.whiteColor,
                               ),
                               SizedBox(width: 8),
                               Text(
                                 'Duyurular',
                                 style: TextStyle(
-                                  color: Themes.cardTextColor,
+                                  color: Themes.whiteColor,
                                   fontSize: Tokens.fontSize[3],
                                   fontWeight: Tokens.fontWeight[7],
                                 ),
@@ -107,7 +107,7 @@ class Home extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: CustomCard(
-                        color: Themes.cardBackgroundColor,
+                        color: Themes.blueColor,
                         children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -118,13 +118,13 @@ class Home extends StatelessWidget {
                                   Icon(
                                     Icons.analytics_outlined,
                                     size: 30,
-                                    color: Themes.cardTextColor,
+                                    color: Themes.whiteColor,
                                   ),
                                   SizedBox(width: 8),
                                   Text(
                                     "Ziyaret Sayısı",
                                     style: TextStyle(
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                       fontSize: Tokens.fontSize[3],
                                       fontWeight: Tokens.fontWeight[7],
                                     ),
@@ -141,7 +141,7 @@ class Home extends StatelessWidget {
                                   Text(
                                     '1/4',
                                     style: TextStyle(
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                       fontSize: Tokens.fontSize[6],
                                       fontWeight: Tokens.fontWeight[5],
                                     ),
@@ -149,7 +149,7 @@ class Home extends StatelessWidget {
                                   Text(
                                     'Ziyaret Tamamlama Durumu',
                                     style: TextStyle(
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                       fontSize: Tokens.fontSize[1],
                                       fontWeight: Tokens.fontWeight[4],
                                     ),
@@ -163,7 +163,7 @@ class Home extends StatelessWidget {
                                   Text(
                                     '25%',
                                     style: TextStyle(
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                       fontSize: Tokens.fontSize[6],
                                       fontWeight: Tokens.fontWeight[5],
                                     ),
@@ -171,7 +171,7 @@ class Home extends StatelessWidget {
                                   Text(
                                     'Ziyaret Tamamlama Yüzdesi',
                                     style: TextStyle(
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                       fontSize: Tokens.fontSize[1],
                                       fontWeight: Tokens.fontWeight[4],
                                     ),
@@ -209,7 +209,7 @@ class Home extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: CustomCard(
-                              color: Themes.cardBackgroundColor,
+                              color: Themes.greenColor,
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -217,7 +217,7 @@ class Home extends StatelessWidget {
                                     Icon(
                                       Icons.location_on_outlined,
                                       size: 30,
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                     ),
                                     SizedBox(width: 8),
                                     Text(
@@ -225,7 +225,7 @@ class Home extends StatelessWidget {
                                       maxLines: 2,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: Themes.cardTextColor,
+                                        color: Themes.whiteColor,
                                         fontSize: Tokens.fontSize[3],
                                         fontWeight: Tokens.fontWeight[7],
                                       ),
@@ -247,7 +247,7 @@ class Home extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: CustomCard(
-                              color: Themes.cardBackgroundColor,
+                              color: Themes.secondaryColor,
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -255,7 +255,7 @@ class Home extends StatelessWidget {
                                     Icon(
                                       Icons.question_answer_outlined,
                                       size: 30,
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                     ),
                                     SizedBox(width: 8),
                                     Text(
@@ -263,7 +263,7 @@ class Home extends StatelessWidget {
                                       maxLines: 2,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: Themes.cardTextColor,
+                                        color: Themes.whiteColor,
                                         fontSize: Tokens.fontSize[3],
                                         fontWeight: Tokens.fontWeight[7],
                                       ),
@@ -292,7 +292,7 @@ class Home extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: CustomCard(
-                              color: Themes.cardBackgroundColor,
+                              color: Themes.accentColor,
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -300,7 +300,7 @@ class Home extends StatelessWidget {
                                     Icon(
                                       Icons.dashboard_outlined,
                                       size: 30,
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                     ),
                                     SizedBox(width: 8),
                                     Text(
@@ -308,7 +308,7 @@ class Home extends StatelessWidget {
                                       maxLines: 2,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: Themes.cardTextColor,
+                                        color: Themes.whiteColor,
                                         fontSize: Tokens.fontSize[3],
                                         fontWeight: Tokens.fontWeight[7],
                                       ),
@@ -330,7 +330,7 @@ class Home extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: CustomCard(
-                              color: Themes.cardBackgroundColor,
+                              color: Themes.purpleColor,
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -338,7 +338,7 @@ class Home extends StatelessWidget {
                                     Icon(
                                       Icons.assignment_outlined,
                                       size: 30,
-                                      color: Themes.cardTextColor,
+                                      color: Themes.whiteColor,
                                     ),
                                     SizedBox(width: 8),
                                     Text(
@@ -346,7 +346,7 @@ class Home extends StatelessWidget {
                                       maxLines: 2,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: Themes.cardTextColor,
+                                        color: Themes.whiteColor,
                                         fontSize: Tokens.fontSize[3],
                                         fontWeight: Tokens.fontWeight[7],
                                       ),

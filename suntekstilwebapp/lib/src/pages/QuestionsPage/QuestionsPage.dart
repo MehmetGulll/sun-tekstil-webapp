@@ -15,7 +15,6 @@ import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
-
 class Questions extends StatefulWidget {
   @override
   _QuestionsState createState() => _QuestionsState();
@@ -30,19 +29,19 @@ class _QuestionsState extends State<Questions> {
     var url = Uri.parse(ApiUrls.questionsUrl);
     var data = await http.get(url);
 
- Future<List<Map<String, dynamic>>> _getQuestions() async {
-  String? token = await TokenHelper.getToken();
-  print(token);
-  var url = Uri.parse(ApiUrls.questionsUrl);
-  var data = await http.get(url);
+    Future<List<Map<String, dynamic>>> _getQuestions() async {
+      String? token = await TokenHelper.getToken();
+      print(token);
+      var url = Uri.parse(ApiUrls.questionsUrl);
+      var data = await http.get(url);
 
-  var jsonData = json.decode(data.body) as List;
-  print(jsonData);
+      var jsonData = json.decode(data.body) as List;
+      print(jsonData);
 
-  _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
-  return _questions;
-}
-
+      _questions =
+          jsonData.map((item) => item as Map<String, dynamic>).toList();
+      return _questions;
+    }
 
     var jsonData = json.decode(data.body) as List;
     print(jsonData);
@@ -73,9 +72,8 @@ class _QuestionsState extends State<Questions> {
     print(id);
     print("status");
     print(question['status']);
-    Auth auth = Provider.of<Auth>(context, listen: false);
-    print(auth.token);
-    String? token = auth.token;
+ 
+    String? token = await TokenHelper.getToken();
     final response = await http.post(
       Uri.parse('${ApiUrls.updateQuestion}'),
       headers: <String, String>{
@@ -90,7 +88,8 @@ class _QuestionsState extends State<Questions> {
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
       Navigator.pop(context);
-      var updatedQuestion = _questions.firstWhere((q) => q['questionId'] == question['questionId']);
+      var updatedQuestion = _questions
+          .firstWhere((q) => q['questionId'] == question['questionId']);
       updatedQuestion['status'] = newStatus;
     } else {
       print("Hata");
@@ -188,8 +187,7 @@ class _QuestionsState extends State<Questions> {
                       style: TextStyle(fontSize: Tokens.fontSize[2]),
                     ),
                     CustomDropdown(
-                      selectedItem:
-                          question['status'] == 1 ? 'Aktif' : 'Pasif',
+                      selectedItem: question['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
                       onChanged: (String? value) {},
                     ),
@@ -203,9 +201,10 @@ class _QuestionsState extends State<Questions> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
-                      onPressed: ()async {
+                      onPressed: () async {
                         print("Butona basıldı");
-                        await updateQuestion(context, question['questionId'], Map<String, dynamic>.from(question));
+                        await updateQuestion(context, question['questionId'],
+                            Map<String, dynamic>.from(question));
                       },
                     ),
                   ),

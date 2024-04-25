@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Reports extends StatefulWidget {
   @override
@@ -88,9 +89,8 @@ class _ReportsState extends State<Reports> {
     print(report['status']);
     print("id değeri");
     print(report['inspectionId']);
-    Auth auth = Provider.of<Auth>(context, listen: false);
-    print(auth.token);
-    String? token = auth.token;
+    String? token = await TokenHelper.getToken();
+ 
     final response = await http.put(
       Uri.parse(ApiUrls.updateReport),
       headers: <String, String>{
