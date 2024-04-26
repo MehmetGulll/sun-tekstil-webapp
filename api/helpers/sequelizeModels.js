@@ -399,6 +399,14 @@ const aksiyon = {
     status: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    ds_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'denetim_sorulari',
+            key: 'ds_id'
+        }
     }
 };
 

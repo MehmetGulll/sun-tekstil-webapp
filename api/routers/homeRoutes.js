@@ -35,7 +35,7 @@ router.get(
       const completedCount = await denetimModel.count({
         where: {
           denetci_id: id,
-          status: 1,
+          status: 0,
         },
       });
 
@@ -275,5 +275,8 @@ router.get("/getAllStoreCount", authenticateToken, async (req, res) => {
     return res.status(500).send(error);
   }
 });
+
+
+
 
 module.exports = router;

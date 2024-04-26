@@ -84,7 +84,6 @@ class Home extends StatelessWidget {
       });
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Data getInspectionCompletionStatus: $data');
         return data;
       } else {
         print('Request failed with status: ${response.statusCode}');
@@ -163,7 +162,6 @@ class Home extends StatelessWidget {
                           } else {
                             Map<String, dynamic> kronikSorularData =
                                 kronikSnapshot.data as Map<String, dynamic>;
-                                print("kronikSorularDatakan: $kronikSorularData");
                             return CustomScaffold(
                               body: Padding(
                                 padding: const EdgeInsets.all(16.0),
