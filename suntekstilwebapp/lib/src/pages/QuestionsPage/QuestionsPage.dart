@@ -20,21 +20,57 @@ class Questions extends StatefulWidget {
   _QuestionsState createState() => _QuestionsState();
 }
 
+Widget buildColumn(BuildContext context, String label, List<String> items,
+    ValueChanged<String?> onChanged) {
+  return Container(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: Tokens.fontSize[4]),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          child: CustomDropdown(
+            items: items,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _QuestionsState extends State<Questions> {
   final TextEditingController questionIdController = TextEditingController();
   final TextEditingController questionNameController = TextEditingController();
   final TextEditingController questionPointController = TextEditingController();
+  final TextEditingController questionFilteredTypeController =
+      TextEditingController();
+  final TextEditingController questionFilteredNameController =
+      TextEditingController();
   final TextInputType keyboardType = TextInputType.text;
+  bool isFiltered = false;
+  String? _chosenQuestionType;
+  Map<String, String> _storeTypeList = {'Evet': '1', 'Hayır': '0'};
   Future<List<Map<String, dynamic>>> _getQuestions() async {
-    String? token = await TokenHelper.getToken();
-    print(token);
-    var url = Uri.parse(ApiUrls.questionsUrl);
-    var data = await http.get(url);
+    if (!isFiltered) {
+      String? token = await TokenHelper.getToken();
+      print(token);
+      var url = Uri.parse(ApiUrls.questionsUrl);
+      var data = await http.get(url);
 
-    var jsonData = json.decode(data.body) as List;
-    print(jsonData);
+      var jsonData = json.decode(data.body) as List;
+      print("Bütün data");
+      print(jsonData);
 
-    _questions = jsonData.map((item) => item as Map<String, dynamic>).toList();
+      _questions =
+          jsonData.map((item) => item as Map<String, dynamic>).toList();
+    }
     return _questions;
   }
 
@@ -81,6 +117,26 @@ class _QuestionsState extends State<Questions> {
         var updatedQuestion = _questions
             .firstWhere((q) => q['questionId'] == question['questionId']);
         updatedQuestion['status'] = newStatus;
+      });
+    } else {
+      print("Hata");
+    }
+  }
+
+  Future<void> filteredQuestion(String queryType, String queryText) async {
+    print(queryType);
+    print(queryText);
+    final response = await http
+        .get(Uri.parse('${ApiUrls.filteredQuestion}?$queryType=$queryText'));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body) as List;
+      print("Filtreleme için");
+      print(jsonData);
+      setState(() {
+        _questions.clear();
+
+        _questions =
+            jsonData.map((item) => item as Map<String, dynamic>).toList();
       });
     } else {
       print("Hata");
@@ -219,17 +275,8 @@ class _QuestionsState extends State<Questions> {
           margin: EdgeInsets.symmetric(horizontal: 80),
           child: Column(
             children: [
-              Text(
-                "SORU KODU",
-                style: TextStyle(
-                    color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
-              ),
-              CustomInput(
-                  controller: TextEditingController(),
-                  hintText: "SORU KODU",
-                  keyboardType: TextInputType.text),
               SizedBox(
-                height: 50,
+                height: 20,
               ),
               Text(
                 "SORU ADI",
@@ -237,28 +284,32 @@ class _QuestionsState extends State<Questions> {
                     color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
               ),
               CustomInput(
-                  controller: TextEditingController(),
+                  controller: questionFilteredNameController,
                   hintText: "SORU ADI",
                   keyboardType: TextInputType.text),
               SizedBox(
-                height: 50,
+                height: 20,
               ),
-              Text(
-                "SORU TİPİ",
-                style: TextStyle(
-                    color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
+              buildColumn(context, "SORU TİPİ", _storeTypeList.keys.toList(),
+                  (value) => setState(() => _chosenQuestionType = value)),
+              SizedBox(
+                height: 20,
               ),
-              CustomInput(
-                  controller: TextEditingController(),
-                  hintText: "SORU TİPİ",
-                  keyboardType: TextInputType.text),
-              SizedBox(height: 15),
               CustomButton(
-                  buttonText: 'Ara',
+                  buttonText: 'Filtreleme',
                   textColor: Themes.whiteColor,
                   buttonColor: Themes.blueColor,
                   onPressed: () {
                     print("Arama kısmı çalıştı");
+                    if (questionFilteredNameController.text.isNotEmpty) {
+                      filteredQuestion(
+                          'soru_adi', questionFilteredNameController.text);
+                      isFiltered = true;
+                    } else if (_chosenQuestionType != null) {
+                      String? queryValue = _storeTypeList[_chosenQuestionType];
+                      filteredQuestion('soru_cevap', queryValue!);
+                      isFiltered = true;
+                    }
                   }),
               Padding(
                 padding: EdgeInsets.only(top: 20),
