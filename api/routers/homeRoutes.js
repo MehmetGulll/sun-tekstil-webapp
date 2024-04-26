@@ -133,56 +133,147 @@ router.get(
 );
 
 // 3 ve 3den FAZLA YANLIŞ YAPILAN SORULARI LİSTELER
-router.get("/getFrequentlyWrongQuestions", authenticateToken, async (req, res) => {
+router.get(
+  "/getFrequentlyWrongQuestions",
+  authenticateToken,
+  async (req, res) => {
     try {
-        const sequelize = await initializeSequelize();
+      const sequelize = await initializeSequelize();
 
-        const soruModel = sequelize.define("soru", soru, {
-            timestamps: false,
-            freezeTableName: true,
-        });
+      const soruModel = sequelize.define("soru", soru, {
+        timestamps: false,
+        freezeTableName: true,
+      });
 
-        const denetimSorulariModel = sequelize.define("denetim_sorulari", denetim_sorulari, {
-            timestamps: false,
-            freezeTableName: true,
-        });
+      const denetimSorulariModel = sequelize.define(
+        "denetim_sorulari",
+        denetim_sorulari,
+        {
+          timestamps: false,
+          freezeTableName: true,
+        }
+      );
 
-        denetimSorulariModel.belongsTo(soruModel, {
-            foreignKey: "soru_id",
-            targetKey: "soru_id",
-        });
+      const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
+        timestamps: false,
+        freezeTableName: true,
+      });
 
-        soruModel.hasMany(denetimSorulariModel, {
-            foreignKey: "soru_id",
-            sourceKey: "soru_id",
-        });
+      denetimSorulariModel.belongsTo(soruModel, {
+        foreignKey: "soru_id",
+        targetKey: "soru_id",
+      });
 
-        const frequentlyWrongQuestions = await denetimSorulariModel.findAll({
-            attributes: [
-                "soru_id",
-                [sequelize.fn("COUNT", sequelize.col("soru_id")), "question_count"]
-            ],
+      soruModel.hasMany(denetimSorulariModel, {
+        foreignKey: "soru_id",
+        sourceKey: "soru_id",
+      });
+      soruModel.belongsTo(denetimTipiModel, {
+        foreignKey: "denetim_tip_id",
+        targetKey: "denetim_tip_id",
+      });
+
+      const frequentlyWrongQuestions = await denetimSorulariModel.findAll({
+        attributes: [
+          "soru_id",
+          [sequelize.fn("COUNT", sequelize.col("soru_id")), "question_count"],
+        ],
+        where: {
+          cevap: {
+            [Op.ne]: sequelize.col("dogru_cevap"),
+          },
+        },
+        group: ["soru_id"],
+        having: sequelize.where(sequelize.literal("COUNT(soru_id)"), ">", 2),
+        order: [[sequelize.literal("question_count"), "DESC"]],
+      });
+
+      if (!frequentlyWrongQuestions || frequentlyWrongQuestions.length === 0)
+        return res.status(404).send("Kronik yanlış soru bulunamadı.");
+
+      const frequentlyWrongQuestionsWithNames = await Promise.all(
+        frequentlyWrongQuestions.map(async (question) => {
+          const soru = await soruModel.findOne({
             where: {
-                cevap: {
-                    [Op.ne]: sequelize.col("dogru_cevap"),
-                },
+              soru_id: question.soru_id,
             },
-            group: ["soru_id"],
-            having: sequelize.where(sequelize.literal("COUNT(soru_id)"), ">", 2),
-            order: [[sequelize.literal("question_count"), "DESC"]],
-        });
+            attributes: ["soru_adi", "denetim_tip_id"],
+            include: [
+              {
+                model: denetimTipiModel,
+                attributes: ["denetim_tipi"],
+              },
+            ],
+          });
+          return {
+            soru_id: question.soru_id,
+            soru_adi: soru.soru_adi,
+            question_count: question.dataValues.question_count,
+            denetim_tip_id: soru.denetim_tip_id,
+            denetim_tipi: soru.denetim_tipi.denetim_tipi,
+          };
+        })
+      );
+      const groupedQuestions = frequentlyWrongQuestionsWithNames.reduce(
+        (acc, question) => {
+          if (acc.hasOwnProperty(question.denetim_tip_id)) {
+            acc[question.denetim_tip_id].push(question);
+          } else {
+            acc[question.denetim_tip_id] = [question];
+          }
+          return acc;
+        },
+        {}
+      );
 
-        if (!frequentlyWrongQuestions || frequentlyWrongQuestions.length === 0)
-            return res.status(404).send("Kronik yanlış soru bulunamadı.");
+      // Şimdi ise bu gruplanmış veriyi istediğiniz formatta bir array'e dönüştürelim.
+      const groupedQuestionsArray = Object.keys(groupedQuestions).map(
+        (denetim_tip_id) => {
+          return {
+            denetim_tipi: groupedQuestions[denetim_tip_id][0].denetim_tipi, // İlk öğeden alıyoruz, diğerleri aynı olacak zaten.
+            questions: groupedQuestions[denetim_tip_id],
+          };
+        }
+      );
 
-        return res.status(200).send(frequentlyWrongQuestions);
+      // Şimdi bu gruplanmış veriyi döndürebiliriz.
+      return res.status(200).send(groupedQuestionsArray);
     } catch (error) {
-        console.error("Get Frequently Wrong Questions Error:", error);
-        return res.status(500).send(error);
+      console.error("Get Frequently Wrong Questions Error:", error);
+      return res.status(500).send(error);
     }
+  }
+);
+
+//  Mağaza Sayılarını (aktif pasif total) Sayısını Getirir
+router.get("/getAllStoreCount", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const magazaModel = sequelize.define("magaza", magaza, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const activStoreCount = await magazaModel.count({
+      where: {
+        status: 1,
+      },
+    });
+    const inactiveStoreCount = await magazaModel.count({
+      where: {
+        status: 0,
+      },
+    });
+
+    const totalStoreCount = await magazaModel.count();
+
+    return res
+      .status(200)
+      .send({ activStoreCount, inactiveStoreCount, totalStoreCount });
+  } catch (error) {
+    console.error("Get Active Store Count Error:", error);
+    return res.status(500).send(error);
+  }
 });
-
-
-
 
 module.exports = router;
