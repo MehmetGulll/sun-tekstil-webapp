@@ -118,22 +118,15 @@ exports.filterStores = async (req, res) => {
     const magaza_tipi = req.query.magaza_tipi;
     let query = "SELECT * FROM magaza WHERE ";
 
-    if (magaza_tipi) {
+    if (magaza_adi && sehir && magaza_tipi) {
+      query += `magaza_adi LIKE '%${magaza_adi}%' AND sehir LIKE '%${sehir}%' AND magaza_tipi = ${magaza_tipi} `;
+    } else if (magaza_adi) {
+      query += `magaza_adi LIKE '%${magaza_adi}%' `;
+    } else if (sehir && magaza_tipi) {
+      query += `sehir LIKE '%${sehir}%' AND magaza_tipi = ${magaza_tipi} `;
+    } else if (magaza_tipi) {
       query += `magaza_tipi = ${magaza_tipi} `;
     } else {
-      if (magaza_adi) {
-        query += `magaza_adi LIKE '%${magaza_adi}%' `;
-      }
-      if (sehir) {
-        if (magaza_adi) {
-          query += `AND sehir LIKE '%${sehir}%' `;
-        } else {
-          query += `sehir LIKE '%${sehir}%' `;
-        }
-      }
-    }
-
-    if (!magaza_adi && !sehir && !magaza_tipi) {
       query = "SELECT * FROM magaza";
     }
 
@@ -159,3 +152,4 @@ exports.filterStores = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
+
