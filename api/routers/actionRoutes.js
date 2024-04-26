@@ -65,6 +65,8 @@ router.post("/createAction", authenticateToken, async (req, res) => {
       denetim_tip_id: Joi.number().required(),
       aksiyon_kapatan_id: Joi.number(),
       
+
+      
     }).validate(req.body);
 
     if (error) return res.status(400).send(error);
