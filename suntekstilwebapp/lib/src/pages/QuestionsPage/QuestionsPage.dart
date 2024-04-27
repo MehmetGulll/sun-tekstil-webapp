@@ -56,7 +56,7 @@ class _QuestionsState extends State<Questions> {
   final TextInputType keyboardType = TextInputType.text;
   bool isFiltered = false;
   String? _chosenQuestionType;
-  Map<String, String> _storeTypeList = {'Evet': '1', 'Hayır': '0'};
+  Map<String, String> _questionTypeList = {'Evet': '1', 'Hayır': '0'};
   Future<List<Map<String, dynamic>>> _getQuestions() async {
     if (!isFiltered) {
       String? token = await TokenHelper.getToken();
@@ -290,7 +290,7 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
-              buildColumn(context, "SORU TİPİ", _storeTypeList.keys.toList(),
+              buildColumn(context, "SORU TİPİ", _questionTypeList.keys.toList(),
                   (value) => setState(() => _chosenQuestionType = value)),
               SizedBox(
                 height: 20,
@@ -306,7 +306,7 @@ class _QuestionsState extends State<Questions> {
                           'soru_adi', questionFilteredNameController.text);
                       isFiltered = true;
                     } else if (_chosenQuestionType != null) {
-                      String? queryValue = _storeTypeList[_chosenQuestionType];
+                      String? queryValue = _questionTypeList[_chosenQuestionType];
                       filteredQuestion('soru_cevap', queryValue!);
                       isFiltered = true;
                     }
