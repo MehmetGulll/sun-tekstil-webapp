@@ -22,4 +22,5 @@ class ApiUrls {
   static const String getUsers = 'http://localhost:5000/getUsers';
   static const String updateOfficalUser = 'http://localhost:5000/updateUserStatus';
   static const String filteredQuestion = 'http://localhost:5000/filteredQuestion';
+  static const String filteredStore = 'http://localhost:5000/filteredStore';
 }
