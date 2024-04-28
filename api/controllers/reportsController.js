@@ -64,7 +64,8 @@ exports.filterReports = async (req, res) => {
     const inspectorName = req.query.inspectorName;
     const inspectionDate = req.query.inspectionDate;
     const inspectionCompletionDate = req.query.inspectionCompletionDate;
-    let query = "SELECT d.denetim_id AS inspectionId, dt.denetim_tip_id AS inspectionTypeId, m.magaza_id AS storeId, r.rol_adi AS inspectorRole, k.ad + ' ' + k.soyad AS inspectorName, d.alinan_puan AS pointsReceived, d.denetim_tarihi AS inspectionDate, d.denetim_tamamlanma_tarihi AS inspectionCompletionDate, d.status FROM denetim d INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id INNER JOIN magaza m ON d.magaza_id = m.magaza_id INNER JOIN kullanici k ON d.denetci_id = k.id INNER JOIN rol r ON k.rol = r.rol_id WHERE ";
+    let query =
+      "SELECT d.denetim_id AS inspectionId, dt.denetim_tipi AS inspectionTypeId, m.magaza_adi AS storeId, r.rol_adi AS inspectorRole, k.ad + ' ' + k.soyad AS inspectorName, d.alinan_puan AS pointsReceived, d.denetim_tarihi AS inspectionDate, d.denetim_tamamlanma_tarihi AS inspectionCompletionDate, d.status FROM denetim d INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id INNER JOIN magaza m ON d.magaza_id = m.magaza_id INNER JOIN kullanici k ON d.denetci_id = k.id INNER JOIN rol r ON k.rol = r.rol_id WHERE ";
 
     if (
       inspectionTypeId &&
@@ -88,7 +89,8 @@ exports.filterReports = async (req, res) => {
     } else if (inspectionCompletionDate) {
       query += `d.denetim_tamamlanma_tarihi LIKE '%${inspectionCompletionDate}%' `;
     } else {
-      query = "SELECT d.denetim_id AS inspectionId, dt.denetim_tip_id AS inspectionTypeId, m.magaza_id AS storeId, r.rol_adi AS inspectorRole, k.ad + ' ' + k.soyad AS inspectorName, d.alinan_puan AS pointsReceived, d.denetim_tarihi AS inspectionDate, d.denetim_tamamlanma_tarihi AS inspectionCompletionDate, d.status FROM denetim d INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id INNER JOIN magaza m ON d.magaza_id = m.magaza_id INNER JOIN kullanici k ON d.denetci_id = k.id INNER JOIN rol r ON k.rol = r.rol_id";
+      query =
+        "SELECT d.denetim_id AS inspectionId, dt.denetim_tip_id AS inspectionTypeId, m.magaza_id AS storeId, r.rol_adi AS inspectorRole, k.ad + ' ' + k.soyad AS inspectorName, d.alinan_puan AS pointsReceived, d.denetim_tarihi AS inspectionDate, d.denetim_tamamlanma_tarihi AS inspectionCompletionDate, d.status FROM denetim d INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id INNER JOIN magaza m ON d.magaza_id = m.magaza_id INNER JOIN kullanici k ON d.denetci_id = k.id INNER JOIN rol r ON k.rol = r.rol_id";
     }
 
     const result = await pool.request().query(query);

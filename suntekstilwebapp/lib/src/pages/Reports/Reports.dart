@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Reports extends StatefulWidget {
@@ -57,13 +58,17 @@ class _ReportsState extends State<Reports> {
   final TextEditingController inspectionCompletionDateController =
       TextEditingController();
 
-  Future<List<Map<String, dynamic>>> _getReports() async {
-    var url = Uri.parse(ApiUrls.reportsUrl);
-    var data = await http.get(url);
+  bool isFiltered = false;
 
-    var jsonData = json.decode(data.body) as List;
-    print(jsonData);
-    _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
+  Future<List<Map<String, dynamic>>> _getReports() async {
+    if (!isFiltered) {
+      var url = Uri.parse(ApiUrls.reportsUrl);
+      var data = await http.get(url);
+
+      var jsonData = json.decode(data.body) as List;
+      print(jsonData);
+      _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    }
     return _reports;
   }
 
@@ -111,6 +116,43 @@ class _ReportsState extends State<Reports> {
       });
     } else {
       print("Bir hata oluştu");
+    }
+  }
+
+  Future<void> filteredReports() async {
+    String startDate =
+        '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}';
+    String endDate =
+        '${_endDate.year}-${_endDate.month.toString().padLeft(2, '0')}-${_endDate.day.toString().padLeft(2, '0')}';
+
+    print(_chosenInspectorType);
+    print(_chosenInspectorRole);
+    print(startDate);
+    print(endDate);
+
+    String url =
+        '${ApiUrls.filteredReport}?inspectionDate=$startDate&inspectionCompletionDate=$endDate';
+
+    if (_chosenInspectorType != null) {
+      url += '&inspectionTypeId=$_chosenInspectorType';
+    }
+
+    if (_chosenInspectorRole != null) {
+      url += '&inspectorRole=$_chosenInspectorRole';
+    }
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body) as List;
+        setState(() {
+          _reports.clear();
+          _reports =
+              jsonData.map((item) => item as Map<String, dynamic>).toList();
+        });
+      }
+    } catch (e) {
+      print("Hata: $e");
     }
   }
 
@@ -204,17 +246,17 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-  String? _chosenOperation;
-  String? _chosenRegion;
-  String? _chosenLocation;
+  String? _chosenInspectorType;
+  String? _chosenInspectorRole;
+  String? _chosenInspectorName;
   String? _chosenLocationType;
   String? _chosenAuditor;
   String? _chosenVisitType;
   String? _chosenCenterTeam;
 
-  List<String> _operationList = ['Operation 1', 'Operation 2', 'Operation 3'];
-  List<String> _regionList = ['Region 1', 'Region 2', 'Region 3'];
-  List<String> _locationList = ['Location 1', 'Location 2', 'Location 3'];
+  List<String> _inspectorType = ['Operation 1', 'Operation 2', 'Operation 3'];
+  List<String> _inspectorRole = ['Region 1', 'Region 2', 'Region 3'];
+  List<String> _inspectorName = ['Location 1', 'Location 2', 'Location 3'];
   List<String> _locationTypeList = [
     'Location Type 1',
     'Location Type 2',
@@ -286,30 +328,45 @@ class _ReportsState extends State<Reports> {
             SizedBox(
               height: 20,
             ),
-            buildRow("Operasyonlar", _operationList,
-                (value) => setState(() => _chosenOperation = value)),
+            buildRow("DENETİM TİPİ", _inspectorType,
+                (value) => setState(() => _chosenInspectorType = value)),
             SizedBox(height: 10),
-            buildRow("Lokasyon", _locationList,
-                (value) => setState(() => _chosenLocation = value)),
+            buildRow("DENETİMCİ ROLÜ", _inspectorRole,
+                (value) => setState(() => _chosenInspectorRole = value)),
             SizedBox(height: 10),
-            buildRow("Lokasyon Tipi", _locationTypeList,
-                (value) => setState(() => _chosenLocationType = value)),
-            SizedBox(height: 10),
-            buildRow("Denetçi", _auditorList,
-                (value) => setState(() => _chosenAuditor = value)),
-            SizedBox(height: 10),
-            buildRow("Ziyaret Tipi", _visitTypeList,
-                (value) => setState(() => _chosenVisitType = value)),
-            SizedBox(
-              height: 10,
-            ),
-            buildRow("Merkez Ekibi", _centerTeamList,
-                (value) => setState(() => _chosenCenterTeam = value)),
+            buildRow("DENETÇİ", _inspectorName,
+                (value) => setState(() => _chosenInspectorName = value)),
             SizedBox(height: 10),
             CustomButton(
                 buttonText: "Filtreleme",
-                onPressed: () {
-                  print("Filtrelendi");
+                onPressed: () async {
+                  if (_startDate != null && _endDate != null) {
+                    print("Filtrelendi");
+                    isFiltered = true;
+                    await filteredReports();
+                  } else if (_startDate == null) {
+                    String errorMessage = "Başlangıç tarihi seçiniz!";
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ErrorDialog(
+                            errorMessage: errorMessage,
+                            errorIcon: Icons.person_off,
+                          );
+                        });
+                  } else if (_endDate == null) {
+                    String errorMessage = "Bitiş tarihi seçiniz!";
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ErrorDialog(
+                            errorMessage: errorMessage,
+                            errorIcon: Icons.person_off,
+                          );
+                        });
+                  } else {
+                    print("Tarihleri seçiniz lütfem");
+                  }
                 }),
             Padding(
               padding: EdgeInsets.all(20),
