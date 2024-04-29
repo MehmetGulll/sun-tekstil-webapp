@@ -24,20 +24,19 @@ const inspectationRoutes = require("./routers/inspectationRoutes");
 const actionRoutes = require("./routers/actionRoutes");
 const questionRoutes = require("./routers/questionRoutes");
 const homeRoutes = require("./routers/homeRoutes");
+const titleRoutes = require("./routers/titleRoutes");
+const mailRoutes = require("./routers/mailRoutes");
 
-// app.use(authRoutes);
+app.use(authRoutes);
 app.use(regionRoutes);
 // app.use(storeRoutes);
 app.use(homeRoutes);
-
-
+app.use(titleRoutes);
+app.use(mailRoutes);
 app.use(questionsRoutes);
-
 app.use(userRoutes);
 app.use(storesRoutes);
 app.use(reportsRoutes);
-
-
 app.use(inspectationRoutes);
 app.use(actionRoutes);
 app.use(questionRoutes);

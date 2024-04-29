@@ -402,6 +402,48 @@ const aksiyon = {
     }
 };
 
+const unvan = {
+    unvan_id : {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false
+    },
+    unvan_adi: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    denetim_tip_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'denetim_tipi',
+            key: 'denetim_tip_id'
+        }
+    },
+    ekleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    guncelleyen_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'kullanici',
+            key: 'id'
+        }
+    },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+
+} 
+
 
 module.exports = {
     bolge,
@@ -414,5 +456,6 @@ module.exports = {
     rol,
     soru,
     yetki,
-    aksiyon
+    aksiyon,
+    unvan
 };
