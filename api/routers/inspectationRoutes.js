@@ -9,6 +9,7 @@ const {
   denetim,
   soru,
   denetim_sorulari,
+  aksiyon,
 } = require("../helpers/sequelizemodels");
 
 // TÜM DENETİM TİPLERİNİ LİSTELER
@@ -198,11 +199,21 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
           Joi.object({
             soru_id: Joi.number().required(),
             cevap: Joi.number().required(),
+            aksiyon: Joi.array()
+              .items(
+                Joi.object({
+                  aksiyon_konu: Joi.string().required(),
+                  aksiyon_gorsel: Joi.string(),
+                  aksiyon_bitis_tarihi: Joi.string(),
+                  aksiyon_sure: Joi.number().required(),
+                  aksiyon_oncelik: Joi.number().required(),
+                })
+              )
+              .optional(),
           })
         )
         .required(),
     }).validate(req.body);
-
     if (error) return res.status(400).send(error);
 
     const { denetim_id, cevaplar } = value;
@@ -228,6 +239,11 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
       }
     );
 
+    const aksiyonModel = sequelize.define("aksiyon", aksiyon, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
     const existingInspection = await denetimModel.findOne({
       where: {
         denetim_id,
@@ -244,56 +260,59 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
       },
     });
 
-    // Tüm cevaplanan soruları bir kerede denetim_sorulari tablosuna ekleyelim ama tüm sorular cevaplanmamışsa error döndür ve o denetim_id nin status 0 yap
-    if (sorular.length !== cevaplar.length) {
-      return res.status(400).send("Eksik veya Fazla Soru Cevaplandı!");
-    } else {
-      // Eksik soruları bul
-      const eksikSorular = [];
-      for (let i = 0; i < sorular.length; i++) {
-        const soru = sorular[i];
-        const cevapVarMi = cevaplar.some(cevap => cevap.soru_id === soru.dataValues.soru_id);
-        if (!cevapVarMi) {
-          eksikSorular.push(soru);
-        }
-      }
-
-      if (eksikSorular.length > 0) {
-        console.log("Eksik Sorular:", eksikSorular);
-        return res.status(400).send("Tüm Sorular Cevaplanmalı!");
-      }
-
-      // Eksik soru yoksa cevapları kaydet
-      for (let i = 0; i < cevaplar.length; i++) {
-        const cevap = cevaplar[i];
-        const soru = sorular.find(
-          (soru) => soru.dataValues.soru_id === cevap.soru_id
-        );
-        if (!soru) {
-          return res.status(400).send("Soru Bulunamadı!");
-        }
-
-        await denetimSorulariModel.create({
-          denetim_id,
-          soru_id: cevap.soru_id,
-          cevap: cevap.cevap,
-          dogru_cevap: soru.dataValues.soru_cevap,
-        });
-      }
-
-      // Tüm cevaplar güncellendikten sonra denetim_id'nin status'unu 0 yap
-      await denetimModel.update(
-        { 
-          status: 0 ,
-          denetim_tamamlanma_tarihi: new Date().toISOString().split("T")[0]
-        },
-        {
-          where: {
-            denetim_id,
-          },
-        }
+    // Tüm cevaplanan soruları bir kerede denetim_sorulari tablosuna ekleyelim
+    const denetimSorular = [];
+    for (let i = 0; i < cevaplar.length; i++) {
+      const cevap = cevaplar[i];
+      const soru = sorular.find(
+        (soru) => soru.dataValues.soru_id === cevap.soru_id
       );
+      if (!soru) {
+        return res.status(400).send("Soru Bulunamadı!");
+      }
+
+      const createDenetimSorular = await denetimSorulariModel.create({
+        denetim_id,
+        soru_id: cevap.soru_id,
+        cevap: cevap.cevap,
+        dogru_cevap: soru.dataValues.soru_cevap,
+      });
+      denetimSorular.push(createDenetimSorular);
     }
+    
+    // Aksiyonları oluştur
+    for (let i = 0; i < denetimSorular.length; i++) {
+      const ds_id = denetimSorular[i].dataValues.ds_id;
+      const cevap = cevaplar[i];
+      if (cevap.aksiyon && cevap.aksiyon.length > 0) {
+        for (let j = 0; j < cevap.aksiyon.length; j++) {
+          const aksiyon = cevap.aksiyon[j];
+          await aksiyonModel.create({
+            ds_id : ds_id,
+            aksiyon_konu: aksiyon.aksiyon_konu,
+            aksiyon_gorsel: aksiyon.aksiyon_gorsel,
+            aksiyon_acilis_tarihi: "2024-04-30",
+            aksiyon_sure: aksiyon.aksiyon_sure,
+            aksiyon_oncelik: aksiyon.aksiyon_oncelik,
+            aksiyon_olusturan_id: req.user.id,
+            status: 1,
+          });
+        }
+      }
+    }
+
+    // Denetim statusunu güncelle
+    await denetimModel.update(
+      {
+        status: 0,
+        denetim_tamamlanma_tarihi: new Date().toISOString().split("T")[0],
+      },
+      {
+        where: {
+          denetim_id,
+        },
+      }
+    );
 
     return res.status(201).send(`Denetim Soruları Başarıyla Cevaplandı!`);
   } catch (error) {
@@ -304,7 +323,4 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
 
 
 
-
-
 module.exports = router;
-

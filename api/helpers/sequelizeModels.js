@@ -372,14 +372,6 @@ const aksiyon = {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    denetim_tip_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'denetim_tipi',
-            key: 'denetim_tip_id'
-        }
-    },
     aksiyon_olusturan_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
