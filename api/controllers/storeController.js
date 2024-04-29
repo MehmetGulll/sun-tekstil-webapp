@@ -96,16 +96,60 @@ exports.updateStore = async (req, res) => {
       .query(
         "UPDATE magaza SET magaza_kodu = @storeCode, magaza_adi = @storeName, magaza_tipi = @storeType, sehir = @city, magaza_telefon = @storePhone, status = @status WHERE magaza_id =@storeId "
       );
-      console.log(result);
-      console.log(req.body.storeId);
-      console.log(req.body.storeCode);
-      console.log(req.body.storeName);
-      console.log(req.body.storeType);
-      console.log(req.body.city);
-      console.log(req.body.storePhone);
-      res.status(200).send({message:"Mağaza başarıyla güncellendi"});
+    console.log(result);
+    console.log(req.body.storeId);
+    console.log(req.body.storeCode);
+    console.log(req.body.storeName);
+    console.log(req.body.storeType);
+    console.log(req.body.city);
+    console.log(req.body.storePhone);
+    res.status(200).send({ message: "Mağaza başarıyla güncellendi" });
   } catch (error) {
     console.log("Error", error);
     res.status(500).send({ message: "Sunucu hatası:", error });
   }
 };
+
+exports.filterStores = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const magaza_adi = req.query.magaza_adi;
+    const sehir = req.query.sehir;
+    const magaza_tipi = req.query.magaza_tipi;
+    let query = "SELECT * FROM magaza WHERE ";
+
+    if (magaza_adi && sehir && magaza_tipi) {
+      query += `magaza_adi LIKE '%${magaza_adi}%' AND sehir LIKE '%${sehir}%' AND magaza_tipi = ${magaza_tipi} `;
+    } else if (magaza_adi) {
+      query += `magaza_adi LIKE '%${magaza_adi}%' `;
+    } else if (sehir && magaza_tipi) {
+      query += `sehir LIKE '%${sehir}%' AND magaza_tipi = ${magaza_tipi} `;
+    } else if (magaza_tipi) {
+      query += `magaza_tipi = ${magaza_tipi} `;
+    } else {
+      query = "SELECT * FROM magaza";
+    }
+
+    const result = await pool.request().query(query);
+    const stores = result.recordset.map(
+      (store) =>
+        new Store(
+          store.magaza_id,
+          store.magaza_kodu,
+          store.magaza_adi,
+          store.magaza_tipi,
+          store.bolge_id,
+          store.sehir,
+          store.magaza_telefon,
+          store.magaza_metre,
+          store.magaza_muduru,
+          store.status
+        )
+    );
+    res.json(stores);
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server Error", error });
+  }
+};
+

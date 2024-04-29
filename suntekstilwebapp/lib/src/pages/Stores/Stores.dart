@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
@@ -18,29 +19,31 @@ class Stores extends StatefulWidget {
   _StoresState createState() => _StoresState();
 }
 
-Widget buildRow(
-    String label, List<String> items, ValueChanged<String?> onChanged) {
+Widget buildColumn(BuildContext context, String label, List<String> items,
+    ValueChanged<String?> onChanged) {
   return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-            child: Text(label),
-            flex: 1,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: Tokens.fontSize[4]),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          child: CustomDropdown(
+            items: items,
+            onChanged: onChanged,
           ),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-              child: CustomDropdown(
-                items: items,
-                onChanged: onChanged,
-              ),
-              flex: 2)
-        ],
-      ));
+        ),
+      ],
+    ),
+  );
 }
+
 
 class _StoresState extends State<Stores> {
   TextEditingController storeCodeController = TextEditingController();
@@ -48,6 +51,10 @@ class _StoresState extends State<Stores> {
   TextEditingController storeTypeController = TextEditingController();
   TextEditingController storeCityController = TextEditingController();
   TextEditingController storePhoneController = TextEditingController();
+  TextEditingController filteredStoreNameController = TextEditingController();
+  TextEditingController filteredStoreCityController = TextEditingController();
+  bool isFiltered = false;
+  Map<String, String> _storeTypeList = {'AVM': '1', 'CADDE': '2'};
   Map<String, String?> selectedValues = {
     'storeCode': '',
     'storeName': '',
@@ -57,14 +64,16 @@ class _StoresState extends State<Stores> {
   };
   List<Map<String, dynamic>> _stores = [];
   Future<List<Map<String, dynamic>>> _getStores() async {
-    var url = Uri.parse(ApiUrls.storesUrl);
-    var data = await http.get(url);
-    var jsonData = json.decode(data.body) as List;
-    print(jsonData);
+    if (!isFiltered) {
+      var url = Uri.parse(ApiUrls.storesUrl);
+      var data = await http.get(url);
+      var jsonData = json.decode(data.body) as List;
+      print(jsonData);
 
-    _stores = jsonData.map((item) => item as Map<String, dynamic>).toList();
+      _stores = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    }
 
-    return jsonData.map((item) => item as Map<String, dynamic>).toList();
+    return _stores;
   }
 
   Future<void> deleteStore(int id) async {
@@ -119,6 +128,28 @@ class _StoresState extends State<Stores> {
       }
     } catch (e) {
       print('Bir hata oluştu: $e');
+    }
+  }
+
+  Future<void> filteredStore(
+      String? queryName, String? queryType, String? queryCity) async {
+    print(queryName);
+    print(queryType);
+    print(queryCity);
+    try {
+      final response = await http.get(Uri.parse(
+          '${ApiUrls.filteredStore}?magaza_adi=$queryName&magaza_tipi=$queryType&sehir=$queryCity'));
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body) as List;
+        setState(() {
+          _stores.clear();
+
+          _stores =
+              jsonData.map((item) => item as Map<String, dynamic>).toList();
+        });
+      }
+    } catch (e) {
+      print("hata: $e");
     }
   }
 
@@ -284,60 +315,89 @@ class _StoresState extends State<Stores> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               var stores = snapshot.data;
-              return Column(
-                children: [
-                  buildRow(
-                      "Mağaza Kodu",
-                      buildDropdownMenuItems(stores, 'storeCode'),
-                      (value) => setState(() => _chosenStoreCode = value)),
-                  SizedBox(height: 10),
-                  buildRow(
-                      "Mağaza Adı",
-                      buildDropdownMenuItems(stores, 'storeName'),
-                      (value) => setState(() => _chosenStoreName = value)),
-                  SizedBox(height: 10),
-                  buildRow(
-                      "Mağaza Tipi",
-                      buildDropdownMenuItems(stores, 'storeType'),
-                      (value) => setState(() => _chosenStoreType = value)),
-                  SizedBox(height: 10),
-                  buildRow("Şehir", buildDropdownMenuItems(stores, 'city'),
-                      (value) => setState(() => _chosenStoreCity = value)),
-                  SizedBox(height: 10),
-                  buildRow(
-                      "Mağaza Telefon",
-                      buildDropdownMenuItems(stores, 'storePhone'),
-                      (value) => setState(() => _chosenStorePhone = value)),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 350),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              return Container(
+                margin: EdgeInsets.symmetric(horizontal: 80),
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+                    Column(
                       children: [
-                        Expanded(
-                          child: CustomButton(
-                            buttonText: "Ara",
-                            onPressed: () {},
-                          ),
+                        Text(
+                          "MAĞAZA ADI",
+                          style: TextStyle(fontSize: Tokens.fontSize[4]),
                         ),
                         SizedBox(
-                          width: 20,
+                          height: 20,
                         ),
-                        Expanded(
-                          child: CustomButton(
-                            buttonText: "Mağaza Ekle",
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/addLocation');
-                            },
-                          ),
-                        )
+                        CustomInput(
+                          controller: filteredStoreNameController,
+                          hintText: 'MAĞAZA ADI',
+                          keyboardType: TextInputType.name,
+                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 10),
-                ],
+                    SizedBox(height: 20),
+                    buildColumn(
+                        context,
+                        "MAĞAZA TİPİ",
+                        _storeTypeList.keys.toList(),
+                        (value) => setState(() => _chosenStoreType = value)),
+                    SizedBox(height: 20),
+                    Column(
+                      children: [
+                        Text(
+                          "ŞEHİR",
+                          style: TextStyle(fontSize: Tokens.fontSize[4]),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        CustomInput(
+                          controller: filteredStoreCityController,
+                          hintText: 'ŞEHİR',
+                          keyboardType: TextInputType.name,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 350),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: CustomButton(
+                              buttonText: "Filtreleme",
+                              onPressed: () {
+                                String? queryValue =
+                                    _storeTypeList[_chosenStoreType];
+                                isFiltered = true;
+                                filteredStore(
+                                    filteredStoreNameController.text,
+                                    queryValue,
+                                    filteredStoreCityController.text);
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: CustomButton(
+                              buttonText: "Mağaza Ekle",
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/addLocation');
+                              },
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                ),
               );
             } else {
               return CircularProgressIndicator();
