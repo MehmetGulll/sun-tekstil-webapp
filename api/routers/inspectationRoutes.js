@@ -204,7 +204,6 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
                 Joi.object({
                   aksiyon_konu: Joi.string().required(),
                   aksiyon_gorsel: Joi.string(),
-                  aksiyon_bitis_tarihi: Joi.string(),
                   aksiyon_sure: Joi.number().required(),
                   aksiyon_oncelik: Joi.number().required(),
                 })
@@ -280,7 +279,6 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
       denetimSorular.push(createDenetimSorular);
     }
     
-    // Aksiyonları oluştur
     for (let i = 0; i < denetimSorular.length; i++) {
       const ds_id = denetimSorular[i].dataValues.ds_id;
       const cevap = cevaplar[i];
@@ -291,7 +289,7 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
             ds_id : ds_id,
             aksiyon_konu: aksiyon.aksiyon_konu,
             aksiyon_gorsel: aksiyon.aksiyon_gorsel,
-            aksiyon_acilis_tarihi: "2024-04-30",
+            aksiyon_acilis_tarihi: new Date().toISOString().split("T")[0],
             aksiyon_sure: aksiyon.aksiyon_sure,
             aksiyon_oncelik: aksiyon.aksiyon_oncelik,
             aksiyon_olusturan_id: req.user.id,
