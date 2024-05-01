@@ -60,6 +60,10 @@ class _ReportsState extends State<Reports> {
 
   bool isFiltered = false;
 
+  Map<String, String> inspectionTypes = {
+    'Görsel Denetim': '3',
+    'Mağaza Denetim': '4'
+  };
   Future<List<Map<String, dynamic>>> _getReports() async {
     if (!isFiltered) {
       var url = Uri.parse(ApiUrls.reportsUrl);
@@ -68,9 +72,18 @@ class _ReportsState extends State<Reports> {
       var jsonData = json.decode(data.body) as List;
       print(jsonData);
       _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
-      _inspectorType= _reports.map((report)=> report['inspectionTypeId'].toString()).toSet().toList();
-      _inspectorName=_reports.map((report)=>report['inspectorName'].toString()).toSet().toList();
-      _inspectorRole=_reports.map((report)=>report['inspectorRole'].toString()).toSet().toList();
+      _inspectorType = _reports
+          .map((report) => report['inspectionTypeId'].toString())
+          .toSet()
+          .toList();
+      _inspectorName = _reports
+          .map((report) => report['inspectorName'].toString())
+          .toSet()
+          .toList();
+      _inspectorRole = _reports
+          .map((report) => report['inspectorRole'].toString())
+          .toSet()
+          .toList();
     }
     return _reports;
   }
@@ -137,7 +150,9 @@ class _ReportsState extends State<Reports> {
         '${ApiUrls.filteredReport}?inspectionDate=$startDate&inspectionCompletionDate=$endDate';
 
     if (_chosenInspectorType != null) {
-      url += '&inspectionTypeId=$_chosenInspectorType';
+      String? inspectionTypeId = inspectionTypes[_chosenInspectorType];
+      print(inspectionTypeId);
+      url += '&inspectionTypeId=$inspectionTypeId';
     }
 
     if (_chosenInspectorRole != null) {
@@ -369,7 +384,7 @@ class _ReportsState extends State<Reports> {
                 ),
                 SizedBox(height: 30),
                 Column(children: [
-                  Text('Başlangıç Tarihi:'),
+                  Text('DENETİM TARİHİ:'),
                   SizedBox(width: 8),
                   Text("${_startDate.toLocal()}".split(' ')[0]),
                   SizedBox(width: 8),
@@ -380,7 +395,7 @@ class _ReportsState extends State<Reports> {
                 ]),
                 SizedBox(height: 16),
                 Column(children: [
-                  Text('Bitiş Tarihi:'),
+                  Text('DENETİM TAMAMLANMA TARİHİ:'),
                   SizedBox(width: 8),
                   Text("${_endDate.toLocal()}".split(' ')[0]),
                   SizedBox(width: 8),
@@ -393,11 +408,6 @@ class _ReportsState extends State<Reports> {
                 buildRow("DENETİM TİPİ", _inspectorType,
                     (value) => setState(() => _chosenInspectorType = value)),
                 SizedBox(height: 10),
-                buildRow("DENETİMCİ ROLÜ", _inspectorRole,
-                    (value) => setState(() => _chosenInspectorRole = value)),
-                SizedBox(height: 10),
-                buildRow("DENETÇİ", _inspectorName,
-                    (value) => setState(() => _chosenInspectorName = value)),
                 SizedBox(height: 10),
                 CustomButton(
                     buttonText: "Filtreleme",
