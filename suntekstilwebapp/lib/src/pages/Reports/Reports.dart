@@ -373,6 +373,18 @@ class _ReportsState extends State<Reports> {
                       },
                     ),
                   ),
+                   Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: CustomButton(
+                      buttonText: 'Mail ',
+                      textColor: Themes.secondaryColor,
+                      buttonColor: Themes.whiteColor,
+                      onPressed: () {
+                        print("Mail ile yollandı");
+                        Navigator.pushReplacementNamed(context, '/sendMail');
+                      },
+                    ),
+                  ),
                 ]);
               }).toList();
               return Column(children: [
@@ -518,6 +530,13 @@ class _ReportsState extends State<Reports> {
                           color: Themes.yellowColor,
                           child: Text(
                             "DÜZENLE",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ), Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "MAİL GÖNDER",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
                         ),
