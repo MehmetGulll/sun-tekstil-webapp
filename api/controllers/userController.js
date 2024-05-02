@@ -89,7 +89,7 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { userName, userSurname, user_name, userEposta, userPassword } =
+  const { userName, userSurname, user_name, userEposta, userPassword, userRole } =
     req.body;
   const saltRounds = 10;
   try {
@@ -116,9 +116,10 @@ exports.register = async (req, res) => {
         .input("input_param3", sql.VarChar, user_name)
         .input("input_param4", sql.VarChar, userEposta)
         .input("input_param5", sql.VarChar, hashedPassword)
-        .input("input_param6", sql.Int, 1)
+        .input("input_param6", sql.Int, userRole)
+        .input("input_param7", sql.Int, 1)
         .query(
-          "INSERT INTO kullanici (ad,soyad,kullanici_adi,eposta,sifre,rol) VALUES ( @input_param1, @input_param2, @input_param3, @input_param4, @input_param5,@input_param6)"
+          "INSERT INTO kullanici (ad,soyad,kullanici_adi,eposta,sifre,rol,status) VALUES ( @input_param1, @input_param2, @input_param3, @input_param4, @input_param5,@input_param6,@input_param7)"
         );
       res.status(200).send({ message: "Kullanıcı başarıyla kaydedildi" });
     }

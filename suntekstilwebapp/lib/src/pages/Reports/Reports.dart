@@ -373,7 +373,7 @@ class _ReportsState extends State<Reports> {
                       },
                     ),
                   ),
-                   Container(
+                  Container(
                     padding: EdgeInsets.all(8.0),
                     child: CustomButton(
                       buttonText: 'Mail ',
@@ -420,38 +420,54 @@ class _ReportsState extends State<Reports> {
                 buildRow("DENETİM TİPİ", _inspectorType,
                     (value) => setState(() => _chosenInspectorType = value)),
                 SizedBox(height: 10),
-                SizedBox(height: 10),
-                CustomButton(
-                    buttonText: "Filtreleme",
-                    onPressed: () async {
-                      if (_startDate != null && _endDate != null) {
-                        print("Filtrelendi");
-                        isFiltered = true;
-                        await filteredReports();
-                      } else if (_startDate == null) {
-                        String errorMessage = "Başlangıç tarihi seçiniz!";
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ErrorDialog(
-                                errorMessage: errorMessage,
-                                errorIcon: Icons.person_off,
-                              );
-                            });
-                      } else if (_endDate == null) {
-                        String errorMessage = "Bitiş tarihi seçiniz!";
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ErrorDialog(
-                                errorMessage: errorMessage,
-                                errorIcon: Icons.person_off,
-                              );
-                            });
-                      } else {
-                        print("Tarihleri seçiniz lütfem");
-                      }
-                    }),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomButton(
+                        buttonText: "Filtreleme",
+                        onPressed: () async {
+                          if (_startDate != null && _endDate != null) {
+                            print("Filtrelendi");
+                            isFiltered = true;
+                            await filteredReports();
+                          } else if (_startDate == null) {
+                            String errorMessage = "Başlangıç tarihi seçiniz!";
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return ErrorDialog(
+                                    errorMessage: errorMessage,
+                                    errorIcon: Icons.person_off,
+                                  );
+                                });
+                          } else if (_endDate == null) {
+                            String errorMessage = "Bitiş tarihi seçiniz!";
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return ErrorDialog(
+                                    errorMessage: errorMessage,
+                                    errorIcon: Icons.person_off,
+                                  );
+                                });
+                          } else {
+                            print("Tarihleri seçiniz lütfem");
+                          }
+                        }),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    CustomButton(
+                        buttonText: 'Filtreleri Sil',
+                        buttonColor: Themes.secondaryColor,
+                        onPressed: () async {
+                          print("Filtreler kaldırıldı");
+                          isFiltered = false;
+                          await _getReports();
+                          setState(() {});
+                        })
+                  ],
+                ),
                 Padding(
                   padding: EdgeInsets.all(20),
                   child: Table(
@@ -532,7 +548,8 @@ class _ReportsState extends State<Reports> {
                             "DÜZENLE",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                        ), Container(
+                        ),
+                        Container(
                           padding: EdgeInsets.all(8.0),
                           color: Themes.yellowColor,
                           child: Text(

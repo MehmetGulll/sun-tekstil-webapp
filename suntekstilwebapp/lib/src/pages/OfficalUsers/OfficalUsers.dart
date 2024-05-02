@@ -17,6 +17,31 @@ class OfficalUsers extends StatefulWidget {
   _OfficalUsers createState() => _OfficalUsers();
 }
 
+Widget buildColumn(BuildContext context, String label, List<String> items,
+    ValueChanged<String?> onChanged) {
+  return Container(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: Tokens.fontSize[4]),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          child: CustomDropdown(
+            items: items,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _OfficalUsers extends State<OfficalUsers> {
   List<Map<String, dynamic>> _users = [];
   Future<List<Map<String, dynamic>>> _getUsers() async {
@@ -90,46 +115,6 @@ class _OfficalUsers extends State<OfficalUsers> {
               SizedBox(
                 height: 20,
               ),
-              // CustomInput(
-              //   controller: TextEditingController(),
-              //   hintText: 'Ad',
-              //   keyboardType: TextInputType.name,
-              // ),
-              // SizedBox(
-              //   height: 20,
-              // ),
-              // CustomInput(
-              //   controller: TextEditingController(),
-              //   hintText: 'Soyad',
-              //   keyboardType: TextInputType.name,
-              // ),
-              // SizedBox(
-              //   height: 20,
-              // ),
-              // CustomInput(
-              //   controller: TextEditingController(),
-              //   hintText: 'Email',
-              //   keyboardType: TextInputType.emailAddress,
-              // ),
-              // SizedBox(
-              //   height: 20,
-              // ),
-              // CustomInput(
-              //   controller: TextEditingController(),
-              //   hintText: 'Kullanıcı Adı',
-              //   keyboardType: TextInputType.name,
-              // ),
-              // SizedBox(
-              //   height: 20,
-              // ),
-              // ...[
-              //   'Operasyon Direktörü',
-              //   'Operasyon Müdürü',
-              //   'Bölge Müdürü',
-              //   'Lokasyon Müdürü',
-              //   'Denetçi',
-              //   'Marka Yöneticisi'
-              // ].map((role) => CustomCheckbox(title: role)).toList(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -364,6 +349,13 @@ class _OfficalUsers extends State<OfficalUsers> {
                   },
                 ),
               ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomButton(
+                  buttonText: "Yeni Kullanici Ekle",
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/register'))
             ],
           ),
         ),

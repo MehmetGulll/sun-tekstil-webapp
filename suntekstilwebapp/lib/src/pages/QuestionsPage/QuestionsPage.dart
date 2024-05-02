@@ -67,7 +67,7 @@ class _QuestionsState extends State<Questions> {
       var jsonData = json.decode(data.body) as List;
       print("Bütün data");
       print(jsonData);
-
+        _questions.clear();
       _questions =
           jsonData.map((item) => item as Map<String, dynamic>).toList();
     }
@@ -142,7 +142,6 @@ class _QuestionsState extends State<Questions> {
       print("Hata");
     }
   }
-
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map question) {
     questionIdController.text = question['questionId'].toString();
@@ -315,12 +314,23 @@ class _QuestionsState extends State<Questions> {
                           isFiltered = true;
                         }
                       }),
-                      SizedBox(width: 20,),
+                  SizedBox(
+                    width: 20,
+                  ),
                   CustomButton(
                       buttonText: 'Soru Ekle',
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/addQuestion');
-                      })
+                      }),
+                      SizedBox(width: 20,),
+                  CustomButton(buttonText: 'Filtreleri Sil',buttonColor: Themes.secondaryColor, onPressed: ()async{
+                    print("Filterleri temizleme");
+                    isFiltered=false;
+                   await _getQuestions();
+                   setState(() {
+                     
+                   });
+                  })
                 ],
               ),
               Padding(

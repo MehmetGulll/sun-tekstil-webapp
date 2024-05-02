@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
+import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -19,41 +21,55 @@ class _RegisterState extends State<Register> {
   final user_nameController = TextEditingController();
   final userEpostaController = TextEditingController();
   final passwordController = TextEditingController();
+  Map<String, String> userRoles = {
+    'Admin': '1',
+    'Marka Yöneticisi': '2',
+    'Bölge Müdürü': '3',
+    'Görsel Yönetici': '4',
+    'Mağaza Müdürü': '9'
+  };
+  List<String> getUserRoleItems() {
+    return userRoles.keys.toList();
+  }
+
+  String? _chosenUserRole;
   bool isModalVisible = false;
   String modalMessage = "";
   Future<void> register(BuildContext context) async {
+    print("Girdi");
     final response = await http.post(Uri.parse(ApiUrls.registerUrl), body: {
       'userName': usernameController.text,
       'userSurname': userSurnameController.text,
       'user_name': user_nameController.text,
       'userEposta': userEpostaController.text,
-      'userPassword': passwordController.text
+      'userPassword': passwordController.text,
+      'userRole': userRoles[_chosenUserRole]
     });
     if (response.statusCode == 200) {
       setState(() {
         isModalVisible = true;
       });
-      modalMessage="Kayıt Başarılı";
-    }else if(response.statusCode == 400){
+      modalMessage = "Kayıt Başarılı";
+    } else if (response.statusCode == 400) {
       setState(() {
-        isModalVisible=true;
+        isModalVisible = true;
         modalMessage = "Bu kullanıcı adı zaten kayıtlı";
       });
-    }
-     else {
+    } else {
       print("Kayıt Başarısız");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
+    return CustomScaffold(
+      body: SingleChildScrollView(
+          child: Container(
         margin: EdgeInsets.symmetric(horizontal: 500, vertical: 50),
         child: Column(
           children: [
             Text(
-              "Kayıt Ol",
+              "Kullanıcı Ekle",
               style: TextStyle(
                   fontSize: Tokens.fontSize[6],
                   fontWeight: Tokens.fontWeight[7]),
@@ -156,38 +172,57 @@ class _RegisterState extends State<Register> {
                 Expanded(
                     flex: 3,
                     child: CustomInput(
-                      controller: passwordController,
-                      hintText: "Şifre",
-                      keyboardType: TextInputType.visiblePassword,
-                      obscureText:true
-                    )),
+                        controller: passwordController,
+                        hintText: "Şifre",
+                        keyboardType: TextInputType.visiblePassword,
+                        obscureText: true)),
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Text("Rolü",
+                      style: TextStyle(
+                          fontSize: Tokens.fontSize[4],
+                          fontWeight: Tokens.fontWeight[6])),
+                ),
+                Expanded(
+                    flex: 3,
+                    child: CustomDropdown(
+                        items: getUserRoleItems(),
+                        onChanged: (value) =>
+                            setState(() => _chosenUserRole = value)))
               ],
             ),
             SizedBox(
               height: 20,
             ),
             CustomButton(
-                buttonText: "Kayıt ol", onPressed: () => register(context)),
+                buttonText: "Kullanıcı Ekle",
+                onPressed: () => register(context)),
             isModalVisible
                 ? CustomModal(
                     backgroundColor: Themes.whiteColor,
                     text: '',
                     child: Column(
                       children: [
-                        
                         Text(modalMessage),
                         CustomButton(
-                            buttonText: "Giriş Ekranına Dön",
+                            buttonText: "Tamam",
                             onPressed: () {
                               Navigator.of(context)
-                                  .pushReplacementNamed('/');
+                                  .pushReplacementNamed('/officalUsers');
                             })
                       ],
                     ))
                 : Container(),
           ],
         ),
-      ),
+      )),
     );
   }
 }
