@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Reports extends StatefulWidget {
@@ -57,13 +58,33 @@ class _ReportsState extends State<Reports> {
   final TextEditingController inspectionCompletionDateController =
       TextEditingController();
 
-  Future<List<Map<String, dynamic>>> _getReports() async {
-    var url = Uri.parse(ApiUrls.reportsUrl);
-    var data = await http.get(url);
+  bool isFiltered = false;
 
-    var jsonData = json.decode(data.body) as List;
-    print(jsonData);
-    _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
+  Map<String, String> inspectionTypes = {
+    'Görsel Denetim': '3',
+    'Mağaza Denetim': '4'
+  };
+  Future<List<Map<String, dynamic>>> _getReports() async {
+    if (!isFiltered) {
+      var url = Uri.parse(ApiUrls.reportsUrl);
+      var data = await http.get(url);
+
+      var jsonData = json.decode(data.body) as List;
+      print(jsonData);
+      _reports = jsonData.map((item) => item as Map<String, dynamic>).toList();
+      _inspectorType = _reports
+          .map((report) => report['inspectionTypeId'].toString())
+          .toSet()
+          .toList();
+      _inspectorName = _reports
+          .map((report) => report['inspectorName'].toString())
+          .toSet()
+          .toList();
+      _inspectorRole = _reports
+          .map((report) => report['inspectorRole'].toString())
+          .toSet()
+          .toList();
+    }
     return _reports;
   }
 
@@ -111,6 +132,45 @@ class _ReportsState extends State<Reports> {
       });
     } else {
       print("Bir hata oluştu");
+    }
+  }
+
+  Future<void> filteredReports() async {
+    String startDate =
+        '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}';
+    String endDate =
+        '${_endDate.year}-${_endDate.month.toString().padLeft(2, '0')}-${_endDate.day.toString().padLeft(2, '0')}';
+
+    print(_chosenInspectorType);
+    print(_chosenInspectorRole);
+    print(startDate);
+    print(endDate);
+
+    String url =
+        '${ApiUrls.filteredReport}?inspectionDate=$startDate&inspectionCompletionDate=$endDate';
+
+    if (_chosenInspectorType != null) {
+      String? inspectionTypeId = inspectionTypes[_chosenInspectorType];
+      print(inspectionTypeId);
+      url += '&inspectionTypeId=$inspectionTypeId';
+    }
+
+    if (_chosenInspectorRole != null) {
+      url += '&inspectorRole=$_chosenInspectorRole';
+    }
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body) as List;
+        setState(() {
+          _reports.clear();
+          _reports =
+              jsonData.map((item) => item as Map<String, dynamic>).toList();
+        });
+      }
+    } catch (e) {
+      print("Hata: $e");
     }
   }
 
@@ -204,17 +264,17 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-  String? _chosenOperation;
-  String? _chosenRegion;
-  String? _chosenLocation;
+  String? _chosenInspectorType;
+  String? _chosenInspectorRole;
+  String? _chosenInspectorName;
   String? _chosenLocationType;
   String? _chosenAuditor;
   String? _chosenVisitType;
   String? _chosenCenterTeam;
 
-  List<String> _operationList = ['Operation 1', 'Operation 2', 'Operation 3'];
-  List<String> _regionList = ['Region 1', 'Region 2', 'Region 3'];
-  List<String> _locationList = ['Location 1', 'Location 2', 'Location 3'];
+  List<String> _inspectorType = [];
+  List<String> _inspectorRole = [];
+  List<String> _inspectorName = [];
   List<String> _locationTypeList = [
     'Location Type 1',
     'Location Type 2',
@@ -247,241 +307,250 @@ class _ReportsState extends State<Reports> {
   Widget build(BuildContext context) {
     return CustomScaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Text(
-              "Raporlar",
-              style: TextStyle(
-                  fontSize: Tokens.fontSize[9],
-                  fontWeight: Tokens.fontWeight[6]),
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            Column(
-              children: [
-                Text('Başlangıç Tarihi:'),
-                SizedBox(width: 8),
-                Text("${_startDate.toLocal()}".split(' ')[0]),
-                SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context, true),
-                  child: Text('Seç'),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Column(
-              children: [
-                Text('Bitiş Tarihi:'),
-                SizedBox(width: 8),
-                Text("${_endDate.toLocal()}".split(' ')[0]),
-                SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context, false),
-                  child: Text('Seç'),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            buildRow("Operasyonlar", _operationList,
-                (value) => setState(() => _chosenOperation = value)),
-            SizedBox(height: 10),
-            buildRow("Lokasyon", _locationList,
-                (value) => setState(() => _chosenLocation = value)),
-            SizedBox(height: 10),
-            buildRow("Lokasyon Tipi", _locationTypeList,
-                (value) => setState(() => _chosenLocationType = value)),
-            SizedBox(height: 10),
-            buildRow("Denetçi", _auditorList,
-                (value) => setState(() => _chosenAuditor = value)),
-            SizedBox(height: 10),
-            buildRow("Ziyaret Tipi", _visitTypeList,
-                (value) => setState(() => _chosenVisitType = value)),
-            SizedBox(
-              height: 10,
-            ),
-            buildRow("Merkez Ekibi", _centerTeamList,
-                (value) => setState(() => _chosenCenterTeam = value)),
-            SizedBox(height: 10),
-            CustomButton(
-                buttonText: "Filtreleme",
-                onPressed: () {
-                  print("Filtrelendi");
-                }),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: FutureBuilder<List>(
-                future: _getReports(),
-                builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    List<TableRow> rows = snapshot.data!.map((report) {
-                      return TableRow(children: [
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['inspectionTypeId'],
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['storeId'],
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['inspectorRole'],
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['inspectorName'],
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['pointsReceived'].toString(),
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['inspectionDate'],
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            report['inspectionCompletionDate'],
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: CustomButton(
-                            buttonText: 'Düzenle',
-                            textColor: Themes.blueColor,
-                            buttonColor: Themes.whiteColor,
-                            onPressed: () {
-                              showModal(context, Themes.whiteColor, "", report);
-                            },
-                          ),
-                        ),
-                      ]);
-                    }).toList();
-
-                    return Table(
-                      defaultColumnWidth: FlexColumnWidth(1),
-                      columnWidths: {
-                        0: FlexColumnWidth(2),
-                        1: FlexColumnWidth(1),
-                        2: FlexColumnWidth(1),
-                        3: FlexColumnWidth(1),
-                        4: FlexColumnWidth(1),
-                        5: FlexColumnWidth(1),
-                        6: FlexColumnWidth(2),
-                        7: FlexColumnWidth(1)
+        child: FutureBuilder<List>(
+          future: _getReports(),
+          builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              List<TableRow> rows = snapshot.data!.map((report) {
+                return TableRow(children: [
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['inspectionTypeId'],
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['storeId'],
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['inspectorRole'],
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['inspectorName'],
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['pointsReceived'].toString(),
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['inspectionDate'],
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      report['inspectionCompletionDate'],
+                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: CustomButton(
+                      buttonText: 'Düzenle',
+                      textColor: Themes.blueColor,
+                      buttonColor: Themes.whiteColor,
+                      onPressed: () {
+                        showModal(context, Themes.whiteColor, "", report);
                       },
-                      border: TableBorder.all(color: Themes.blackColor),
-                      children: [
-                        TableRow(children: [
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text(
-                              "DENETİM TİPİ",
-                              style:
-                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
-                            ),
+                    ),
+                  ),
+                   Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: CustomButton(
+                      buttonText: 'Mail ',
+                      textColor: Themes.secondaryColor,
+                      buttonColor: Themes.whiteColor,
+                      onPressed: () {
+                        print("Mail ile yollandı");
+                        Navigator.pushReplacementNamed(context, '/sendMail');
+                      },
+                    ),
+                  ),
+                ]);
+              }).toList();
+              return Column(children: [
+                Text(
+                  "Raporlar",
+                  style: TextStyle(
+                      fontSize: Tokens.fontSize[9],
+                      fontWeight: Tokens.fontWeight[6]),
+                ),
+                SizedBox(height: 30),
+                Column(children: [
+                  Text('DENETİM TARİHİ:'),
+                  SizedBox(width: 8),
+                  Text("${_startDate.toLocal()}".split(' ')[0]),
+                  SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => _selectDate(context, true),
+                    child: Text('Seç'),
+                  ),
+                ]),
+                SizedBox(height: 16),
+                Column(children: [
+                  Text('DENETİM TAMAMLANMA TARİHİ:'),
+                  SizedBox(width: 8),
+                  Text("${_endDate.toLocal()}".split(' ')[0]),
+                  SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => _selectDate(context, false),
+                    child: Text('Seç'),
+                  ),
+                ]),
+                SizedBox(height: 20),
+                buildRow("DENETİM TİPİ", _inspectorType,
+                    (value) => setState(() => _chosenInspectorType = value)),
+                SizedBox(height: 10),
+                SizedBox(height: 10),
+                CustomButton(
+                    buttonText: "Filtreleme",
+                    onPressed: () async {
+                      if (_startDate != null && _endDate != null) {
+                        print("Filtrelendi");
+                        isFiltered = true;
+                        await filteredReports();
+                      } else if (_startDate == null) {
+                        String errorMessage = "Başlangıç tarihi seçiniz!";
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ErrorDialog(
+                                errorMessage: errorMessage,
+                                errorIcon: Icons.person_off,
+                              );
+                            });
+                      } else if (_endDate == null) {
+                        String errorMessage = "Bitiş tarihi seçiniz!";
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ErrorDialog(
+                                errorMessage: errorMessage,
+                                errorIcon: Icons.person_off,
+                              );
+                            });
+                      } else {
+                        print("Tarihleri seçiniz lütfem");
+                      }
+                    }),
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Table(
+                    defaultColumnWidth: FlexColumnWidth(1),
+                    columnWidths: {
+                      0: FlexColumnWidth(2),
+                      1: FlexColumnWidth(1),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
+                      5: FlexColumnWidth(1),
+                      6: FlexColumnWidth(2),
+                      7: FlexColumnWidth(1)
+                    },
+                    border: TableBorder.all(color: Themes.blackColor),
+                    children: [
+                      TableRow(children: [
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DENETİM TİPİ",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text("MAĞAZA ADI",
-                                style: TextStyle(
-                                  fontWeight: Tokens.fontWeight[2],
-                                )),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "MAĞAZA ADI",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text(
-                              "DENETİMCİ ROLÜ",
-                              style:
-                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
-                            ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DENETİMCİ ROLÜ",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text(
-                              "DENETÇİ",
-                              style:
-                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
-                            ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DENETÇİ",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text(
-                              "PUAN",
-                              style:
-                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
-                            ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "PUAN",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text(
-                              "DENETİM TARİHİ",
-                              style:
-                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
-                            ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DENETİM TARİHİ",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            color: Themes.yellowColor,
-                            child: Text(
-                              "DENETİM TAMAMLANMA GÜNÜ",
-                              style:
-                                  TextStyle(fontWeight: Tokens.fontWeight[2]),
-                            ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DENETİM TAMAMLANMA GÜNÜ",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
-                          Container(
-                              padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
-                              child: Text(
-                                "DÜZENLE",
-                                style:
-                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
-                              ))
-                        ]),
-                        ...rows,
-                      ],
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
-                  }
-                  return CircularProgressIndicator();
-                },
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            )
-          ],
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "DÜZENLE",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ), Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Themes.yellowColor,
+                          child: Text(
+                            "MAİL GÖNDER",
+                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          ),
+                        ),
+                      ]),
+                      ...rows,
+                    ],
+                  ),
+                ),
+              ]);
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            return CircularProgressIndicator();
+          },
         ),
       ),
     );
