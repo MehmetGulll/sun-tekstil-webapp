@@ -295,22 +295,34 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
-              CustomButton(
-                  buttonText: 'Filtreleme',
-                  textColor: Themes.whiteColor,
-                  buttonColor: Themes.blueColor,
-                  onPressed: () {
-                    print("Arama kısmı çalıştı");
-                    if (questionFilteredNameController.text.isNotEmpty) {
-                      filteredQuestion(
-                          'soru_adi', questionFilteredNameController.text);
-                      isFiltered = true;
-                    } else if (_chosenQuestionType != null) {
-                      String? queryValue = _questionTypeList[_chosenQuestionType];
-                      filteredQuestion('soru_cevap', queryValue!);
-                      isFiltered = true;
-                    }
-                  }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomButton(
+                      buttonText: 'Filtreleme',
+                      textColor: Themes.whiteColor,
+                      buttonColor: Themes.blueColor,
+                      onPressed: () {
+                        print("Arama kısmı çalıştı");
+                        if (questionFilteredNameController.text.isNotEmpty) {
+                          filteredQuestion(
+                              'soru_adi', questionFilteredNameController.text);
+                          isFiltered = true;
+                        } else if (_chosenQuestionType != null) {
+                          String? queryValue =
+                              _questionTypeList[_chosenQuestionType];
+                          filteredQuestion('soru_cevap', queryValue!);
+                          isFiltered = true;
+                        }
+                      }),
+                      SizedBox(width: 20,),
+                  CustomButton(
+                      buttonText: 'Soru Ekle',
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/addQuestion');
+                      })
+                ],
+              ),
               Padding(
                 padding: EdgeInsets.only(top: 20),
                 child: FutureBuilder<List>(
