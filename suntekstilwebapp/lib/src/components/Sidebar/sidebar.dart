@@ -104,6 +104,16 @@ class Sidebar extends StatelessWidget {
         }
       },
     );
+    final MailTile = ListTile(
+      leading: Icon(Icons.mail),
+      title: Text('Mail Yönetimi', style: TextStyle(color: Themes.whiteColor)),
+      onTap: () {
+        Navigator.pop(context);
+        if (ModalRoute.of(context)?.settings.name != '/sendMail') {
+          Navigator.pushReplacementNamed(context, '/sendMail');
+        }
+      },
+    );
 
     final LogOutTile = ListTile(
       leading: Icon(Icons.logout),
@@ -128,7 +138,8 @@ class Sidebar extends StatelessWidget {
             RegionsTile,
             UserManagementTile,
             ReportsTile,
-            LogOutTile
+            MailTile,
+            LogOutTile,
           ],
         ),
       ),
