@@ -376,12 +376,12 @@ class _ReportsState extends State<Reports> {
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: CustomButton(
-                      buttonText: 'Mail ',
+                      buttonText: 'Detay',
                       textColor: Themes.secondaryColor,
                       buttonColor: Themes.whiteColor,
                       onPressed: () {
-                        print("Mail ile yollandı");
-                        Navigator.pushReplacementNamed(context, '/sendMail');
+                        print("Detay");
+                        
                       },
                     ),
                   ),
@@ -553,7 +553,7 @@ class _ReportsState extends State<Reports> {
                           padding: EdgeInsets.all(8.0),
                           color: Themes.yellowColor,
                           child: Text(
-                            "MAİL GÖNDER",
+                            "Detay Gör",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
                         ),
