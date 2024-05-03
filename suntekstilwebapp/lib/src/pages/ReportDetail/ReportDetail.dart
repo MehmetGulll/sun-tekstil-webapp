@@ -9,8 +9,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:html' as html;
+import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:open_file/open_file.dart';
 import 'dart:io';
-import 'dart:html';
+import 'package:path_provider/path_provider.dart';
 
 class ReportDetail extends StatefulWidget {
   final String reportId;
@@ -26,6 +32,11 @@ class _ReportDetailState extends State<ReportDetail> {
     var excel = Excel.createExcel();
 
     Sheet sheetObject = excel['Sheet1'];
+
+    sheetObject.setColumnWidth(0, 50);
+    sheetObject.setColumnWidth(1, 35);
+    sheetObject.setColumnWidth(2, 35);
+    sheetObject.setColumnWidth(3,35);
 
     sheetObject.cell(CellIndex.indexByString("A1")).value =
         TextCellValue('SORU ADI');
@@ -48,18 +59,83 @@ class _ReportDetailState extends State<ReportDetail> {
     }
 
     var bytes = excel.encode();
-    final blob = Blob([bytes]);
-    final url = Url.createObjectUrlFromBlob(blob);
-    final anchor = document.createElement('a') as AnchorElement
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.document.createElement('a') as html.AnchorElement
       ..href = url
       ..style.display = 'none'
       ..download = 'RaporDetayi.xlsx';
-    document.body!.children.add(anchor);
+    html.document.body!.children.add(anchor);
 
     anchor.click();
 
-    document.body!.children.remove(anchor);
-    Url.revokeObjectUrl(url);
+    html.document.body!.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
+  }
+
+  void createPdfAndDownload(List<Map<String, dynamic>> data) async {
+    final pdf = pw.Document();
+
+    final fontData =
+        await rootBundle.load('fonts/NotoSans_Condensed-Black.ttf');
+
+    final font = pw.Font.ttf(fontData);
+
+    pdf.addPage(pw.Page(build: (pw.Context context) {
+      return pw.Table(border: pw.TableBorder.all(width: 1.0), columnWidths: {
+        0: pw.FlexColumnWidth(2),
+        1: pw.FlexColumnWidth(1),
+        2: pw.FlexColumnWidth(1),
+        3: pw.FlexColumnWidth(1),
+      }, children: [
+        pw.TableRow(children: [
+          pw.Container(
+              child: pw.Text('SORU ADI', style: pw.TextStyle(font: font)),
+              alignment: pw.Alignment.center),
+          pw.Container(
+              child: pw.Text('VERİLEN CEVAP', style: pw.TextStyle(font: font)),
+              alignment: pw.Alignment.center),
+          pw.Container(
+              child: pw.Text('SORU PUAN', style: pw.TextStyle(font: font)),
+              alignment: pw.Alignment.center),
+          pw.Container(
+              child: pw.Text('DOĞRU CEVAP', style: pw.TextStyle(font: font)),
+              alignment: pw.Alignment.center),
+        ]),
+        ...data.map((item) => pw.TableRow(children: [
+              pw.Container(
+                  child:
+                      pw.Text(item['soruAdi'], style: pw.TextStyle(font: font)),
+                  alignment: pw.Alignment.center),
+              pw.Container(
+                  child: pw.Text(item['soruCevap'] == 0 ? 'Evet' : 'Hayır',
+                      style: pw.TextStyle(font: font)),
+                  alignment: pw.Alignment.center),
+              pw.Container(
+                  child: pw.Text(item['soruPuan'].toString(),
+                      style: pw.TextStyle(font: font)),
+                  alignment: pw.Alignment.center),
+              pw.Container(
+                  child: pw.Text(item['dogruCevap'] == 0 ? 'Evet' : 'Hayır',
+                      style: pw.TextStyle(font: font)),
+                  alignment: pw.Alignment.center),
+            ]))
+      ]);
+    }));
+
+    final Future<Uint8List> pdfDataFuture = pdf.save();
+
+    final Uint8List pdfData = await pdfDataFuture;
+
+    final blob = html.Blob([pdfData.buffer.asUint8List()], 'application/pdf');
+
+    final url = html.Url.createObjectUrlFromBlob(blob);
+
+    final anchor = html.AnchorElement(href: url)
+      ..target = 'blank'
+      ..download = 'RaporDetayi.pdf';
+
+    anchor.click();
   }
 
   Future<List<Map<String, dynamic>>> getReportDetail() async {
@@ -149,6 +225,9 @@ class _ReportDetailState extends State<ReportDetail> {
                         buttonColor: Themes.secondaryColor,
                         onPressed: () {
                           print("PDF çıktısı");
+                          List<Map<String, dynamic>> data =
+                              List<Map<String, dynamic>>.from(snapshot.data!);
+                          createPdfAndDownload(data);
                         })
                   ],
                 ),
