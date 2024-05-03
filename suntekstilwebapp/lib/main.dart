@@ -9,14 +9,15 @@ import 'package:suntekstilwebapp/src/pages/Login/Login.dart';
 import 'package:suntekstilwebapp/src/pages/Mail/Mail.dart';
 import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart';
-import 'package:suntekstilwebapp/src/pages/Register/Register.dart'; 
+import 'package:suntekstilwebapp/src/pages/Register/Register.dart';
+import 'package:suntekstilwebapp/src/pages/ReportDetail/ReportDetail.dart';
 import 'package:suntekstilwebapp/src/pages/Stores/Stores.dart';
 import 'package:suntekstilwebapp/src/pages/Reports/Reports.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => Auth(), 
+      create: (context) => Auth(),
       child: MyApp(),
     ),
   );
@@ -32,20 +33,18 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/' : (context) => Login(),
+        '/': (context) => Login(),
         '/home': (context) => Home(),
-        '/register':(context) => Register(),
+        '/register': (context) => Register(),
         '/questions': (context) => Questions(),
-        '/stores':(context) => Stores(),
-        '/addLocation':(context) => AddLocation(),
-        '/officalUsers':(context) => OfficalUsers(),
-        '/changePassword':(context)=>ChangePassword(),
+        '/stores': (context) => Stores(),
+        '/addLocation': (context) => AddLocation(),
+        '/officalUsers': (context) => OfficalUsers(),
+        '/changePassword': (context) => ChangePassword(),
         '/reports': (context) => Reports(),
-        '/sendMail':(context)=>MailPage(),
-        '/addQuestion':(context)=>AddQuestion()
-        
+        '/sendMail': (context) => MailPage(),
+        '/addQuestion': (context) => AddQuestion(),
       },
     );
   }
 }
-
