@@ -66,6 +66,7 @@ router.post("/addStore", authenticateToken, async (req, res) => {
       magaza_metre: Joi.number().required(),
       magaza_muduru: Joi.number().required(),
       acilis_tarihi: Joi.string().required(),
+      magaza_eposta: Joi.string().email().required(),
       status: Joi.number().required(),
     }).validate(req.body);
 
@@ -83,6 +84,7 @@ router.post("/addStore", authenticateToken, async (req, res) => {
       magaza_metre,
       magaza_muduru,
       acilis_tarihi,
+      magaza_eposta,
       status,
     } = value;
 
@@ -126,6 +128,7 @@ router.post("/addStore", authenticateToken, async (req, res) => {
       acilis_tarihi,
       status,
       ekleyen_id: req.user.id,
+      magaza_eposta,
     });
 
     return res.status(201).send(newStore);
