@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/pages/ReportDetail/ReportDetail.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Reports extends StatefulWidget {
@@ -381,7 +382,13 @@ class _ReportsState extends State<Reports> {
                       buttonColor: Themes.whiteColor,
                       onPressed: () {
                         print("Detay");
-                        
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ReportDetail(reportId: report['inspectionId'].toString()),
+                          ),
+                        );
                       },
                     ),
                   ),
