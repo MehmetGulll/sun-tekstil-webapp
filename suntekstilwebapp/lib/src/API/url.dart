@@ -25,4 +25,5 @@ class ApiUrls {
   static const String filteredStore = 'http://localhost:5000/filteredStore';
   static const String filteredReport = 'http://localhost:5000/filteredReport';
   static const String addQuestion = 'http://localhost:5000/addQuestion';
+  static const String detailReport ='http://localhost:5000/detailReport';
 }

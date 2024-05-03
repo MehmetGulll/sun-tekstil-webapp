@@ -114,3 +114,34 @@ exports.filterReports = async (req, res) => {
     res.status(500).send({ message: "Server error", error });
   }
 };
+
+exports.getReportDetails = async (req, res) => {
+  try {
+    const { denetim_id } = req.params;
+    const pool = await sql.connect(config);
+    const result = await pool
+      .request()
+      .input("denetim_id", sql.Int, denetim_id)
+      .query(`
+        SELECT d.denetim_id, ds.soru_id, ds.cevap, ds.dogru_cevap, s.soru_adi, s.soru_cevap, s.soru_puan
+        FROM denetim d
+        INNER JOIN denetim_sorulari ds ON d.denetim_id = ds.denetim_id
+        INNER JOIN soru s ON ds.soru_id = s.soru_id
+        WHERE d.denetim_id = @denetim_id
+      `);
+    const reportDetails = result.recordset.map((row) => ({
+      denetimId: row.denetim_id,
+      soruId: row.soru_id,
+      cevap: row.cevap,
+      dogruCevap: row.dogru_cevap,
+      soruAdi: row.soru_adi,
+      soruCevap: row.soru_cevap,
+      soruPuan: row.soru_puan,
+    }));
+    res.status(200).send(reportDetails);
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server Error", error });
+  }
+};
+
