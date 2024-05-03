@@ -249,6 +249,10 @@ const magaza = {
       key: "id",
     },
   },
+  magaza_eposta: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 };
 
 const magaza_tipi = {
@@ -464,8 +468,8 @@ const unvanDenetimTipiLink = {
     },
   },
 };
-const mail = {
-  mail_id: {
+const kullaniciDenetimTipiLink = {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -523,5 +527,5 @@ module.exports = {
   aksiyon,
   unvan,
   unvanDenetimTipiLink,
-  mail,
+  kullaniciDenetimTipiLink
 };

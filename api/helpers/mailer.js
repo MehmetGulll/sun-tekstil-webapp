@@ -19,8 +19,9 @@ async function sendMail(options) {
       from: options.from, // Gönderen adresi
       to: options.to, // Alıcı adresi
       subject: options.subject, // Mail konusu
-      text: options.text, // Mail içeriği (metin formatında)
-      // html: options.html, // Opsiyonel: HTML içeriği
+      // text: options.text, // Mail içeriği (metin formatında)
+      html: options.html, // Opsiyonel: HTML içeriği
+      attachments: options.attachments, // Opsiyonel: Eklentiler
     };
 
     // Maili gönder
