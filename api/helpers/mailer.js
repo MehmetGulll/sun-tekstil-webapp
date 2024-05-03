@@ -9,8 +9,8 @@ async function sendMail(options) {
       port: 465, // SMTP portu (genellikle 587 veya 465 olabilir)
       secure: true, // true ise SSL kullanılıyor demektir
       auth: {
-        user: "sunteks64039@gmail.com", // SMTP sunucusu için kullanıcı adı
-        pass: "xdzl vkqb ygaf pars", // SMTP sunucusu için şifre
+        user: process.env.MAIL_USER, // SMTP sunucusu için kullanıcı adı
+        pass: process.env.GOOGLE_APP_PASSWORD, // SMTP sunucusu için şifre
       },
     });
 
