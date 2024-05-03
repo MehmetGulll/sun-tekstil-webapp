@@ -44,7 +44,6 @@ Widget buildColumn(BuildContext context, String label, List<String> items,
   );
 }
 
-
 class _StoresState extends State<Stores> {
   TextEditingController storeCodeController = TextEditingController();
   TextEditingController storeNameController = TextEditingController();
@@ -138,7 +137,7 @@ class _StoresState extends State<Stores> {
     print(queryCity);
     try {
       final response = await http.get(Uri.parse(
-          '${ApiUrls.filteredStore}?magaza_adi=$queryName&magaza_tipi=$queryType&sehir=$queryCity'));
+          '${ApiUrls.filteredStore}?magaza_adi=${queryName ?? ''}&magaza_tipi=${queryType ?? ''}&sehir=${queryCity ?? ''}'));
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body) as List;
         setState(() {
@@ -306,256 +305,281 @@ class _StoresState extends State<Stores> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
-        body: SingleChildScrollView(
-            child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        FutureBuilder(
-          future: _getStores(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              var stores = snapshot.data;
-              return Container(
-                margin: EdgeInsets.symmetric(horizontal: 80),
-                child: Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Column(
-                      children: [
-                        Text(
-                          "MAĞAZA ADI",
-                          style: TextStyle(fontSize: Tokens.fontSize[4]),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        CustomInput(
-                          controller: filteredStoreNameController,
-                          hintText: 'MAĞAZA ADI',
-                          keyboardType: TextInputType.name,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    buildColumn(
-                        context,
-                        "MAĞAZA TİPİ",
-                        _storeTypeList.keys.toList(),
-                        (value) => setState(() => _chosenStoreType = value)),
-                    SizedBox(height: 20),
-                    Column(
-                      children: [
-                        Text(
-                          "ŞEHİR",
-                          style: TextStyle(fontSize: Tokens.fontSize[4]),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        CustomInput(
-                          controller: filteredStoreCityController,
-                          hintText: 'ŞEHİR',
-                          keyboardType: TextInputType.name,
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 350),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: CustomButton(
-                              buttonText: "Filtreleme",
-                              onPressed: () {
-                                String? queryValue =
-                                    _storeTypeList[_chosenStoreType];
-                                isFiltered = true;
-                                filteredStore(
-                                    filteredStoreNameController.text,
-                                    queryValue,
-                                    filteredStoreCityController.text);
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Expanded(
-                            child: CustomButton(
-                              buttonText: "Mağaza Ekle",
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/addLocation');
-                              },
-                            ),
-                          )
-                        ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 80),
+              child: Column(
+                children: [
+                  SizedBox(height: 20),
+                  Column(
+                    children: [
+                      Text(
+                        "MAĞAZA ADI",
+                        style: TextStyle(fontSize: Tokens.fontSize[4]),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                  ],
-                ),
-              );
-            } else {
-              return CircularProgressIndicator();
-            }
-          },
-        ),
-        SizedBox(height: 10),
-        Container(
-            margin: EdgeInsets.all(30),
-            child: Text(
-              "Mağazalar",
-              style: TextStyle(
-                  fontSize: Tokens.fontSize[9],
-                  fontWeight: Tokens.fontWeight[6]),
-            )),
-        Padding(
-          padding: EdgeInsets.all(20),
-          child: FutureBuilder<List>(
-            future: _getStores(),
-            builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
-              if (snapshot.hasData && snapshot.data != null) {
-                List<TableRow> rows = snapshot.data!.map((store) {
-                  return TableRow(children: [
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        store['storeCode'],
-                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      SizedBox(
+                        height: 20,
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        store['storeName'],
-                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      CustomInput(
+                        controller: filteredStoreNameController,
+                        hintText: 'MAĞAZA ADI',
+                        keyboardType: TextInputType.name,
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        store['storeType'].toString(),
-                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  buildColumn(
+                      context,
+                      "MAĞAZA TİPİ",
+                      _storeTypeList.keys.toList(),
+                      (value) => setState(() => _chosenStoreType = value)),
+                  SizedBox(height: 20),
+                  Column(
+                    children: [
+                      Text(
+                        "ŞEHİR",
+                        style: TextStyle(fontSize: Tokens.fontSize[4]),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        store['city'],
-                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      SizedBox(
+                        height: 20,
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        store['storePhone'],
-                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      CustomInput(
+                        controller: filteredStoreCityController,
+                        hintText: 'ŞEHİR',
+                        keyboardType: TextInputType.name,
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        store['status'] == 1 ? 'Aktif' : 'Pasif',
-                        style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(8.0),
-                      child: CustomButton(
-                        buttonText: 'Düzenle',
-                        textColor: Themes.blueColor,
-                        buttonColor: Themes.whiteColor,
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CustomButton(
+                        buttonText: "Filtreleme",
                         onPressed: () {
-                          showModal(context, Themes.whiteColor, "", store);
+                          String? queryValue = _storeTypeList[_chosenStoreType];
+                          isFiltered = true;
+                          filteredStore(filteredStoreNameController.text,
+                              queryValue, filteredStoreCityController.text);
                         },
                       ),
-                    ),
-                  ]);
-                }).toList();
-                return Table(
-                  defaultColumnWidth: FlexColumnWidth(1),
-                  columnWidths: {
-                    0: FlexColumnWidth(1),
-                    1: FlexColumnWidth(1),
-                    2: FlexColumnWidth(1),
-                    3: FlexColumnWidth(1),
-                    4: FlexColumnWidth(1),
-                  },
-                  border: TableBorder.all(color: Themes.blackColor),
-                  children: [
-                    TableRow(children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      CustomButton(
+                        buttonText: "Mağaza Ekle",
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/addLocation');
+                        },
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      CustomButton(
+                        buttonText: "Filtreleri Sil",
+                        buttonColor: Themes.secondaryColor,
+                        onPressed: () async {
+                          print("Filtreler kaldırıldı");
+                          isFiltered = false;
+                          await _getStores();
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
+            ),
+            FutureBuilder(
+              future: _getStores(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  var stores = snapshot.data;
+                  return Column(
+                    children: [
                       Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
+                        margin: EdgeInsets.all(30),
                         child: Text(
-                          "MAĞAZA KODU",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                          "Mağazalar",
+                          style: TextStyle(
+                              fontSize: Tokens.fontSize[9],
+                              fontWeight: Tokens.fontWeight[6]),
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "MAĞAZA ADI",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      Padding(
+                        padding: EdgeInsets.all(20),
+                        child: FutureBuilder<List>(
+                          future: _getStores(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List> snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              List<TableRow> rows = snapshot.data!.map((store) {
+                                return TableRow(children: [
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      store['storeCode'],
+                                      style: TextStyle(
+                                          fontWeight: Tokens.fontWeight[2]),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      store['storeName'],
+                                      style: TextStyle(
+                                          fontWeight: Tokens.fontWeight[2]),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      store['storeType'].toString(),
+                                      style: TextStyle(
+                                          fontWeight: Tokens.fontWeight[2]),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      store['city'],
+                                      style: TextStyle(
+                                          fontWeight: Tokens.fontWeight[2]),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      store['storePhone'],
+                                      style: TextStyle(
+                                          fontWeight: Tokens.fontWeight[2]),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      store['status'] == 1 ? 'Aktif' : 'Pasif',
+                                      style: TextStyle(
+                                          fontWeight: Tokens.fontWeight[2]),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CustomButton(
+                                      buttonText: 'Düzenle',
+                                      textColor: Themes.blueColor,
+                                      buttonColor: Themes.whiteColor,
+                                      onPressed: () {
+                                        showModal(context, Themes.whiteColor,
+                                            "", store);
+                                      },
+                                    ),
+                                  ),
+                                ]);
+                              }).toList();
+                              return Table(
+                                defaultColumnWidth: FlexColumnWidth(1),
+                                columnWidths: {
+                                  0: FlexColumnWidth(1),
+                                  1: FlexColumnWidth(1),
+                                  2: FlexColumnWidth(1),
+                                  3: FlexColumnWidth(1),
+                                  4: FlexColumnWidth(1),
+                                },
+                                border:
+                                    TableBorder.all(color: Themes.blackColor),
+                                children: [
+                                  TableRow(children: [
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "MAĞAZA KODU",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "MAĞAZA ADI",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "MAĞAZA TİPİ",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "ŞEHİR",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "MAĞAZA TELEFON",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "DURUMU",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(8.0),
+                                      color: Themes.yellowColor,
+                                      child: Text(
+                                        "DÜZENLE",
+                                        style: TextStyle(
+                                            fontWeight: Tokens.fontWeight[2]),
+                                      ),
+                                    ),
+                                  ]),
+                                  ...rows,
+                                ],
+                              );
+                            } else if (snapshot.hasError) {
+                              return Text("${snapshot.error}");
+                            }
+                            return CircularProgressIndicator();
+                          },
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "MAĞAZA TİPİ",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "ŞEHİR",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "MAĞAZA TELEFON",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "DURUMU",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8.0),
-                        color: Themes.yellowColor,
-                        child: Text(
-                          "DÜZENLE",
-                          style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                        ),
-                      ),
-                    ]),
-                    ...rows,
-                  ],
-                );
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
-              return CircularProgressIndicator();
-            },
-          ),
+                    ],
+                  );
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
+          ],
         ),
-      ],
-    )));
+      ),
+    );
   }
 }

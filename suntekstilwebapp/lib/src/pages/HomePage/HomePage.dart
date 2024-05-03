@@ -540,26 +540,72 @@ class Home extends StatelessWidget {
                                                                   .cardTextColor,
                                                             ),
                                                             SizedBox(width: 8),
-                                                            Text(
-                                                              "Kronik Hale Gelen Sorular",
-                                                              maxLines: 2,
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: Themes
-                                                                    .cardTextColor,
-                                                                fontSize: Tokens
-                                                                    .fontSize[3],
-                                                                fontWeight: Tokens
-                                                                    .fontWeight[7],
-                                                              ),
-                                                            ),
+                                                            FutureBuilder(
+                                                                future:
+                                                                    kronikSorular(),
+                                                                builder: (BuildContext
+                                                                        context,
+                                                                    AsyncSnapshot<
+                                                                            Map<String,
+                                                                                dynamic>>
+                                                                        snapshot) {
+                                                                  if (snapshot
+                                                                          .connectionState ==
+                                                                      ConnectionState
+                                                                          .waiting) {
+                                                                    return CircularProgressIndicator();
+                                                                  } else if (snapshot
+                                                                      .hasError) {
+                                                                    return Text(
+                                                                        'Hata:${snapshot.error}');
+                                                                  } else {
+                                                                    String
+                                                                        message =
+                                                                        '';
+                                                                    if (snapshot
+                                                                            .data !=
+                                                                        null) {
+                                                                      if (snapshot
+                                                                          .data!
+                                                                          .isEmpty) {
+                                                                        message =
+                                                                            'Kronik yanlış soru bulunamadı';
+                                                                      } else {
+                                                                        message =
+                                                                            'Kronik yanlış sorular: ${snapshot.data}';
+                                                                      }
+                                                                    }
+                                                                    return Column(
+                                                                      children: [
+                                                                        Text(
+                                                                          'Kronik Hale Gelen Sorular',
+                                                                          maxLines:
+                                                                              2,
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style: TextStyle(
+                                                                              color: Themes.cardTextColor,
+                                                                              fontSize: Tokens.fontSize[3],
+                                                                              fontWeight: Tokens.fontWeight[7]),
+                                                                        ),
+                                                                        SizedBox(height: 100,),
+                                                                        Text(
+                                                                          message,
+                                                                          maxLines:
+                                                                              2,
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style: TextStyle(
+                                                                              color: Themes.cardTextColor,
+                                                                              fontSize: Tokens.fontSize[2],
+                                                                              fontWeight: Tokens.fontWeight[5]),
+                                                                        )
+                                                                      ],
+                                                                    );
+                                                                  }
+                                                                })
                                                           ],
                                                         ),
-                                                        //Column(
-                                                        // children:
-                                                        //)
                                                       ],
                                                     ),
                                                   ),

@@ -126,6 +126,8 @@ exports.filterStores = async (req, res) => {
       query += `sehir LIKE '%${sehir}%' AND magaza_tipi = ${magaza_tipi} `;
     } else if (magaza_tipi) {
       query += `magaza_tipi = ${magaza_tipi} `;
+    } else if (sehir) {
+      query+=`sehir LIKE '%${sehir}%'`;
     } else {
       query = "SELECT * FROM magaza";
     }
@@ -152,4 +154,3 @@ exports.filterStores = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
-

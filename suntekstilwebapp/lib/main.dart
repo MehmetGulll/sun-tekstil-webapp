@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart'; //
 import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
+import 'package:suntekstilwebapp/src/pages/AddQuestion/AddQuestion.dart';
 import 'package:suntekstilwebapp/src/pages/ChangePassword/ChangePassword.dart';
 import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
 import 'package:suntekstilwebapp/src/pages/Login/Login.dart';
@@ -40,7 +41,8 @@ class MyApp extends StatelessWidget {
         '/officalUsers':(context) => OfficalUsers(),
         '/changePassword':(context)=>ChangePassword(),
         '/reports': (context) => Reports(),
-        '/sendMail':(context)=>MailPage()
+        '/sendMail':(context)=>MailPage(),
+        '/addQuestion':(context)=>AddQuestion()
         
       },
     );

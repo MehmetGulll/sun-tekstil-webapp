@@ -51,7 +51,10 @@ class Login extends StatelessWidget {
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return ErrorDialog(errorMessage: errorMessage, errorIcon: Icons.person_off,);
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.person_off,
+            );
           });
     }
   }
@@ -135,10 +138,6 @@ class Login extends StatelessWidget {
                 SizedBox(
                   width: 20,
                 ),
-                CustomButton(
-                    buttonText: "Kayıt Ol",
-                    onPressed: () =>
-                        Navigator.pushReplacementNamed(context, '/register'))
               ],
             ),
             SizedBox(

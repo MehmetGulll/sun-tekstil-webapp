@@ -67,7 +67,7 @@ class _QuestionsState extends State<Questions> {
       var jsonData = json.decode(data.body) as List;
       print("Bütün data");
       print(jsonData);
-
+        _questions.clear();
       _questions =
           jsonData.map((item) => item as Map<String, dynamic>).toList();
     }
@@ -142,7 +142,6 @@ class _QuestionsState extends State<Questions> {
       print("Hata");
     }
   }
-
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map question) {
     questionIdController.text = question['questionId'].toString();
@@ -295,22 +294,45 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
-              CustomButton(
-                  buttonText: 'Filtreleme',
-                  textColor: Themes.whiteColor,
-                  buttonColor: Themes.blueColor,
-                  onPressed: () {
-                    print("Arama kısmı çalıştı");
-                    if (questionFilteredNameController.text.isNotEmpty) {
-                      filteredQuestion(
-                          'soru_adi', questionFilteredNameController.text);
-                      isFiltered = true;
-                    } else if (_chosenQuestionType != null) {
-                      String? queryValue = _questionTypeList[_chosenQuestionType];
-                      filteredQuestion('soru_cevap', queryValue!);
-                      isFiltered = true;
-                    }
-                  }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomButton(
+                      buttonText: 'Filtreleme',
+                      textColor: Themes.whiteColor,
+                      buttonColor: Themes.blueColor,
+                      onPressed: () {
+                        print("Arama kısmı çalıştı");
+                        if (questionFilteredNameController.text.isNotEmpty) {
+                          filteredQuestion(
+                              'soru_adi', questionFilteredNameController.text);
+                          isFiltered = true;
+                        } else if (_chosenQuestionType != null) {
+                          String? queryValue =
+                              _questionTypeList[_chosenQuestionType];
+                          filteredQuestion('soru_cevap', queryValue!);
+                          isFiltered = true;
+                        }
+                      }),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  CustomButton(
+                      buttonText: 'Soru Ekle',
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/addQuestion');
+                      }),
+                      SizedBox(width: 20,),
+                  CustomButton(buttonText: 'Filtreleri Sil',buttonColor: Themes.secondaryColor, onPressed: ()async{
+                    print("Filterleri temizleme");
+                    isFiltered=false;
+                   await _getQuestions();
+                   setState(() {
+                     
+                   });
+                  })
+                ],
+              ),
               Padding(
                 padding: EdgeInsets.only(top: 20),
                 child: FutureBuilder<List>(
