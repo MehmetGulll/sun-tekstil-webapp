@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
@@ -12,7 +13,7 @@ import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
-
+import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Questions extends StatefulWidget {
@@ -473,6 +474,7 @@ class _QuestionsState extends State<Questions> {
                   },
                 ),
               ),
+            BarChartSample4()
             ],
           ),
         ),
