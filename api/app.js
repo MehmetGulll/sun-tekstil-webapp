@@ -26,8 +26,7 @@ const questionRoutes = require("./routers/questionRoutes");
 const homeRoutes = require("./routers/homeRoutes");
 const titleRoutes = require("./routers/titleRoutes");
 const mailRoutes = require("./routers/mailRoutes");
-const upload = require("./helpers/upload");
-app.use(upload);
+
 app.use(authRoutes);
 app.use(regionRoutes);
 // app.use(storeRoutes);

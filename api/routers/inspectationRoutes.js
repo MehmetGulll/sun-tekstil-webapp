@@ -11,6 +11,8 @@ const {
   denetim_sorulari,
   aksiyon,
 } = require("../helpers/sequelizemodels");
+const configureCloudinaryMulter = require("../helpers/cloudinaryMulter");
+const cloudinary = require("cloudinary").v2;
 
 // TÜM DENETİM TİPLERİNİ LİSTELER
 router.get("/getAllInspectionType", authenticateToken, async (req, res) => {
@@ -190,7 +192,7 @@ router.post("/addInspection", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/answerInspection", authenticateToken, async (req, res) => {
+router.post("/answerInspection", authenticateToken, configureCloudinaryMulter(cloudinary).array("aksiyon_gorsel"), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       denetim_id: Joi.number().required(),
@@ -199,16 +201,14 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
           Joi.object({
             soru_id: Joi.number().required(),
             cevap: Joi.number().required(),
-            aksiyon: Joi.array()
-              .items(
-                Joi.object({
-                  aksiyon_konu: Joi.string().required(),
-                  aksiyon_gorsel: Joi.string(),
-                  aksiyon_sure: Joi.number().required(),
-                  aksiyon_oncelik: Joi.number().required(),
-                })
-              )
-              .optional(),
+            aksiyon: Joi.array().items(
+              Joi.object({
+                aksiyon_konu: Joi.string().required(),
+                aksiyon_gorsel: Joi.array().items(Joi.string()).required(), // Accept array of strings for images
+                aksiyon_sure: Joi.number().required(),
+                aksiyon_oncelik: Joi.number().required()
+              })
+            ).optional()
           })
         )
         .required(),
@@ -228,6 +228,11 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
       timestamps: false,
       freezeTableName: true,
     });
+    
+    const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
+      timestamps: false,
+      freezeTableName: true,
+    });
 
     const denetimSorulariModel = sequelize.define(
       "denetim_sorulari",
@@ -243,11 +248,14 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
       freezeTableName: true,
     });
 
-    const existingInspection = await denetimModel.findOne({
-      where: {
-        denetim_id,
-      },
+    soruModel.belongsTo(denetimTipiModel, {
+      foreignKey: "denetim_tip_id",
     });
+
+    const existingInspection = await denetimModel.findOne({
+      where: { denetim_id },
+    });
+
     if (!existingInspection) return res.status(404).send("Denetim Bulunamadı!");
     if (existingInspection.status === 0)
       return res.status(400).send("Bu Denetim Zaten Tamamlandı!");
@@ -257,7 +265,15 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
         denetim_tip_id: existingInspection.dataValues.denetim_tipi_id,
         status: 1,
       },
+      include: [
+        {
+          model: denetimTipiModel,
+          attributes: ["denetim_tipi"],
+        },
+      ],
     });
+
+    const denetimTipiAdi = sorular[0].dataValues.denetim_tipi.dataValues.denetim_tipi;
 
     // Tüm cevaplanan soruları bir kerede denetim_sorulari tablosuna ekleyelim
     const denetimSorular = [];
@@ -278,17 +294,35 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
       });
       denetimSorular.push(createDenetimSorular);
     }
-    
     for (let i = 0; i < denetimSorular.length; i++) {
       const ds_id = denetimSorular[i].dataValues.ds_id;
       const cevap = cevaplar[i];
       if (cevap.aksiyon && cevap.aksiyon.length > 0) {
         for (let j = 0; j < cevap.aksiyon.length; j++) {
           const aksiyon = cevap.aksiyon[j];
+          const uploadedAksiyonGorselIds = [];
+          for (const image of aksiyon.aksiyon_gorsel) { // Iterate through each image in the array
+            const uploadAksiyonGorsel = await cloudinary.uploader.upload(
+              image,
+              {
+                folder: "action-images",
+                use_filename: true,
+                unique_filename: true,
+                overwrite: false,
+                tags: [denetimTipiAdi],
+                transformation: [
+                  { width: 1000, crop: "scale" },
+                  { quality: "auto" },
+                  { fetch_format: "auto" },
+                ],
+              }
+            );
+            uploadedAksiyonGorselIds.push(uploadAksiyonGorsel.public_id);
+          }
           await aksiyonModel.create({
-            ds_id : ds_id,
+            ds_id,
             aksiyon_konu: aksiyon.aksiyon_konu,
-            aksiyon_gorsel: aksiyon.aksiyon_gorsel,
+            aksiyon_gorsel: uploadedAksiyonGorselIds.join(","),
             aksiyon_acilis_tarihi: new Date().toISOString().split("T")[0],
             aksiyon_sure: aksiyon.aksiyon_sure,
             aksiyon_oncelik: aksiyon.aksiyon_oncelik,
@@ -298,7 +332,6 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
         }
       }
     }
-
     // Denetim statusunu güncelle
     await denetimModel.update(
       {
@@ -318,7 +351,6 @@ router.post("/answerInspection", authenticateToken, async (req, res) => {
     return res.status(500).send(error);
   }
 });
-
 
 
 module.exports = router;
