@@ -20,7 +20,7 @@ const port = 5000;
 const authRoutes = require("./routers/authRoutes");
 const regionRoutes = require("./routers/regionRoutes");
 const storeRoutes = require("./routers/storeRoutes");
-const inspectationRoutes = require("./routers/inspectationRoutes");
+const inspection = require("./routers/inspectionRoutes");
 const actionRoutes = require("./routers/actionRoutes");
 const questionRoutes = require("./routers/questionRoutes");
 const homeRoutes = require("./routers/homeRoutes");
@@ -37,7 +37,7 @@ app.use(questionsRoutes);
 app.use(userRoutes);
 app.use(storesRoutes);
 app.use(reportsRoutes);
-app.use(inspectationRoutes);
+app.use(inspection);
 app.use(actionRoutes);
 app.use(questionRoutes);
 
