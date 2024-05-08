@@ -59,7 +59,7 @@ class _SuccessRateState extends State<SuccessRate> {
             children: [
               Expanded(child: PieChartSample2()),
               SizedBox(width: 20,),
-              Expanded(child: BarChartSample4())
+              Expanded( child: BarChartSample3())
             ],
           )
         ],

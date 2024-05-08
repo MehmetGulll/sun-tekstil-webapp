@@ -474,7 +474,7 @@ class _QuestionsState extends State<Questions> {
                   },
                 ),
               ),
-            BarChartSample4()
+   
             ],
           ),
         ),
