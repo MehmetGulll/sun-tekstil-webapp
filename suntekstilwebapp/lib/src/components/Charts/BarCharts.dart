@@ -2,9 +2,42 @@ import 'package:suntekstilwebapp/src/presentation/app_resources.dart';
 import 'package:suntekstilwebapp/src/extension/color_extensions.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:suntekstilwebapp/src/API/url.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+
+Future<List<Report>> fetchReports(int inspectionTypeId) async {
+  final response = await http.get(Uri.parse('${ApiUrls.getReportsByInspectionType}/$inspectionTypeId'));
+
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body);
+    print("Responsedata : ${response.body}");
+    return jsonResponse.map((item) => Report.fromJson(item)).toList();
+  } else {
+    throw Exception('Failed to load reports from API');
+  }
+}
+
+class Report {
+  final String? regionName;
+  final double? averagePoints;
+
+  Report({this.regionName, this.averagePoints});
+
+  factory Report.fromJson(Map<String, dynamic> json) {
+    return Report(
+      regionName: json['inspectionId'],
+      averagePoints: json['inspectionTypeId'].toDouble(),
+    );
+  }
+}
 
 class _BarChart extends StatelessWidget {
-  const _BarChart();
+   _BarChart({Key? key,required this.reports}) : super(key: key);
+
+  final List<Report> reports;
+  final List<String> regions = ['Ege Bölgesi', 'İstanbul Asya Bölgesi', 'İstanbul Avrupa Bölgesi', 'Akdeniz Bölgesi', 'Karadeniz Bölgesi', 'İç Anadolu Bölgesi'];
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +49,7 @@ class _BarChart extends StatelessWidget {
         barGroups: barGroups,
         gridData: const FlGridData(show: false),
         alignment: BarChartAlignment.spaceAround,
-        maxY: 20,
+        maxY: 100,
       ),
     );
   }
@@ -114,93 +147,41 @@ class _BarChart extends StatelessWidget {
         end: Alignment.topCenter,
       );
 
-  List<BarChartGroupData> get barGroups => [
-        BarChartGroupData(
-          x: 0,
-          barRods: [
-            BarChartRodData(
-              toY: 8,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 1,
-          barRods: [
-            BarChartRodData(
-              toY: 10,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 2,
-          barRods: [
-            BarChartRodData(
-              toY: 14,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 3,
-          barRods: [
-            BarChartRodData(
-              toY: 15,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 4,
-          barRods: [
-            BarChartRodData(
-              toY: 13,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 5,
-          barRods: [
-            BarChartRodData(
-              toY: 10,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-        BarChartGroupData(
-          x: 6,
-          barRods: [
-            BarChartRodData(
-              toY: 16,
-              gradient: _barsGradient,
-            )
-          ],
-          showingTooltipIndicators: [0],
-        ),
-      ];
+  List<BarChartGroupData> get barGroups {
+    return List.generate(6, (index) {
+      final report = reports.firstWhere((report) => report.regionName == regions[index], orElse: () => Report(regionName: regions[index], averagePoints: 0.0));
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: report?.averagePoints ?? 0,
+            gradient: _barsGradient,
+          )
+        ],
+        showingTooltipIndicators: [0],
+      );
+    });
+  }
 }
 
-class BarChartSample3 extends StatefulWidget {
-  const BarChartSample3({super.key});
+class BarChartSample3 extends StatelessWidget {
+  const BarChartSample3({Key? key}) : super(key: key);
 
-  @override
-  State<StatefulWidget> createState() => BarChartSample3State();
-}
-
-class BarChartSample3State extends State<BarChartSample3> {
   @override
   Widget build(BuildContext context) {
-    return const AspectRatio(
-      aspectRatio: 1.6,
-      child: _BarChart(),
+    return FutureBuilder<List<Report>>(
+      future: fetchReports(4),  
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return AspectRatio(
+            aspectRatio: 1.6,
+            child: _BarChart(reports: snapshot.data!),
+          );
+        } else if (snapshot.hasError) {
+          return Text("${snapshot.error}");
+        }
+        return CircularProgressIndicator();
+      },
     );
   }
 }

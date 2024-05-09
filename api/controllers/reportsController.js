@@ -151,29 +151,18 @@ exports.getReportsByInspectionType = async (req, res) => {
     const result = await pool.request()
       .input('inspectionTypeId', sql.Int, inspectionTypeId)
       .query(`
-        SELECT d.denetim_id AS inspectionId, dt.denetim_tipi AS inspectionTypeId, m.magaza_adi AS storeId, m.bolge_id AS regionId, b.bolge_adi AS regionName, r.rol_adi AS inspectorRole, k.ad + ' ' + k.soyad AS inspectorName, d.alinan_puan AS pointsReceived, d.denetim_tarihi AS inspectionDate, d.denetim_tamamlanma_tarihi AS inspectionCompletionDate, d.status 
+        SELECT b.bolge_adi AS regionName, ISNULL(SUM(ISNULL(d.alinan_puan, 0)), 0)/2 AS averagePoints
         FROM denetim d 
         INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id 
         INNER JOIN magaza m ON d.magaza_id = m.magaza_id 
         INNER JOIN bolge b ON m.bolge_id = b.bolge_id
-        INNER JOIN kullanici k ON d.denetci_id = k.id 
-        INNER JOIN rol r ON k.rol = r.rol_id
         WHERE dt.denetim_tip_id = @inspectionTypeId
-        GROUP BY d.denetim_id, dt.denetim_tipi, m.magaza_adi, m.bolge_id, b.bolge_adi, r.rol_adi, k.ad, k.soyad, d.alinan_puan, d.denetim_tarihi, d.denetim_tamamlanma_tarihi, d.status`);
+        GROUP BY b.bolge_adi`);
     const reports = result.recordset.map(
       (row) =>
         new Report(
-          row.inspectionId,
-          row.inspectionTypeId,
-          row.storeId,
-          row.regionId,
           row.regionName,
-          row.inspectorRole,
-          row.inspectorName,
-          row.pointsReceived,
-          row.inspectionDate,
-          row.inspectionCompletionDate,
-          row.status
+          row.averagePoints
         )
     );
     res.status(200).send(reports);
@@ -182,4 +171,6 @@ exports.getReportsByInspectionType = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
+
+
 
