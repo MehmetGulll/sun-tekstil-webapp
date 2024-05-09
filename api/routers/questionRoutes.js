@@ -143,21 +143,6 @@ router.post("/updateQuestion", authenticateToken, async (req, res) => {
 
     if (!findQuestion) return res.status(404).send("Soru Bulunamadi!");
 
-    if (findQuestion.soru_adi === soru_adi)
-      return res.status(400).send("Soru adı aynı olduğu için güncelleme yapılamaz! Lütfen farklı bir değer giriniz!");
-
-    if (findQuestion.soru_cevap === soru_cevap)
-      return res.status(400).send("Soru cevap aynı olduğu için güncelleme yapılamaz! Lütfen farklı bir değer giriniz!");
-
-    if (findQuestion.soru_puan === soru_puan)
-      return res.status(400).send("Soru puan aynı olduğu için güncelleme yapılamaz! Lütfen farklı bir değer giriniz!");
-
-    if (findQuestion.denetim_tip_id === denetim_tip_id)
-      return res.status(400).send("Denetim tip id aynı olduğu için güncelleme yapılamaz! Lütfen farklı bir değer giriniz!");
-
-    if (findQuestion.status === status)
-      return res.status(400).send("Status aynı olduğu için güncelleme yapılamaz! Lütfen farklı bir değer giriniz!");
-
     const oldSoruSiraNo = findQuestion.soru_sira_no;
     const otherQuestions = await soruModel.findAll({
       where: {

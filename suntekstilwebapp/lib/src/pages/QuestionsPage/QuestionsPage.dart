@@ -173,14 +173,8 @@ class _QuestionsState extends State<Questions> {
                       icon: Icon(Icons.close))
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: questionIdController,
-                hintText: 'Soru Kodu',
-                keyboardType: TextInputType.name,
-              ),
+             
+              
               SizedBox(
                 height: 20,
               ),
