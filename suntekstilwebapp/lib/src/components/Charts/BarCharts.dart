@@ -165,12 +165,12 @@ class _BarChart extends StatelessWidget {
 }
 
 class BarChartSample3 extends StatelessWidget {
-  const BarChartSample3({Key? key}) : super(key: key);
-
+ final String? inspectionTypeId;
+  BarChartSample3({this.inspectionTypeId});
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Report>>(
-      future: fetchReports(4),  
+      future: fetchReports(int.parse(inspectionTypeId ?? '4')),  
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return AspectRatio(

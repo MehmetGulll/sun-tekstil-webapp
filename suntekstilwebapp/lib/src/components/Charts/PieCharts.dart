@@ -1,7 +1,11 @@
+import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/presentation/app_resources.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:suntekstilwebapp/src/presentation/indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:suntekstilwebapp/src/components/Charts/PieCharts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class PieChartSample2 extends StatefulWidget {
   const PieChartSample2({super.key});
@@ -13,81 +17,105 @@ class PieChartSample2 extends StatefulWidget {
 class PieChart2State extends State {
   int touchedIndex = -1;
 
+  Map<int, double> averageScores = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+  };
+
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.3,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: AspectRatio(
-              aspectRatio: 0.3,
-              child: PieChart(
-                PieChartData(
-                  pieTouchData: PieTouchData(
-                    touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                      setState(() {
-                        if (!event.isInterestedForInteractions ||
-                            pieTouchResponse == null ||
-                            pieTouchResponse.touchedSection == null) {
-                          touchedIndex = -1;
-                          return;
-                        }
-                        touchedIndex = pieTouchResponse
-                            .touchedSection!.touchedSectionIndex;
-                      });
-                    },
+    return FutureBuilder(
+      future: fetchAverageScores(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return AspectRatio(
+            aspectRatio: 1.3,
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 0.3,
+                    child: PieChart(
+                      PieChartData(
+                        pieTouchData: PieTouchData(touchCallback:
+                            (FlTouchEvent event, pieTouchResponse) {
+                          if (!event.isInterestedForInteractions ||
+                              pieTouchResponse == null ||
+                              pieTouchResponse.touchedSection == null) {
+                            if (touchedIndex != -1) {
+                              setState(() {
+                                touchedIndex = -1;
+                              });
+                            }
+                            return;
+                          }
+                        }),
+                        borderData: FlBorderData(
+                          show: false,
+                        ),
+                        sectionsSpace: 0,
+                        centerSpaceRadius: 100,
+                        sections: showingSections(),
+                      ),
+                    ),
                   ),
-                  borderData: FlBorderData(
-                    show: false,
-                  ),
-                  sectionsSpace: 0,
-                  centerSpaceRadius: 40,
-                  sections: showingSections(),
                 ),
-              ),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 15),
+                      child: Indicator(
+                        color: AppColors.contentColorBlue,
+                        text: 'Mağaza Denetim',
+                        isSquare: true,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Indicator(
+                      color: AppColors.contentColorYellow,
+                      text: 'Görsel Denetim',
+                      isSquare: true,
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Indicator(
+                      color: AppColors.contentColorPurple,
+                      text: 'Bölge Müdürü Haftalık Denetim',
+                      isSquare: true,
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Indicator(
+                      color: AppColors.contentColorGreen,
+                      text: 'Bölge Müdürü Aylık Denetim',
+                      isSquare: true,
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 15),
-                child: Indicator(
-                  color: AppColors.contentColorBlue,
-                  text: 'Mağaza Denetim',
-                  isSquare: true,
-                ),
-              ),
-              SizedBox(
-                height: 4,
-              ),
-              Indicator(
-                color: AppColors.contentColorYellow,
-                text: 'Görsel Denetim',
-                isSquare: true,
-              ),
-              SizedBox(
-                height: 4,
-              ),
-              Indicator(
-                color: AppColors.contentColorPurple,
-                text: 'Bölge Müdürü Haftalık Denetim',
-                isSquare: true,
-              ),
-              SizedBox(
-                height: 4,
-              ),
-              Indicator(
-                color: AppColors.contentColorGreen,
-                text: 'Bölge Müdürü Aylık Denetim',
-                isSquare: true,
-              ),
-            ],
-          ),
-        ],
-      ),
+          );
+        } else {
+          return CircularProgressIndicator();
+        }
+      },
     );
+  }
+
+  Future<void> fetchAverageScores() async {
+    final response = await http
+        .get(Uri.parse("${ApiUrls.getAverageScoresByInspectionType}"));
+    var data = jsonDecode(response.body);
+    data.forEach((item) {
+      averageScores[item['inspectionTypeId']] = item['averageScore'];
+    });
   }
 
   List<PieChartSectionData> showingSections() {
@@ -100,8 +128,8 @@ class PieChart2State extends State {
         case 0:
           return PieChartSectionData(
             color: AppColors.contentColorBlue,
-            value: 40,
-            title: '40%',
+            value: averageScores[4] ?? 0,
+            title: '${averageScores[4] ?? 0}%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -113,8 +141,8 @@ class PieChart2State extends State {
         case 1:
           return PieChartSectionData(
             color: AppColors.contentColorYellow,
-            value: 30,
-            title: '30%',
+            value: averageScores[3] ?? 0,
+            title: '${averageScores[3] ?? 0}%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -126,8 +154,8 @@ class PieChart2State extends State {
         case 2:
           return PieChartSectionData(
             color: AppColors.contentColorPurple,
-            value: 15,
-            title: '15%',
+            value: averageScores[1] ?? 0,
+            title: '${averageScores[1] ?? 0}%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -139,8 +167,8 @@ class PieChart2State extends State {
         case 3:
           return PieChartSectionData(
             color: AppColors.contentColorGreen,
-            value: 15,
-            title: '15%',
+            value: averageScores[2] ?? 0,
+            title: '${averageScores[2] ?? 0}%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
