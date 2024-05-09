@@ -26,4 +26,6 @@ class ApiUrls {
   static const String filteredReport = 'http://localhost:5000/filteredReport';
   static const String addQuestion = 'http://localhost:5000/addQuestion';
   static const String detailReport ='http://localhost:5000/detailReport';
+  static const String getReportsByInspectionType = 'http://localhost:5000/getReportsByInspectionType';
+  static const String getAverageScoresByInspectionType = 'http://localhost:5000/getAverageScoresByInspectionType';
 }
