@@ -28,6 +28,9 @@ dependencies:
   printing: ^5.7.1
   open_file: ^3.2.1
   intl: ^0.17.0
+  file_picker: ^4.0.0
+
+
 
 
 dev_dependencies:

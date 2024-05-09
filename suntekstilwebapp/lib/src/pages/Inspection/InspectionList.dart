@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'dart:convert';
+import 'dart:html' as html;
 
 class InspectionPage extends StatefulWidget {
   @override
@@ -27,7 +28,6 @@ class _InspectionPageState extends State<InspectionPage> {
 
   Future<void> _fetchInspections() async {
     String? token = await TokenHelper.getToken();
-    // Boş searchTerm'i API isteğine ekleme
     Map<String, dynamic> requestBody = {
       'page': _currentPage,
     };
@@ -43,11 +43,6 @@ class _InspectionPageState extends State<InspectionPage> {
       requestBody['endDate'] = DateFormat('dd.MM.yyyy').format(_endDate!);
       requestBody['page'] = 1;
     }
-
-    print("startDate: ${_startDate}");
-    print("endDate: ${_endDate}");
-    print("searchTerm: ${_searchController.text}");
-    print("requestBody: ${requestBody}");
 
     final response = await http.post(
       Uri.parse(ApiUrls.getInspections),
@@ -98,6 +93,22 @@ class _InspectionPageState extends State<InspectionPage> {
       _endDate = null;
     });
     _applyFilters();
+  }
+
+  void _performInspection(Map<String, dynamic> inspection) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InspectionScreen(inspection: inspection),
+      ),
+    );
+  }
+
+  void _viewDetail() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DetailScreen()),
+    );
   }
 
   @override
@@ -318,9 +329,10 @@ class _InspectionPageState extends State<InspectionPage> {
                       DataCell(
                         ElevatedButton(
                           onPressed: () {
-                            // Burada duruma göre yapılacak işlemi belirtin
+                            inspection['status'] == 0
+                                ? _viewDetail()
+                                : _performInspection(inspection);
                           },
-                          // text   width: 120
                           child: Text(
                             inspection['status'] == 0
                                 ? 'Detayı Görüntüle'
@@ -350,6 +362,317 @@ class _InspectionPageState extends State<InspectionPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class InspectionScreen extends StatefulWidget {
+  final Map<String, dynamic> inspection;
+
+  InspectionScreen({required this.inspection});
+
+  @override
+  _InspectionScreenState createState() => _InspectionScreenState();
+}
+
+class _InspectionScreenState extends State<InspectionScreen> {
+  List<dynamic> _inspectionQuestions = [];
+  Map<int, bool> _actionVisibilityMap = {};
+  Map<int, Map<String, dynamic>> _actionMap = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _getAllInspectionQuestions();
+  }
+
+  Future<void> _getAllInspectionQuestions() async {
+    final denetimTipId = widget.inspection['denetim_tip_id'];
+    String? token = await TokenHelper.getToken();
+    final response = await http.post(
+      Uri.parse(ApiUrls.getAllInspectionQuestionsByType),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, dynamic>{
+        'denetim_tip_id': denetimTipId,
+      }),
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _inspectionQuestions = responseData['data'];
+        _actionVisibilityMap = Map.fromIterable(_inspectionQuestions,
+            key: (question) => question['soru_id'], value: (_) => false);
+      });
+    } else {
+      throw Exception('Failed to load inspection questions');
+    }
+  }
+
+  void _answerInspection(Map<String, dynamic> inspection) async {
+    List<Map<String, dynamic>> requestBodyList = [];
+    _inspectionQuestions.forEach((question) {
+      final int soruId = question['soru_id'];
+      final int cevap = question['soru_cevap'];
+
+      Map<String, dynamic> answer = {
+        'soru_id': soruId,
+        'cevap': cevap,
+      };
+
+      if (_actionMap.containsKey(soruId)) {
+        answer['aksiyon'] = [_actionMap[soruId]];
+      }
+
+      requestBodyList.add(answer);
+    });
+
+    String? token = await TokenHelper.getToken();
+    final response = await http.post(
+      Uri.parse(ApiUrls.answerInspection),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': '$token'
+      },
+      body: jsonEncode({
+        "denetim_id": inspection['denetim_id'],
+        "cevaplar": requestBodyList,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Inspection answered successfully: ${response.body}');
+    } else {
+      print('Error: ${response.body}');
+      throw Exception('Failed to answer inspection');
+    }
+  }
+
+  void _addImages(int soruId) {
+    html.InputElement uploadInput = html.InputElement()..type = 'file';
+    uploadInput.click();
+
+    uploadInput.onChange.listen((e) async {
+      final files = uploadInput.files;
+      if (files!.length == 1) {
+        final file = files[0];
+        final reader = html.FileReader();
+        reader.readAsDataUrl(file);
+        reader.onLoadEnd.listen((e) {
+          final encodedImage = reader.result.toString().split(',').last;
+          setState(() {
+            _actionMap[soruId] ??= {};
+            _actionMap[soruId]!['aksiyon_gorsel'] = encodedImage;
+          });
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Seçili Denetim Sayfası'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Denetim Tipi: ${widget.inspection['denetim_tipi']}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Mağaza Adı: ${widget.inspection['magaza_adi']}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Sorular:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _inspectionQuestions.length,
+                itemBuilder: (context, index) {
+                  return _buildQuestionCard(
+                      _inspectionQuestions[index], index + 1);
+                },
+              ),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                _answerInspection(widget.inspection);
+              },
+              child: Text('Denetimi Tamamla'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionCard(Map<String, dynamic> question, int questionNumber) {
+    final int soruId = question['soru_id'];
+    final bool isActionVisible = _actionVisibilityMap[soruId] ?? false;
+
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$questionNumber) ${question['soru_adi']}',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                DropdownButton<int>(
+                  value: question['soru_cevap'],
+                  onChanged: (value) {
+                    setState(() {
+                      question['soru_cevap'] = value!;
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem(
+                      value: 1,
+                      child: Text('Evet'),
+                    ),
+                    DropdownMenuItem(
+                      value: 0,
+                      child: Text('Hayır'),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _actionVisibilityMap[soruId] =
+                          !_actionVisibilityMap[soruId]!;
+                    });
+                  },
+                  child: Text('Aksiyon Oluştur'),
+                ),
+              ],
+            ),
+            if (isActionVisible) _buildActionAccordion(soruId),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionAccordion(int soruId) {
+    String? selectedImageName;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Aksiyon Bilgileri',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8.0),
+          Row(
+            children: [
+              Flexible(
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Aksiyon Konusu',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _actionMap[soruId] ??= {};
+                      _actionMap[soruId]!['aksiyon_konu'] = value;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(width: 8.0),
+              Flexible(
+                child: DropdownButtonFormField<int>(
+                  onChanged: (value) {
+                    setState(() {
+                      _actionMap[soruId] ??= {};
+                      _actionMap[soruId]!['aksiyon_sure'] = value;
+                    });
+                  },
+                  items: List.generate(
+                    51,
+                    (index) => DropdownMenuItem<int>(
+                      value: index,
+                      child: Text('$index Gün'),
+                    ),
+                  ).where((item) => item.value != 0).toList(),
+                  decoration: InputDecoration(
+                    labelText: 'Aktivasyon Süresi',
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.0),
+              Flexible(
+                child: DropdownButtonFormField<int>(
+                  onChanged: (value) {
+                    setState(() {
+                      _actionMap[soruId] ??= {};
+                      _actionMap[soruId]!['aksiyon_oncelik'] = value;
+                    });
+                  },
+                  items: List.generate(
+                    5,
+                    (index) => DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text(
+                          '${index + 1 == 1 ? 'Çok Önemli' : index + 1 == 2 ? 'Önemli' : index + 1 == 3 ? 'Orta' : index + 1 == 4 ? 'Az Önemli' : index + 1 == 5 ? 'Çok Az Önemli' : '-'}'),
+                    ),
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Öncelik',
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.0),
+              // Resim ekleme işlevi
+              ElevatedButton(
+                onPressed: () {
+                  _addImages(soruId);
+                },
+                child: Text('Resim Ekle'),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.0),
+        ],
+      ),
+    );
+  }
+}
+
+// DETAY EKRANI
+class DetailScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Denetim Detay Sayfası'),
+      ),
+      body: Center(
+        child: Text('DENETİM İLE İLGİLİ DETAY BİLGİLER GELECEK'),
       ),
     );
   }

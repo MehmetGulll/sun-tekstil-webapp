@@ -270,15 +270,17 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
       const [day, month, year] = date.split(".");
       return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     };
-    
+
     if (startDate && endDate) {
-      whereObj.denetim_tarihi = { [Op.between]: [formatDate(startDate), formatDate(endDate)] };
+      whereObj.denetim_tarihi = {
+        [Op.between]: [formatDate(startDate), formatDate(endDate)],
+      };
     } else if (startDate) {
       whereObj.denetim_tarihi = { [Op.gte]: formatDate(startDate) };
     } else if (endDate) {
       whereObj.denetim_tarihi = { [Op.lte]: formatDate(endDate) };
     }
-    
+
     const allInspections = await denetimModel.findAndCountAll({
       where: whereObj,
       include: [
@@ -308,7 +310,7 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
         ["denetim_tarihi", "DESC"],
       ],
     });
-  
+
     if (!allInspections || allInspections.length === 0)
       return res.status(404).send("Hiç Denetim Bulunamadı!");
 
@@ -326,6 +328,7 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
         ).toLocaleDateString(),
         status: inspection.status,
         denetim_tipi: inspection.denetim_tipi.denetim_tipi,
+        denetim_tip_id: inspection.denetim_tipi_id,
         magaza_adi: inspection.magaza.magaza_adi,
         sehir: inspection.magaza.sehir,
         denetci: inspection.kullanici.ad + " " + inspection.kullanici.soyad,
@@ -360,7 +363,9 @@ router.post(
                 .items(
                   Joi.object({
                     aksiyon_konu: Joi.string().required(),
-                    aksiyon_gorsel: Joi.array().items(Joi.string()).required(),
+                    aksiyon_gorsel: Joi.array().items(
+                      Joi.string().optional()
+                    ).optional(),
                     aksiyon_sure: Joi.number().required(),
                     aksiyon_oncelik: Joi.number().required(),
                   })
