@@ -171,6 +171,26 @@ exports.getReportsByInspectionType = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
+exports.getAverageScoresByInspectionType = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request().query(`
+      SELECT denetim_tipi_id, AVG(ISNULL(alinan_puan, 0)) as averageScore
+      FROM denetim
+      GROUP BY denetim_tipi_id
+    `);
+    const averages = result.recordset.map(
+      (row) => ({
+        inspectionTypeId: row.denetim_tipi_id,
+        averageScore: row.averageScore
+      })
+    );
+    res.status(200).send(averages);
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server Error", error });
+  }
+};
 
 
 
