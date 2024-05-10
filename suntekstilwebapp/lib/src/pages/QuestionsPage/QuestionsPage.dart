@@ -57,7 +57,9 @@ class _QuestionsState extends State<Questions> {
   final TextInputType keyboardType = TextInputType.text;
   bool isFiltered = false;
   String? _chosenQuestionType;
+  String? _chosenQuestionState;
   Map<String, String> _questionTypeList = {'Evet': '1', 'Hayır': '0'};
+  Map<String, String> _questionStateList = {'Aktif': '1', 'Pasif': '0'};
   Future<List<Map<String, dynamic>>> _getQuestions() async {
     if (!isFiltered) {
       String? token = await TokenHelper.getToken();
@@ -68,7 +70,7 @@ class _QuestionsState extends State<Questions> {
       var jsonData = json.decode(data.body) as List;
       print("Bütün data");
       print(jsonData);
-        _questions.clear();
+      _questions.clear();
       _questions =
           jsonData.map((item) => item as Map<String, dynamic>).toList();
     }
@@ -92,9 +94,17 @@ class _QuestionsState extends State<Questions> {
 
   Future<void> updateQuestion(
       BuildContext context, int id, Map<String, dynamic> question) async {
-    var currentStatus = question['status'];
-    var newStatus = currentStatus == 0 ? 1 : 0;
-    question['status'] = newStatus;
+    String questionName = questionNameController.text;
+    String questionPoint = questionPointController.text;
+    String chosenQuestionType = _chosenQuestionType ?? 'Evet';
+    String chosenQuestionState = _chosenQuestionState ?? 'Aktif';
+    print("isim $questionName");
+    print("yeni puan $questionPoint");
+    print("seçilen tip: $chosenQuestionType");
+
+    // var currentStatus = question['status'];
+    // var newStatus = currentStatus == 0 ? 1 : 0;
+    // question['status'] = newStatus;
     print(id);
     print("status");
     print(question['status']);
@@ -108,7 +118,10 @@ class _QuestionsState extends State<Questions> {
       },
       body: jsonEncode(<String, String>{
         'soru_id': question['questionId'].toString(),
-        'status': newStatus.toString()
+        'soru_adi': questionName,
+        'soru_puan': questionPoint,
+        'soru_cevap': _questionTypeList[chosenQuestionType] ?? 'Evet',
+        'status': _questionStateList[chosenQuestionState] ?? 'Aktif'
       }),
     );
     if (response.statusCode == 200) {
@@ -117,7 +130,7 @@ class _QuestionsState extends State<Questions> {
       setState(() {
         var updatedQuestion = _questions
             .firstWhere((q) => q['questionId'] == question['questionId']);
-        updatedQuestion['status'] = newStatus;
+        updatedQuestion['status'] = _questionStateList;
       });
     } else {
       print("Hata");
@@ -143,6 +156,7 @@ class _QuestionsState extends State<Questions> {
       print("Hata");
     }
   }
+
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map question) {
     questionIdController.text = question['questionId'].toString();
@@ -173,8 +187,6 @@ class _QuestionsState extends State<Questions> {
                       icon: Icon(Icons.close))
                 ],
               ),
-             
-              
               SizedBox(
                 height: 20,
               ),
@@ -210,7 +222,9 @@ class _QuestionsState extends State<Questions> {
                       selectedItem:
                           question['questionAnswer'] == 1 ? 'Evet' : 'Hayır',
                       items: ['Evet', 'Hayır'],
-                      onChanged: (String? value) {},
+                      onChanged: (String? value) {
+                        _chosenQuestionType = value;
+                      },
                     ),
                   ],
                 ),
@@ -230,7 +244,9 @@ class _QuestionsState extends State<Questions> {
                     CustomDropdown(
                       selectedItem: question['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
-                      onChanged: (String? value) {},
+                      onChanged: (String? value) {
+                        _chosenQuestionState = value;
+                      },
                     ),
                   ],
                 ),
@@ -317,15 +333,18 @@ class _QuestionsState extends State<Questions> {
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/addQuestion');
                       }),
-                      SizedBox(width: 20,),
-                  CustomButton(buttonText: 'Filtreleri Sil',buttonColor: Themes.secondaryColor, onPressed: ()async{
-                    print("Filterleri temizleme");
-                    isFiltered=false;
-                   await _getQuestions();
-                   setState(() {
-                     
-                   });
-                  })
+                  SizedBox(
+                    width: 20,
+                  ),
+                  CustomButton(
+                      buttonText: 'Filtreleri Sil',
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () async {
+                        print("Filterleri temizleme");
+                        isFiltered = false;
+                        await _getQuestions();
+                        setState(() {});
+                      })
                 ],
               ),
               Padding(
@@ -468,7 +487,6 @@ class _QuestionsState extends State<Questions> {
                   },
                 ),
               ),
-   
             ],
           ),
         ),
