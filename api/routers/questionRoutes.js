@@ -4,7 +4,7 @@ const Joi = require("joi");
 const { Op } = require("sequelize");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
-const { soru } = require("../helpers/sequelizemodels");
+const { soru, denetim_tipi, denetim,kullanici,magaza, unvan,} = require("../helpers/sequelizemodels");
 
 // TÜM SORULARI LİSTELER
 router.post("/getAllQuestion", authenticateToken, async (req, res) => {

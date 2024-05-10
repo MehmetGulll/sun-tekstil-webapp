@@ -8,7 +8,12 @@ function configureCloudinaryMulter(cloudinary) {
     secure: true,
   });
 
-  const upload = multer({ dest: "/" });
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 50 * 1024 * 1024,
+    },
+  });
 
   return upload;
 }

@@ -28,4 +28,8 @@ class ApiUrls {
   static const String detailReport ='http://localhost:5000/detailReport';
   static const String getReportsByInspectionType = 'http://localhost:5000/getReportsByInspectionType';
   static const String getAverageScoresByInspectionType = 'http://localhost:5000/getAverageScoresByInspectionType';
+  static const String getInspections ='http://localhost:5000/getInspections';
+  static const String getAllInspectionQuestionsByType ='http://localhost:5000/getAllInspectionQuestionsByType';
+  static const String answerInspection ='http://localhost:5000/answerInspection';
+
 }

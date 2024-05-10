@@ -115,6 +115,17 @@ class Sidebar extends StatelessWidget {
       },
     );
 
+     final InspectionTile = ListTile(
+      leading: Icon(Icons.content_paste_search_rounded),
+      title: Text('Denetimlerim', style: TextStyle(color: Themes.whiteColor)),
+      onTap: () {
+        Navigator.pop(context);
+        if (ModalRoute.of(context)?.settings.name != '/inspectionList') {
+          Navigator.pushReplacementNamed(context, '/inspectionList');
+        }
+      },
+    );
+
     final LogOutTile = ListTile(
       leading: Icon(Icons.logout),
       title: Text(
@@ -139,6 +150,7 @@ class Sidebar extends StatelessWidget {
             UserManagementTile,
             ReportsTile,
             MailTile,
+            InspectionTile,
             LogOutTile,
           ],
         ),
