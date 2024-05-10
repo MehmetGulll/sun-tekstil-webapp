@@ -31,5 +31,7 @@ class ApiUrls {
   static const String getInspections ='http://localhost:5000/getInspections';
   static const String getAllInspectionQuestionsByType ='http://localhost:5000/getAllInspectionQuestionsByType';
   static const String answerInspection ='http://localhost:5000/answerInspection';
+  static const String getAllDenetimTipi ='http://localhost:5000/getAllDenetimTipi';
+  static const String getAllUsers ='http://localhost:5000/getAllUsers';
 
 }
