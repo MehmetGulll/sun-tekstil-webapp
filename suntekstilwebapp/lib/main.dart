@@ -17,8 +17,11 @@ import 'package:suntekstilwebapp/src/pages/Inspection/InspectionList.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => Auth(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => Auth()),
+        ChangeNotifierProvider(create: (context) => InspectionTypeId()),
+      ],
       child: MyApp(),
     ),
   );

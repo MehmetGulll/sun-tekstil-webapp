@@ -144,4 +144,53 @@ exports.getReportDetails = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
+exports.getReportsByInspectionType = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const { inspectionTypeId } = req.params;
+    const result = await pool.request()
+      .input('inspectionTypeId', sql.Int, inspectionTypeId)
+      .query(`
+        SELECT b.bolge_adi AS regionName, ISNULL(SUM(ISNULL(d.alinan_puan, 0)), 0)/2 AS averagePoints
+        FROM denetim d 
+        INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id 
+        INNER JOIN magaza m ON d.magaza_id = m.magaza_id 
+        INNER JOIN bolge b ON m.bolge_id = b.bolge_id
+        WHERE dt.denetim_tip_id = @inspectionTypeId
+        GROUP BY b.bolge_adi`);
+    const reports = result.recordset.map(
+      (row) =>
+        new Report(
+          row.regionName,
+          row.averagePoints
+        )
+    );
+    res.status(200).send(reports);
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server Error", error });
+  }
+};
+exports.getAverageScoresByInspectionType = async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request().query(`
+      SELECT denetim_tipi_id, AVG(ISNULL(alinan_puan, 0)) as averageScore
+      FROM denetim
+      GROUP BY denetim_tipi_id
+    `);
+    const averages = result.recordset.map(
+      (row) => ({
+        inspectionTypeId: row.denetim_tipi_id,
+        averageScore: row.averageScore
+      })
+    );
+    res.status(200).send(averages);
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send({ message: "Server Error", error });
+  }
+};
+
+
 
