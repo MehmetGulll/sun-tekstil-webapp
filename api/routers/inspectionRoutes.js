@@ -17,6 +17,7 @@ const {
 const configureCloudinaryMulter = require("../helpers/cloudinaryMulter");
 const { format } = require("path");
 const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
 
 // TÜM DENETİM TİPLERİNİ LİSTELER
 router.get("/getAllInspectionType", authenticateToken, async (req, res) => {
@@ -466,9 +467,12 @@ router.post(
             const aksiyon = cevap.aksiyon[j];
             const uploadedAksiyonGorselIds = [];
             for (const image of aksiyon.aksiyon_gorsel) {
-              // Iterate through each image in the array
+              const file = fs.readFileSync(image);
+              console.log("image", image);
+              console.log("file", file);
+              const encodedImage = file.toString('base64');
               const uploadAksiyonGorsel = await cloudinary.uploader.upload(
-                image,
+                `data:image/png;base64,${encodedImage}`,
                 {
                   folder: "action-images",
                   use_filename: true,

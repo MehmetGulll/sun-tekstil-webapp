@@ -6,6 +6,8 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'dart:convert';
 import 'dart:html' as html;
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class InspectionPage extends StatefulWidget {
   @override
@@ -451,27 +453,6 @@ class _InspectionScreenState extends State<InspectionScreen> {
     }
   }
 
-  void _addImages(int soruId) {
-    html.InputElement uploadInput = html.InputElement()..type = 'file';
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) async {
-      final files = uploadInput.files;
-      if (files!.length == 1) {
-        final file = files[0];
-        final reader = html.FileReader();
-        reader.readAsDataUrl(file);
-        reader.onLoadEnd.listen((e) {
-          final encodedImage = reader.result.toString().split(',').last;
-          setState(() {
-            _actionMap[soruId] ??= {};
-            _actionMap[soruId]!['aksiyon_gorsel'] = encodedImage;
-          });
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -576,8 +557,23 @@ class _InspectionScreenState extends State<InspectionScreen> {
     );
   }
 
+  String _filePath = '';
+
+  void _openFilePicker() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        List<int> bytes = result.files.first.bytes!;
+        _filePath = result.files.first.name!;
+        print("result is: $result");
+        print("result files first bytes : ${result.files.first.bytes}");
+        print("_filePath: $_filePath");
+      });
+    }
+  }
+
   Widget _buildActionAccordion(int soruId) {
-    String? selectedImageName;
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: Column(
@@ -647,12 +643,21 @@ class _InspectionScreenState extends State<InspectionScreen> {
                 ),
               ),
               SizedBox(width: 8.0),
-              // Resim ekleme işlevi
+              // Resim ekleme işlevi ve eklenen resmi gösterme
               ElevatedButton(
                 onPressed: () {
-                  _addImages(soruId);
+                  _openFilePicker();
                 },
-                child: Text('Resim Ekle'),
+                child: Text('Dosya Seç'),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Dosya Yolu:',
+                style: TextStyle(fontSize: 20),
+              ),
+              Text(
+                _filePath,
+                style: TextStyle(fontSize: 16),
               ),
             ],
           ),

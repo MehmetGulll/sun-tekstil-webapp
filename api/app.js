@@ -13,8 +13,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({extended:false}));
+// app.use(bodyParser.json());
 const port = 5000;
 
 const authRoutes = require("./routers/authRoutes");
@@ -26,6 +26,9 @@ const questionRoutes = require("./routers/questionRoutes");
 const homeRoutes = require("./routers/homeRoutes");
 const titleRoutes = require("./routers/titleRoutes");
 const mailRoutes = require("./routers/mailRoutes");
+
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.use(authRoutes);
 app.use(regionRoutes);
