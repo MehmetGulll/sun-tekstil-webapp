@@ -445,6 +445,9 @@ class _ReportsState extends State<Reports> {
                                   return ErrorDialog(
                                     errorMessage: errorMessage,
                                     errorIcon: Icons.person_off,
+                                    onPressed: (){
+                                      Navigator.of(context).pop();
+                                    },
                                   );
                                 });
                           } else if (_endDate == null) {
@@ -455,6 +458,9 @@ class _ReportsState extends State<Reports> {
                                   return ErrorDialog(
                                     errorMessage: errorMessage,
                                     errorIcon: Icons.person_off,
+                                    onPressed: (){
+                                      Navigator.of(context).pop();
+                                    },
                                   );
                                 });
                           } else {

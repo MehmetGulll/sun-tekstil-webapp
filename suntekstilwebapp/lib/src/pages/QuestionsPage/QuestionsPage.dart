@@ -10,7 +10,9 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
-
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
@@ -102,9 +104,6 @@ class _QuestionsState extends State<Questions> {
     print("yeni puan $questionPoint");
     print("seçilen tip: $chosenQuestionType");
 
-    // var currentStatus = question['status'];
-    // var newStatus = currentStatus == 0 ? 1 : 0;
-    // question['status'] = newStatus;
     print(id);
     print("status");
     print(question['status']);
@@ -126,14 +125,38 @@ class _QuestionsState extends State<Questions> {
     );
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
-      Navigator.pop(context);
+      String successMessage = "Güncelleme Başarılı!!";
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessDialog(
+              successMessage: successMessage,
+              successIcon: Icons.check,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/questions');
+              },
+            );
+          });
+
       setState(() {
         var updatedQuestion = _questions
             .firstWhere((q) => q['questionId'] == question['questionId']);
         updatedQuestion['status'] = _questionStateList;
       });
     } else {
+      String errorMessage = "Bir hata oluştu!!";
       print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     }
   }
 
@@ -257,7 +280,7 @@ class _QuestionsState extends State<Questions> {
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Expanded(
                     child: CustomButton(
-                      buttonText: "Düzenle",
+                      buttonText: "Onay",
                       onPressed: () async {
                         print("Butona basıldı");
                         await updateQuestion(context, question['questionId'],

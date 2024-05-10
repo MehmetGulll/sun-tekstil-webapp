@@ -5,6 +5,8 @@ import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Checkbox/Checkbox.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
@@ -76,6 +78,18 @@ class _OfficalUsers extends State<OfficalUsers> {
     );
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
+      String successMessage = "Güncelleme Başarılı!!";
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessDialog(
+              successMessage: successMessage,
+              successIcon: Icons.check,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/officalUsers');
+              },
+            );
+          });
       Navigator.pop(context);
       setState(() {
         var updatedUser = _users.firstWhere((u) => u['id'] == user['id']);
@@ -83,6 +97,19 @@ class _OfficalUsers extends State<OfficalUsers> {
       });
     } else {
       print("Hata");
+      String errorMessage = "Bir hata oluştu!!";
+      print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     }
   }
 
