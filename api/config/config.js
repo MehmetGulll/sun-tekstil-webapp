@@ -9,4 +9,10 @@ const config={
     }
 }
 
-module.exports=config;
+const cloudConfig = {
+    cloud_name:process.env.CDN_CLOUD_NAME,
+    api_key:process.env.CDN_API_KEY,
+    api_secret:process.envCDN_API_SECRET
+}
+
+module.exports={config, cloudConfig};
