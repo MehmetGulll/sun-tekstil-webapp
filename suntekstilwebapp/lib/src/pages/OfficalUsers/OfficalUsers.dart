@@ -220,10 +220,10 @@ class _OfficalUsers extends State<OfficalUsers> {
                     Uint8List fileBytes = result.files.first.bytes!;
                     String fileName = result.files.first.name;
 
-                    // Dosyayı sunucuya gönder
+                  
                     uploadImage(fileBytes, fileName);
                   } else {
-                    // Kullanıcı dosya seçimi iptal etti
+                   
                     print('No file selected');
                   }
                 },
