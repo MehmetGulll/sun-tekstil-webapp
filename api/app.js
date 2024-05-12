@@ -9,6 +9,7 @@ const questionsRoutes = require('./routers/questionsRoutes');
 const userRoutes = require('./routers/userRoutes');
 const storesRoutes = require('./routers/storesRoutes');
 const reportsRoutes = require('./routers/reportsRoutes');
+const cloudRoutes = require('./routers/cloudRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -43,6 +44,7 @@ app.use(reportsRoutes);
 app.use(inspection);
 app.use(actionRoutes);
 app.use(questionRoutes);
+app.use(cloudRoutes);
 
 
 // Start the server

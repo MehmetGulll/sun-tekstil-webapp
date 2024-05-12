@@ -137,6 +137,7 @@ class _InspectionPageState extends State<InspectionPage> {
                     ),
                   ),
                 ),
+                
                 SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: () async {
@@ -501,6 +502,19 @@ class _InspectionScreenState extends State<InspectionScreen> {
     );
   }
 
+  Future<void> uploadFile(String filePath, String fileName) async {
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('http://your-backend-url.com/upload'));
+    request.files.add(await http.MultipartFile.fromPath('photo', filePath,
+        filename: fileName));
+    var res = await request.send();
+    if (res.statusCode == 200) {
+      print("Upload successful");
+    } else {
+      print("Upload failed");
+    }
+  }
+
   Widget _buildQuestionCard(Map<String, dynamic> question, int questionNumber) {
     final int soruId = question['soru_id'];
     final bool isActionVisible = _actionVisibilityMap[soruId] ?? false;
@@ -541,11 +555,14 @@ class _InspectionScreenState extends State<InspectionScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      _actionVisibilityMap[soruId] =
-                          !_actionVisibilityMap[soruId]!;
-                    });
+                    uploadFile(_filePath, _fileName);
                   },
+                  // onPressed: () {
+                  //   setState(() {
+                  //     _actionVisibilityMap[soruId] =
+                  //         !_actionVisibilityMap[soruId]!;
+                  //   });
+                  // },
                   child: Text('Aksiyon Oluştur'),
                 ),
               ],
@@ -558,6 +575,7 @@ class _InspectionScreenState extends State<InspectionScreen> {
   }
 
   String _filePath = '';
+  String _fileName = '';
 
   void _openFilePicker() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -565,10 +583,12 @@ class _InspectionScreenState extends State<InspectionScreen> {
     if (result != null) {
       setState(() {
         List<int> bytes = result.files.first.bytes!;
-        _filePath = result.files.first.name!;
+        _filePath = result.files.first.path!;
+        _fileName = result.files.first.name!;
         print("result is: $result");
         print("result files first bytes : ${result.files.first.bytes}");
         print("_filePath: $_filePath");
+        print("_fileName: $_fileName");
       });
     }
   }
