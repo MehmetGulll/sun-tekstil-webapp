@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Card/Card.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
@@ -147,22 +146,88 @@ class _MailPageState extends State<MailPage> {
                         children: [
                           SizedBox(
                             height: 320,
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 20),
-                                  child: Row(
-                                    children: [
-                                      Row(
-                                        // ayrıca kullanıcı maili ekleme yeri
-                                      ),
-                                      Row(
-                                        //  tüm kullanıcılar ve mailleri olan alan (listelenecek) tüm kullanıcıların yanında + butonu olacak 
-                                      )
-                                    ],
-                                  ),
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    // Input field for adding new email
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            height: 50,
+                                            child: CustomInput(
+                                              controller:
+                                                  TextEditingController(),
+                                              hintText: 'Yeni Mail Giriniz.',
+                                              keyboardType:
+                                                  TextInputType.emailAddress,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        MaterialButton(
+                                          onPressed: () {
+                                            print("Yeni Mail Eklendi");
+                                          },
+                                          color: Colors.transparent,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            side:
+                                                BorderSide(color: Colors.black54),
+                                          ),
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            child: Icon(
+                                              Icons.add,
+                                              color: Colors.black54,
+                                              size: 30,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    // List of all users and their emails from _tumKullanicilar
+                                    // Here you can display the list of users and their emails,
+                                    //  and a checkbox to select the users to send mail
+                                    // List of all users and their emails
+                                    ListView.builder(
+                                      physics: NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      itemCount: _tumKullanicilar.length,
+                                      itemBuilder: (BuildContext context,
+                                          int index) {
+                                        final user =
+                                            _tumKullanicilar[index];
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              title: Text(user['ad'] +
+                                                  " " +
+                                                  user['soyad']),
+                                              subtitle: Text(user['eposta']),
+                                              leading: Checkbox(
+                                                value: user['selected'] ?? false,
+                                                onChanged: (bool? newValue) {
+                                                  setState(() {
+                                                    _tumKullanicilar[index]
+                                                        ['selected'] = newValue;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                            Divider(),
+                                          ],
+                                        );
+                                      },
+                                    )
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -208,11 +273,17 @@ class _MailPageState extends State<MailPage> {
               SizedBox(
                 height: 20,
               ),
-              CustomButton(
-                buttonText: 'Mail Gönder',
+              ElevatedButton(
                 onPressed: () {
-                  print("Gönderildi");
+                  print("Mail Ayarları Kaydedildi");
                 },
+                child: Text(
+                  'Mail Ayarlarını Kaydet',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ],
           ),
