@@ -5,7 +5,28 @@ import '../../constants/theme.dart';
 import '../../API/url.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
-class Sidebar extends StatelessWidget {
+class Sidebar extends StatefulWidget {
+  @override
+  _SidebarState createState() => _SidebarState();
+}
+
+class _SidebarState extends State<Sidebar> {
+  late int currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUserId();
+  }
+
+  Future<void> getCurrentUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt('currentUserId');
+    setState(() {
+      currentUserId = userId ?? 6;
+    });
+  }
+
   Future<void> logout(BuildContext context) async {
     final response = await http.post(Uri.parse(ApiUrls.logout));
     if (response.statusCode == 200) {
@@ -25,9 +46,11 @@ class Sidebar extends StatelessWidget {
         color: Themes.whiteColor,
       ),
       child: Align(
-          alignment: Alignment.center,
-          child: Image.network(
-              'https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png')),
+        alignment: Alignment.center,
+        child: Image.network(
+          'https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png',
+        ),
+      ),
     );
     final homeTile = ListTile(
       leading: Icon(Icons.home),
@@ -45,8 +68,10 @@ class Sidebar extends StatelessWidget {
 
     final QuestionsExpansionTile = ListTile(
       leading: Icon(Icons.question_mark),
-      title:
-          Text('Denetim Soruları', style: TextStyle(color: Themes.whiteColor)),
+      title: Text(
+        'Denetim Soruları',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/questions') {
@@ -56,7 +81,10 @@ class Sidebar extends StatelessWidget {
     );
     final RegionsTile = ListTile(
       leading: Icon(Icons.map),
-      title: Text('Mağazalar', style: TextStyle(color: Themes.whiteColor)),
+      title: Text(
+        'Mağazalar',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/stores') {
@@ -66,8 +94,10 @@ class Sidebar extends StatelessWidget {
     );
     final UserManagementTile = ExpansionTile(
       leading: Icon(Icons.supervised_user_circle),
-      title: Text('Kullanıcı Yönetimi',
-          style: TextStyle(color: Themes.whiteColor)),
+      title: Text(
+        'Kullanıcı Yönetimi',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       children: <Widget>[
         ListTile(
           leading: Icon(Icons.password),
@@ -83,8 +113,10 @@ class Sidebar extends StatelessWidget {
         ),
         ListTile(
           leading: Icon(Icons.verified_user_rounded),
-          title: Text('Yetkili Kullanıcılar',
-              style: TextStyle(color: Themes.whiteColor)),
+          title: Text(
+            'Yetkili Kullanıcılar',
+            style: TextStyle(color: Themes.whiteColor),
+          ),
           onTap: () {
             Navigator.pop(context);
             if (ModalRoute.of(context)?.settings.name != '/officalUsers') {
@@ -96,7 +128,10 @@ class Sidebar extends StatelessWidget {
     );
     final ReportsTile = ListTile(
       leading: Icon(Icons.report),
-      title: Text('Raporlar', style: TextStyle(color: Themes.whiteColor)),
+      title: Text(
+        'Raporlar',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/reports') {
@@ -104,9 +139,13 @@ class Sidebar extends StatelessWidget {
         }
       },
     );
+
     final MailTile = ListTile(
       leading: Icon(Icons.mail),
-      title: Text('Mail Yönetimi', style: TextStyle(color: Themes.whiteColor)),
+      title: Text(
+        'Mail Yönetimi',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/sendMail') {
@@ -115,9 +154,12 @@ class Sidebar extends StatelessWidget {
       },
     );
 
-     final InspectionTile = ListTile(
+    final InspectionTile = ListTile(
       leading: Icon(Icons.content_paste_search_rounded),
-      title: Text('Denetimlerim', style: TextStyle(color: Themes.whiteColor)),
+      title: Text(
+        'Denetimlerim',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/inspectionList') {
@@ -142,17 +184,27 @@ class Sidebar extends StatelessWidget {
         color: Themes.blackColor,
         child: ListView(
           padding: EdgeInsets.zero,
-          children: <Widget>[
-            drawerHeader,
-            homeTile,
-            QuestionsExpansionTile,
-            RegionsTile,
-            UserManagementTile,
-            ReportsTile,
-            MailTile,
-            InspectionTile,
-            LogOutTile,
-          ],
+          children: currentUserId == 1
+              ? [
+                  drawerHeader,
+                  homeTile,
+                  QuestionsExpansionTile,
+                  RegionsTile,
+                  UserManagementTile,
+                  ReportsTile,
+                  MailTile,
+                  InspectionTile,
+                  LogOutTile,
+                ]
+              : [
+                  drawerHeader,
+                  homeTile,
+                  QuestionsExpansionTile,
+                  RegionsTile,
+                  UserManagementTile,
+                  InspectionTile,
+                  LogOutTile,
+                ],
         ),
       ),
     );

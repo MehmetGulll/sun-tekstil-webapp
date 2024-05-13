@@ -773,4 +773,44 @@ router.post("/sendEmail", async (req, res) => {
   }
 });
 
+// Tüm Denetim Tiplerini Listeler
+router.get("/getAllDenetimTipi", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const findAllDenetimTipi = await denetimTipiModel.findAll({
+      attributes: ["denetim_tip_id", "denetim_tipi"],
+    });
+
+    return res.status(200).send(findAllDenetimTipi);
+  } catch (error) {
+    console.error("Get All Denetim Tipi Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
+// Tüm Kullanıcıları Listeler
+router.get("/getAllUsers", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const findAllUsers = await kullaniciModel.findAll({
+      attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
+    });
+
+    return res.status(200).send(findAllUsers);
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
 module.exports = router;
