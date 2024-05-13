@@ -132,6 +132,8 @@ router.post("/deleteUnvanDenetimTipiLink", authenticateToken, async (req, res) =
   }
 });
 
+
+
 // MAİL YONETIM SOL TARAF
 // Denetim Tipi ve Kullanici ID yi kullanarak kullaniciDenetimTipiLink tablosuna denetim_tipi ve kullanici tablolarını birleştirir.
 router.post("/linkKullaniciDenetimTipi", authenticateToken, async (req, res) => {
@@ -214,13 +216,14 @@ router.post("/deleteKullaniciDenetimTipiLink", authenticateToken, async (req, re
   }
   try {
     const schema = Joi.object({
-      id: Joi.number().required(),
+      kullanici_id: Joi.number().required(),
+      denetim_tip_id: Joi.number().required(),
     });
 
     const { error } = schema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const { id } = req.body;
+    const { kullanici_id, denetim_tip_id } = req.body;
 
     const sequelize = await initializeSequelize();
     const kullaniciDenetimTipiLinkModel = sequelize.define(
@@ -234,26 +237,102 @@ router.post("/deleteKullaniciDenetimTipiLink", authenticateToken, async (req, re
 
     const findData = await kullaniciDenetimTipiLinkModel.findOne({
       where: {
-        id,
+          [Op.and]: [{kullanici_id}, {denetim_tip_id}]
       },
     });
+
 
     if (!findData) return res.status(404).send("Veri bulunamadı.");
 
     const deleteKullaniciDenetimTipiLink = await kullaniciDenetimTipiLinkModel.destroy({
       where: {
-        id,
+        [Op.and]: [{kullanici_id}, {denetim_tip_id}]
       },
     });
 
-    return res.status(200).send(deleteKullaniciDenetimTipiLink);
+    res.status(200).send("Veri başarıyla silindi.");
   } catch (error) {
     console.error("Delete Kullanici Denetim Tipi Link Error:", error);
     return res.status(500).send(error);
   }
 });
 
-// linkKullaniciDenetimTipi verilerini güncelleme 
+// Sol taraf kullanıcılarını listeler
+router.get("/getLinkKullaniciDenetimTipiKullanicilari", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const kullaniciDenetimTipiLinkModel = sequelize.define(
+      "kullaniciDenetimTipiLink",
+      kullaniciDenetimTipiLink,{
+        timestamps: false,
+        freezeTableName: true,
+      }
+    );
+
+    denetimTipiModel.hasMany(kullaniciDenetimTipiLinkModel, {
+      foreignKey: "denetim_tip_id",
+    });
+
+    kullaniciModel.hasMany(kullaniciDenetimTipiLinkModel, {
+      foreignKey: "kullanici_id",
+    });
+
+    kullaniciDenetimTipiLinkModel.belongsTo(denetimTipiModel, {
+      foreignKey: "denetim_tip_id",
+    });
+
+    kullaniciDenetimTipiLinkModel.belongsTo(kullaniciModel, {
+      foreignKey: "kullanici_id",
+    });
+
+
+
+    const findAllUsersRelatedDenetimTipi = await kullaniciDenetimTipiLinkModel.findAll({
+      where: {
+        status: 1,
+      },
+      attributes: ["id", "denetim_tip_id", "kullanici_id"],
+      include: [
+        {
+          model: denetimTipiModel,
+          attributes: ["denetim_tip_id", "denetim_tipi"],
+        },
+        {
+          model: kullaniciModel,
+          attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
+        },
+      ],
+    });
+
+    const modifiedData = findAllUsersRelatedDenetimTipi.map((item) => { 
+      return {
+        id: item.id,
+        kullanici_id: item.kullanici_id,
+        kullanici: item.kullanici.ad + " " + item.kullanici.soyad,
+        eposta: item.kullanici.eposta,
+        denetim_tip_id: item.denetim_tip_id,
+        denetim_tipi: item.denetim_tipi.denetim_tipi,
+      };
+    });
+
+    return res.status(200).send(modifiedData);
+  } catch (error) {
+    console.error("Get Link Kullanici Denetim Tipi Kullanicilari Error:", error);
+    return
+  }
+});
+
+// linkKullaniciDenetimTipi verilerini güncelleme   SİLİNECEK 
 router.post("/updateKullaniciDenetimTipiLink", authenticateToken, async (req, res) => {
   if (req.user.rol_id !== 1 && req.user.rol_id !== 2) {
     return res.status(403).send("Verileri güncelleme yetkiniz yok!");

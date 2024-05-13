@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
         '/officalUsers': (context) => OfficalUsers(),
         '/changePassword': (context) => ChangePassword(),
         '/reports': (context) => Reports(),
-        '/sendMail': (context) => MailPage(),
+        '/mailManagement': (context) => MailPage(),
         '/addQuestion': (context) => AddQuestion(),
         '/inspectionList': (context) => InspectionPage(),
       },

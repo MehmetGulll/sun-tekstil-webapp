@@ -33,5 +33,10 @@ class ApiUrls {
   static const String answerInspection ='http://localhost:5000/answerInspection';
   static const String getAllDenetimTipi ='http://localhost:5000/getAllDenetimTipi';
   static const String getAllUsers ='http://localhost:5000/getAllUsers';
+  static const String getLinkKullaniciDenetimTipiKullanicilari ='http://localhost:5000/getLinkKullaniciDenetimTipiKullanicilari';
+  static const String linkKullaniciDenetimTipi ='http://localhost:5000/linkKullaniciDenetimTipi';
+  static const String deleteKullaniciDenetimTipiLink ='http://localhost:5000/deleteKullaniciDenetimTipiLink';
+  static const String getAllUsersByRelatedDenetimTipi ='http://localhost:5000/getAllUsersByRelatedDenetimTipi';
+
 
 }
