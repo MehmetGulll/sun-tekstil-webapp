@@ -86,7 +86,9 @@ class _OfficalUsers extends State<OfficalUsers> {
     } else {
       print("Hata");
     }
-  } Future<void> uploadImage(Uint8List? bytes, String fileName) async {
+  }
+
+  Future<void> uploadImage(Uint8List? bytes, String fileName) async {
     var request = http.MultipartRequest(
         'POST', Uri.parse('http://localhost:5000/upload'));
     request.files
@@ -97,8 +99,10 @@ class _OfficalUsers extends State<OfficalUsers> {
     } else {
       print("Upload failed");
     }
-  } Uint8List? _fileBytes;
-  String _fileName = '';
+  }
+
+String? _fileName;
+
   void _openFilePicker() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
@@ -112,10 +116,6 @@ class _OfficalUsers extends State<OfficalUsers> {
       });
     }
   }
-
-
-
-
 
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map user) {
@@ -192,8 +192,6 @@ class _OfficalUsers extends State<OfficalUsers> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -220,10 +218,8 @@ class _OfficalUsers extends State<OfficalUsers> {
                     Uint8List fileBytes = result.files.first.bytes!;
                     String fileName = result.files.first.name;
 
-                  
                     uploadImage(fileBytes, fileName);
                   } else {
-                   
                     print('No file selected');
                   }
                 },
