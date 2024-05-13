@@ -10,3 +10,12 @@ class Auth with ChangeNotifier {
     notifyListeners();
   }
 }
+
+class InspectionTypeId with ChangeNotifier{
+  String? _inspectionTypeId;
+  String? get inspectionTypeId => _inspectionTypeId;
+  set inspectionTypeId(String? value){
+    _inspectionTypeId = value;
+    notifyListeners();
+  }
+}

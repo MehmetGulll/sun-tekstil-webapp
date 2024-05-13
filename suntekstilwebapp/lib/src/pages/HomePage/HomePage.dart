@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Card/Card.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
@@ -9,6 +10,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:suntekstilwebapp/src/pages/SuccessRate/SuccessRate.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 
 class Home extends StatelessWidget {
@@ -370,6 +372,19 @@ class Home extends StatelessWidget {
                                                                                 fontWeight: Tokens.fontWeight[4],
                                                                               ),
                                                                             ),
+                                                                            SizedBox(
+                                                                              height: 20,
+                                                                            ),
+                                                                            CustomButton(
+                                                                                buttonText: "Başarı oranlarını gör",
+                                                                                onPressed: () {
+                                                                                  Navigator.pushReplacement(
+                                                                                    context,
+                                                                                    MaterialPageRoute(
+                                                                                      builder: (context) => SuccessRate(),
+                                                                                    ),
+                                                                                  );
+                                                                                })
                                                                           ],
                                                                         ),
                                                                       ],
@@ -588,7 +603,10 @@ class Home extends StatelessWidget {
                                                                               fontSize: Tokens.fontSize[3],
                                                                               fontWeight: Tokens.fontWeight[7]),
                                                                         ),
-                                                                        SizedBox(height: 100,),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              100,
+                                                                        ),
                                                                         Text(
                                                                           message,
                                                                           maxLines:

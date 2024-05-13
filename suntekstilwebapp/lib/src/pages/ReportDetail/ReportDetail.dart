@@ -209,7 +209,7 @@ class _ReportDetailState extends State<ReportDetail> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CustomButton(
-                        buttonText: 'Excel Çıktısı',
+                        buttonText: 'Excel',
                         buttonColor: Themes.greenColor,
                         onPressed: () {
                           print("Excel çıktısı alındı");
@@ -221,7 +221,7 @@ class _ReportDetailState extends State<ReportDetail> {
                       width: 20,
                     ),
                     CustomButton(
-                        buttonText: 'PDF Çıktısı',
+                        buttonText: 'PDF ',
                         buttonColor: Themes.secondaryColor,
                         onPressed: () {
                           print("PDF çıktısı");
