@@ -469,6 +469,11 @@ router.get("/getAllUsersByRelatedDenetimTipi",authenticateToken,async (req, res)
         targetKey: "unvan_id",
       });
 
+      const findAllUsers = await kullaniciModel.findAll({
+        attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
+        order: [["unvan_id", "ASC"]],
+      });
+
       const findDenetimTipiByUnvan = await denetimTipiModel.findAll({
         include: [
           {
@@ -477,41 +482,34 @@ router.get("/getAllUsersByRelatedDenetimTipi",authenticateToken,async (req, res)
               {
                 model: unvanModel,
                 attributes: ["unvan_id", "unvan_adi"],
-                include: [
-                  {
-                    model: kullaniciModel,
-                    attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
-                  },
-                ],
               },
             ],
           },
         ],
         attributes: ["denetim_tip_id", "denetim_tipi"],
-        
       });
 
-      // return res.send(findDenetimTipiByUnvan)
+
 
       const modifiedData = findDenetimTipiByUnvan.map((item) => {
         const unvan = item.unvanDenetimTipiLinks.map((item) => {
           return {
             unvan_id: item.unvan.unvan_id,
             unvan_adi: item.unvan.unvan_adi,
-            kullanici: item.unvan.kullanici,
+            kullanicilar: findAllUsers.filter((user) => user.unvan_id === item.unvan.unvan_id), 
           };
         });
         return {
           denetim_tip_id: item.denetim_tip_id,
           denetim_tipi: item.denetim_tipi,
-          unvan: unvan,
+          unvanlar: unvan,
         };
       });
 
       return res.status(200).send(modifiedData);
     } catch (error) {
       console.error("Add Title Error:", error);
-      return res.status.send(error);
+     return res.status(500).send(error.message);
     }
   }
 );

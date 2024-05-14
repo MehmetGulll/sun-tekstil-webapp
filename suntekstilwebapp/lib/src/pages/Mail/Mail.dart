@@ -15,7 +15,6 @@ class MailPage extends StatefulWidget {
 }
 
 class _MailPageState extends State<MailPage> {
-  // SOL TARAF ARRAYLER
   List<Map<String, dynamic>> _denetimTipleri = [];
   List<Map<String, dynamic>> _tumKullanicilar = [];
   List<Map<String, dynamic>> _selectedUsersLeft = [];
@@ -23,8 +22,12 @@ class _MailPageState extends State<MailPage> {
   late TextEditingController _searchTextController;
   Timer? _debounce;
 
-// SAĞ TARAF ARRAYLER
   List<Map<String, dynamic>> _unvanDenetimData = [];
+  List<Map<String, dynamic>> _unvanHeader = [];
+  List<Map<String, dynamic>> _selectedDenetimTipiPanelList = [];
+  List<Map<String, dynamic>> _selectedDenetimTipiBody = [];
+
+  late int denetimTip;
 
   @override
   void initState() {
@@ -33,7 +36,8 @@ class _MailPageState extends State<MailPage> {
     _fetchDenetimTipleri();
     _fetchAllUsers();
     _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
-    _getAllDataRight();
+    _getAllDataRight(_selectedDenetimTipi!);
+    denetimTip = int.tryParse(_selectedDenetimTipi!) ?? 1;
   }
 
   @override
@@ -43,7 +47,6 @@ class _MailPageState extends State<MailPage> {
     super.dispose();
   }
 
-// SOL TARAF KULLANICILARIN DENETİM TİPİNE GÖRE LİNKLENMESİ
   Future<void> _fetchDenetimTipleri() async {
     try {
       var token = await TokenHelper.getToken();
@@ -81,7 +84,7 @@ class _MailPageState extends State<MailPage> {
           _tumKullanicilar =
               List<Map<String, dynamic>>.from(json.decode(response.body));
         });
-        print("Tüm Kullanıcılar1: $_tumKullanicilar");
+        print("Tüm Kullanıcılar Right: $_tumKullanicilar");
       } else {
         throw Exception('Failed to load data');
       }
@@ -106,7 +109,7 @@ class _MailPageState extends State<MailPage> {
           _selectedUsersLeft =
               List<Map<String, dynamic>>.from(json.decode(response.body));
         });
-        print("Tüm Kullanıcılar2: $_selectedUsersLeft");
+        print("Tüm Kullanıcılar Left: $_selectedUsersLeft");
       } else {
         throw Exception('Failed to load data');
       }
@@ -204,35 +207,47 @@ class _MailPageState extends State<MailPage> {
     }
   }
 
-// SAĞ TARAF UNVAN + DENETİM TİPİNE GÖRE KULLANICILARIN LİNKLENMESİ
-  Future<void> _getAllDataRight() async {
+  Future<void> _getAllDataRight(String denetimTipId) async {
     try {
       var token = await TokenHelper.getToken();
       var response = await http.get(
-          Uri.parse(ApiUrls.getAllUsersByRelatedDenetimTipi),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': '$token'
-          });
+        Uri.parse(ApiUrls.getAllUsersByRelatedDenetimTipi),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': '$token'
+        },
+      );
 
       if (response.statusCode == 200) {
         List<Map<String, dynamic>> unvanDenetimData =
             List<Map<String, dynamic>>.from(json.decode(response.body));
+
         unvanDenetimData.forEach((data) {
           data['isExpanded'] = false;
-          data['unvan'].forEach((unvanData) {
-            if (unvanData['denetim_tip_id'] == int.parse(_selectedDenetimTipi!)) {
-              unvanData['kullanici'] = _tumKullanicilar.firstWhere(
-                (user) => user['id'] == unvanData['kullanici_id'],
-                orElse: () => <String, dynamic>{},
-              );
-            }
-          });
-        }); 
+        });
+
         setState(() {
           _unvanDenetimData = unvanDenetimData;
+          _unvanHeader = _unvanDenetimData
+              .map((item) => {
+                    'denetim_tipi': item['denetim_tip_id'],
+                    'unvanlar': item['unvanlar'],
+                  })
+              .toList();
+
+          _selectedDenetimTipiPanelList = _unvanHeader
+              .where(
+                (item) => item['denetim_tipi'] == int.parse(denetimTipId),
+              )
+              .toList();
+          _selectedDenetimTipiBody = _selectedDenetimTipiPanelList
+              .map((item) => {'unvanlar': item['unvanlar']})
+              .toList();
         });
-        print("Unvana göre tüm data: $_unvanDenetimData");
+        print("_selectedDenetimTipiBodyabc: $_selectedDenetimTipiBody");
+        print(
+            "Unvan Headerabc: $_unvanHeader , _selectedDenetimTipi: $_selectedDenetimTipi , ");
+        print("Sağ tüm data: $_unvanDenetimData");
       } else {
         throw Exception('Failed to load data');
       }
@@ -243,7 +258,6 @@ class _MailPageState extends State<MailPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("Selected Denetim Tipi: $_selectedDenetimTipi");
     return CustomScaffold(
       body: DefaultTabController(
         length: _denetimTipleri.length,
@@ -281,6 +295,7 @@ class _MailPageState extends State<MailPage> {
                             _denetimTipleri[index]['denetim_tip_id'].toString();
                       });
                       _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
+                      _getAllDataRight(_selectedDenetimTipi!);
                     },
                   ),
                 ),
@@ -291,7 +306,6 @@ class _MailPageState extends State<MailPage> {
                   children: [
                     Expanded(
                       child: Container(
-                        // Left section
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: Themes.borderColor,
@@ -402,6 +416,7 @@ class _MailPageState extends State<MailPage> {
                     SizedBox(
                       width: 20,
                     ),
+                    // SAĞ TARAF
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -415,77 +430,94 @@ class _MailPageState extends State<MailPage> {
                           children: [
                             SizedBox(
                               height: 320,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 20),
-                                    child: Container(
-                                      width: double.infinity,
-                                      child: ExpansionPanelList(
-                                        expansionCallback:
-                                            (int index, bool isExpanded) {
-                                          setState(() {
-                                            _unvanDenetimData[index]
-                                                ['isExpanded'] = !isExpanded;
-                                          });
-                                        },
-                                        children: _unvanDenetimData
-                                            .map<ExpansionPanel>((data) {
-                                              print("dataaaaaaa.unvan.map ${data['unvan']}");
-                                              // each unvan_adi in unvan array  
-                                              // DATA İÇERİSİNDEKİ UNVANLARI MAPLE VE İÇERİSİNDEKİ UNVAN_ADİ'Nİ AL 
-                                          return ExpansionPanel(
-                                            headerBuilder:
-                                                (BuildContext context,
-                                                    bool isExpanded) {
-                                              return ListTile(
-                                                title:
-                                                    Text(data['denetim_tipi']),
-                                              );
-                                            },
-                                            body: ListTile(
-                                              title: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: data['unvan']
-                                                    .map<Widget>(
-                                                        (unvanData) => Text(
-                                                              '${unvanData['unvan_adi']}: ${unvanData['kullanici'] != null ? '${unvanData['kullanici']['ad']} ${unvanData['kullanici']['soyad']} (${unvanData['kullanici']['eposta']})' : 'Kullanıcı bulunamadı'}',
-                                                            ))
-                                                    .toList(),
+                              child: SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              "Ünvana Göre Mail Yönetimi",
+                                              style: TextStyle(
+                                                fontSize: Tokens.fontSize[4],
+                                                fontWeight:
+                                                    Tokens.fontWeight[5],
                                               ),
                                             ),
-                                            isExpanded: data['isExpanded'],
-                                          );
-                                        }).toList(),
+                                          ),
+                                        ],
                                       ),
-                                    ),
+                                      ListView.builder(
+                                        physics: NeverScrollableScrollPhysics(),
+                                        shrinkWrap: true,
+                                        itemCount:
+                                            _selectedDenetimTipiBody.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          final unvan =
+                                              _selectedDenetimTipiBody[index];
+                                          final unvanlar = unvan['unvanlar'];
+                                          final kullanicilar = unvanlar
+                                              .map((item) => {
+                                                    item['kullanicilar'],
+                                                  })
+                                              .toList();
+
+                                          final unvan_adi = unvanlar
+                                              .map((item) => {
+                                                    item['unvan_adi'],
+                                                  })
+                                              .toList();
+
+                                          print("abcd0: $unvan");
+                                          print("abcd1: $kullanicilar");
+                                          print("abcd2: $unvanlar");
+                                          print("abcd3: $unvan_adi");
+                                          return ExpansionPanelList(
+                                            expansionCallback: (int panelIndex,
+                                                bool isExpanded) {
+                                              setState(() {
+                                                unvan['isExpanded'] =
+                                                    !isExpanded;
+                                              });
+                                            },
+                                            children: [
+                                              ExpansionPanel(
+                                                headerBuilder: (BuildContext context, bool isExpanded) {
+                                                  print("unvan_adi.index içerisi: $unvan_adi");
+                                                  return ListTile(
+                                                    title: Text(unvan_adi[index]),
+                                                  );
+                                                },
+                                                body: Column(
+                                                  children: kullanicilar[index].map<Widget>((item) {
+                                                    print("kullanicilar içerisi: $item");
+                                                    return ListTile(
+                                                      title: Text("$item['ad']  $item['soyad']"),
+                                                      subtitle: Text("$item['eposta']"),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                                // isExpanded: unvan['isExpanded'],
+                                                // isExpanded UNVAN İÇERİSİNDE YOK O YÜZDEN HATA VERİYOR VE 
+                                                //TİTLE İÇERİSİNDEKİ VERİLERİ DE KONTROL ET
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                    )
                   ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    print("Mail Ayarları Kaydedildi");
-                  },
-                  child: Text(
-                    'Mail Ayarlarını Kaydet',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 16,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -495,3 +527,4 @@ class _MailPageState extends State<MailPage> {
     );
   }
 }
+
