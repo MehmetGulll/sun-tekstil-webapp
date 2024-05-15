@@ -221,7 +221,6 @@ class _MailPageState extends State<MailPage> {
       if (response.statusCode == 200) {
         List<Map<String, dynamic>> unvanDenetimData =
             List<Map<String, dynamic>>.from(json.decode(response.body));
-
         unvanDenetimData.forEach((data) {
           data['isExpanded'] = false;
         });
@@ -245,8 +244,7 @@ class _MailPageState extends State<MailPage> {
               .toList();
         });
         print("_selectedDenetimTipiBodyabc: $_selectedDenetimTipiBody");
-        print(
-            "Unvan Headerabc: $_unvanHeader , _selectedDenetimTipi: $_selectedDenetimTipi , ");
+        print("Unvan Headerabc: $_unvanHeader , _selectedDenetimTipi: $_selectedDenetimTipi , ");
         print("Sağ tüm data: $_unvanDenetimData");
       } else {
         throw Exception('Failed to load data');
@@ -458,52 +456,35 @@ class _MailPageState extends State<MailPage> {
                                             (BuildContext context, int index) {
                                           final unvan =
                                               _selectedDenetimTipiBody[index];
+                                          // for accordion button full data
+                                          // [{unvan_id: 5, unvan_adi: İnsan Kaynakları Grup Müdürü, kullanicilar: []}, {unvan_id: 6, unvan_adi: Süreç iyileştirme Müdürü, kullanicilar: []}, {unvan_id: 7, unvan_adi: Süreç İyileştirme Uzman Yardımcısı, kullanicilar: [{id: 1, ad: Atakan, soyad: Doğan, eposta: atakandogan2001@gmail.com, unvan_id: 7}]}]
                                           final unvanlar = unvan['unvanlar'];
+
+                                          // for accordion button header
+                                          // [{İnsan Kaynakları Grup Müdürü}, {Süreç iyileştirme Müdürü}, {Süreç İyileştirme Uzman Yardımcısı}]
+                                          final unvan_adi = unvanlar
+                                              .map((item) => {
+                                                    item['unvan_adi'],
+                                                  })
+                                              .toList();
+                                          // for accordion button  expanded body
+                                          // [{[]}, {[]}, {[{id: 1, ad: Atakan, soyad: Doğan, eposta: atakandogan2001@gmail.com, unvan_id: 7}]}]
                                           final kullanicilar = unvanlar
                                               .map((item) => {
                                                     item['kullanicilar'],
                                                   })
                                               .toList();
 
-                                          final unvan_adi = unvanlar
-                                              .map((item) => {
-                                                    item['unvan_adi'],
-                                                  })
-                                              .toList();
-
-                                          print("abcd0: $unvan");
-                                          print("abcd1: $kullanicilar");
-                                          print("abcd2: $unvanlar");
-                                          print("abcd3: $unvan_adi");
-                                          return ExpansionPanelList(
-                                            expansionCallback: (int panelIndex,
-                                                bool isExpanded) {
-                                              setState(() {
-                                                unvan['isExpanded'] =
-                                                    !isExpanded;
-                                              });
-                                            },
+                                          // print("selectedDenetimTipi $_selectedDenetimTipi  , abcd0: $unvan");
+                                          print(
+                                              "selectedDenetimTipi $_selectedDenetimTipi  , abcd1: $kullanicilar");
+                                          print(
+                                              "selectedDenetimTipi $_selectedDenetimTipi  , abcd2: $unvanlar");
+                                          print(
+                                              "selectedDenetimTipi $_selectedDenetimTipi  , abcd3: $unvan_adi");
+                                          return  Column(
                                             children: [
-                                              ExpansionPanel(
-                                                headerBuilder: (BuildContext context, bool isExpanded) {
-                                                  print("unvan_adi.index içerisi: $unvan_adi");
-                                                  return ListTile(
-                                                    title: Text(unvan_adi[index]),
-                                                  );
-                                                },
-                                                body: Column(
-                                                  children: kullanicilar[index].map<Widget>((item) {
-                                                    print("kullanicilar içerisi: $item");
-                                                    return ListTile(
-                                                      title: Text("$item['ad']  $item['soyad']"),
-                                                      subtitle: Text("$item['eposta']"),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                                // isExpanded: unvan['isExpanded'],
-                                                // isExpanded UNVAN İÇERİSİNDE YOK O YÜZDEN HATA VERİYOR VE 
-                                                //TİTLE İÇERİSİNDEKİ VERİLERİ DE KONTROL ET
-                                              ),
+                                              // Expansion panel
                                             ],
                                           );
                                         },
@@ -527,4 +508,3 @@ class _MailPageState extends State<MailPage> {
     );
   }
 }
-
