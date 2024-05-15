@@ -38,8 +38,7 @@ class ApiUrls {
   static const String deleteKullaniciDenetimTipiLink ='http://localhost:5000/deleteKullaniciDenetimTipiLink';
   static const String getAllUsersByRelatedDenetimTipi ='http://localhost:5000/getAllUsersByRelatedDenetimTipi';
   static const String linkUnvanDenetimTipi ='http://localhost:5000/linkUnvanDenetimTipi';
-  static const String getAllUnvan ='http://localhost:5000/getAllUnvan';
-
+  static const String deleteUnvanDenetimTipiLink ='http://localhost:5000/deleteUnvanDenetimTipiLink';
 
 
 }

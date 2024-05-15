@@ -8,7 +8,7 @@ import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
-
+// sağ tarafta iptal edince checkbox yeşil kalması lazımken beyaz oluyor
 class MailPage extends StatefulWidget {
   @override
   _MailPageState createState() => _MailPageState();
@@ -18,16 +18,12 @@ class _MailPageState extends State<MailPage> {
   List<Map<String, dynamic>> _denetimTipleri = [];
   List<Map<String, dynamic>> _tumKullanicilar = [];
   List<Map<String, dynamic>> _selectedUsersLeft = [];
-  String? _selectedDenetimTipi = '1';
+  int _selectedDenetimTipi = 1;
   late TextEditingController _searchTextController;
   Timer? _debounce;
 
   List<Map<String, dynamic>> _unvanDenetimData = [];
-  List<Map<String, dynamic>> _unvanHeader = [];
-  List<Map<String, dynamic>> _selectedDenetimTipiPanelList = [];
-  List<Map<String, dynamic>> _selectedDenetimTipiBody = [];
   List<Map<String, dynamic>> _denetimTipineGoreTamObje = [];
-  List<Map<String, dynamic>> _unvanList = [];
 
   late int denetimTip;
 
@@ -37,10 +33,9 @@ class _MailPageState extends State<MailPage> {
     _searchTextController = TextEditingController();
     _fetchDenetimTipleri();
     _fetchAllUsers();
-    _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
-    _getAllDataRight(_selectedDenetimTipi!);
-    denetimTip = int.tryParse(_selectedDenetimTipi!) ?? 1;
-    _getAllUnvanList();
+    _fetchaAllSelectedKullanici(_selectedDenetimTipi);
+    _getAllDataRight(_selectedDenetimTipi);
+    denetimTip = _selectedDenetimTipi;
   }
 
   @override
@@ -96,7 +91,7 @@ class _MailPageState extends State<MailPage> {
     }
   }
 
-  Future<void> _fetchaAllSelectedKullanici(String denetimTipId) async {
+  Future<void> _fetchaAllSelectedKullanici(int denetimTipId) async {
     try {
       var token = await TokenHelper.getToken();
       var response = await http.get(
@@ -138,7 +133,7 @@ class _MailPageState extends State<MailPage> {
       if (response.statusCode == 200) {
         print("Kullanıcı ve denetim tipi bağlantısı başarıyla eklendi.");
         _fetchAllUsers();
-        _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
+        _fetchaAllSelectedKullanici(_selectedDenetimTipi);
       } else {
         throw Exception('Failed to link user and denetim tipi');
       }
@@ -164,7 +159,7 @@ class _MailPageState extends State<MailPage> {
       if (response.statusCode == 200) {
         print("Kullanıcı ve denetim tipi bağlantısı başarıyla silindi.");
         _fetchAllUsers();
-        _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
+        _fetchaAllSelectedKullanici(_selectedDenetimTipi);
       } else {
         throw Exception('Failed to delete link between user and denetim tipi');
       }
@@ -209,7 +204,7 @@ class _MailPageState extends State<MailPage> {
     }
   }
 
-  Future<void> _getAllDataRight(String denetimTipId) async {
+  Future<void> _getAllDataRight(int denetimTipId) async {
     try {
       var token = await TokenHelper.getToken();
       var response = await http.get(
@@ -232,25 +227,9 @@ class _MailPageState extends State<MailPage> {
 
         setState(() {
           _unvanDenetimData = unvanDenetimData;
-          _unvanHeader = _unvanDenetimData
-              .map((item) => {
-                    'denetim_tipi': item['denetim_tip_id'],
-                    'unvanlar': item['unvanlar'],
-                  })
-              .toList();
-
-          _selectedDenetimTipiPanelList = _unvanHeader
-              .where(
-                (item) => item['denetim_tipi'] == int.parse(denetimTipId),
-              )
-              .toList();
-          _selectedDenetimTipiBody = _selectedDenetimTipiPanelList
-              .map((item) => {'unvanlar': item['unvanlar']})
-              .toList();
-
           _denetimTipineGoreTamObje = _unvanDenetimData
               .where(
-                (item) => item['denetim_tip_id'] == int.parse(denetimTipId),
+                (item) => item['denetim_tip_id'] == denetimTipId,
               )
               .toList();
         });
@@ -265,30 +244,7 @@ class _MailPageState extends State<MailPage> {
     }
   }
 
-Future<void> _getAllUnvanList() async {
-    try {
-      var token = await TokenHelper.getToken();
-      var response = await http.get(Uri.parse(ApiUrls.getAllUnvan),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': '$token'
-          });
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _unvanList =
-              List<Map<String, dynamic>>.from(json.decode(response.body));
-        });
-        print("Response Unvanlar: ${response.body}");
-      } else {
-        throw Exception("Hata: ${response.body}");
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> _linkUnvanDenetimTipi() async {
+  Future<void> _linkUnvanDenetimTipi(int unvanId, int denetimTipId) async {
     try {
       var token = await TokenHelper.getToken();
       var response = await http.post(Uri.parse(ApiUrls.linkUnvanDenetimTipi),
@@ -297,10 +253,9 @@ Future<void> _getAllUnvanList() async {
             'Authorization': '$token'
           },
           body: jsonEncode({
-            'unvan_id': 1,
-            'denetim_tip_id': 1,
+            'unvan_id': unvanId,
+            'denetim_tip_id': denetimTipId,
           }));
-          
 
       if (response.statusCode == 200) {
         print("Bağlantı başarıyla oluşturuldu. Response: ${response.body}");
@@ -312,6 +267,59 @@ Future<void> _getAllUnvanList() async {
     }
   }
 
+  Future<void> _deleteUnvanDenetimTipiLink(
+      int unvanId, int denetimTipId) async {
+    try {
+      var token = await TokenHelper.getToken();
+      var response = await http.post(
+          Uri.parse(ApiUrls.deleteUnvanDenetimTipiLink),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': '$token'
+          },
+          body: jsonEncode({
+            'unvan_id': unvanId,
+            'denetim_tip_id': denetimTipId,
+          }));
+
+      if (response.statusCode == 200) {
+        print("Bağlantı başarıyla kaldırıldı. Response: ${response.body}");
+      } else {
+        throw Exception("Bağlantı oluşturulamadı. Hata: ${response.body}");
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  // future for confirmation dialog for link and delete
+  Future<void> _showConfirmationDialog(
+      String title, String content, Function onConfirm) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () {
+                onConfirm();
+                Navigator.pop(context);
+              },
+              child: Text('Onayla'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -349,10 +357,10 @@ Future<void> _getAllUnvanList() async {
                     onTap: (index) {
                       setState(() {
                         _selectedDenetimTipi =
-                            _denetimTipleri[index]['denetim_tip_id'].toString();
+                            _denetimTipleri[index]['denetim_tip_id'];
                       });
-                      _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
-                      _getAllDataRight(_selectedDenetimTipi!);
+                      _fetchaAllSelectedKullanici(_selectedDenetimTipi);
+                      _getAllDataRight(_selectedDenetimTipi);
                     },
                   ),
                 ),
@@ -361,6 +369,7 @@ Future<void> _getAllUnvanList() async {
                 ),
                 Row(
                   children: [
+                    //SOL TARAF
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -435,10 +444,8 @@ Future<void> _getAllUnvanList() async {
                                                     user['soyad']),
                                                 subtitle: Text(user['eposta']),
                                                 leading: Checkbox(
-                                                  value: isChecked(
-                                                      userId,
-                                                      int.parse(
-                                                          _selectedDenetimTipi!)),
+                                                  value: isChecked(userId,
+                                                      _selectedDenetimTipi),
                                                   activeColor:
                                                       Themes.greenColor,
                                                   onChanged: (bool? newValue) {
@@ -446,11 +453,23 @@ Future<void> _getAllUnvanList() async {
                                                       user['selected'] =
                                                           newValue;
                                                       if (newValue == true) {
-                                                        _linkKullaniciDenetimTipi(
-                                                            userId);
+                                                        _showConfirmationDialog(
+                                                          'Seçili Bağlantıyı Onayla',
+                                                          'Seçili kullanıcıyı bu denetim tipine bağlamak istediğinizden emin misiniz?',
+                                                          () {
+                                                            _linkKullaniciDenetimTipi(
+                                                                userId);
+                                                          },
+                                                        );
                                                       } else {
-                                                        _deleteKullaniciDenetimTipiLink(
-                                                            userId);
+                                                        _showConfirmationDialog(
+                                                          'Seçili Bağlantıyı Sil',
+                                                          'Seçili kullanıcının bu denetim tipi bağlantısını silmek istediğinizden emin misiniz?',
+                                                          () {
+                                                            _deleteKullaniciDenetimTipiLink(
+                                                                userId);
+                                                          },
+                                                        );
                                                       }
                                                     });
                                                   },
@@ -489,7 +508,8 @@ Future<void> _getAllUnvanList() async {
                               height: 320,
                               child: SingleChildScrollView(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 14),
                                   child: Column(
                                     children: [
                                       ListView.builder(
@@ -502,6 +522,7 @@ Future<void> _getAllUnvanList() async {
                                           final unvanlar =
                                               _denetimTipineGoreTamObje[index]
                                                   ['unvanlar'];
+                                          print("Unvanlarssss: $unvanlar");
                                           return Column(
                                             children: [
                                               ListTile(
@@ -563,12 +584,54 @@ Future<void> _getAllUnvanList() async {
                                                           child: Padding(
                                                             padding:
                                                                 const EdgeInsets
-                                                                    .all(10.0),
+                                                                    .all(12.0),
                                                             child: Row(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
                                                                       .spaceBetween,
                                                               children: [
+                                                                Checkbox(
+                                                                  value:
+                                                                      unvan['aktif'] ==
+                                                                              1
+                                                                          ? true
+                                                                          : false,
+                                                                  activeColor:
+                                                                      Themes
+                                                                          .greenColor,
+                                                                  onChanged: (bool?
+                                                                      newValue) {
+                                                                    setState(
+                                                                        () {
+                                                                      unvan['aktif'] =
+                                                                          newValue!
+                                                                              ? 1
+                                                                              : 0;
+                                                                      if (newValue ==
+                                                                          true) {
+                                                                            _showConfirmationDialog(
+                                                                              'Seçili Bağlantıyı Onayla',
+                                                                              'Seçili unvanı bu denetim tipine bağlamak istediğinizden emin misiniz?',
+                                                                              () {
+                                                                                _linkUnvanDenetimTipi(
+                                                                                    unvan['unvan_id'],
+                                                                                    denetimTip);
+                                                                              },
+                                                                            );
+                                                                      } else {
+                                                                        _showConfirmationDialog(
+                                                                          'Seçili Bağlantıyı Sil',
+                                                                          'Seçili unvanın bu denetim tipi bağlantısını silmek istediğinizden emin misiniz?',
+                                                                          () {
+                                                                            _deleteUnvanDenetimTipiLink(
+                                                                                unvan['unvan_id'],
+                                                                                denetimTip);
+                                                                          },
+                                                                        );
+                                                                      }
+                                                                    });
+                                                                  },
+                                                                ),
                                                                 Text(
                                                                   unvan[
                                                                       'unvan_adi'],

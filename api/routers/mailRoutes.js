@@ -94,43 +94,52 @@ router.post("/deleteUnvanDenetimTipiLink", authenticateToken, async (req, res) =
   }
   try {
     const schema = Joi.object({
-      id: Joi.number().required(),
+      unvan_id: Joi.number().required(),
+      denetim_tip_id: Joi.number().required(),
     });
 
     const { error } = schema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const { id } = req.body;
+    const { unvan_id, denetim_tip_id } = req.body;
 
-    const sequelize = await initializeSequelize();
-    const unvanDenetimTipiLinkModel = sequelize.define(
-      "unvanDenetimTipiLink",
-      unvanDenetimTipiLink,
-      {
-        timestamps: false,
-        freezeTableName: true,
-      }
-    ); 
-    const findData = await unvanDenetimTipiLinkModel.findOne({
-      where: {
-        id,
-      },
-    });
+    try {
+      const sequelize = await initializeSequelize();
+      const unvanDenetimTipiLinkModel = sequelize.define(
+        "unvanDenetimTipiLink",
+        unvanDenetimTipiLink,
+        {
+          timestamps: false,
+          freezeTableName: true,
+        }
+      );
+      const findData = await unvanDenetimTipiLinkModel.findOne({
+        where: {
+          [Op.and]: [{ unvan_id }, { denetim_tip_id }]
+        },
+      });
 
-    if (!findData) return res.status(404).send("Veri bulunamadı.");
+      if (!findData) return res.status(404).send("Veri bulunamadı.");
 
-    const deleteUnvanDenetimTipiLink = await unvanDenetimTipiLinkModel.destroy({
-      where: {
-        id,
-      },
-    }); 
+      const deleteUnvanDenetimTipiLink = await unvanDenetimTipiLinkModel.destroy({
+        where: {
+          id: findData.id,
+        },
+      });
 
-    return res.status(200).send(deleteUnvanDenetimTipiLink);
+      if (!deleteUnvanDenetimTipiLink) return res.status(404).send("Veri silinemedi.");
+
+      return res.status(200).send("Başarıyla silindi.");
+    } catch (error) {
+      console.error("Delete Unvan Denetim Tipi Link Error:", error);
+      return res.status(500).send("Sunucu hatası");
+    }
   } catch (error) {
-    console.error("Delete Unvan Denetim Tipi Link Error:", error);
-    return res.status(500).send
+    console.error("Validation Error:", error);
+    return res.status(500).send("Sunucu hatası");
   }
 });
+
 
 // Tüm Ünvanları listele
 router.get("/getAllUnvan", authenticateToken, async (req, res) => {
@@ -508,24 +517,56 @@ router.get("/getAllUsersByRelatedDenetimTipi",authenticateToken,async (req, res)
         attributes: ["denetim_tip_id", "denetim_tipi"],
       });
 
-
+      const findAllUnvanlar = await unvanModel.findAll({
+        attributes: ["unvan_id", "unvan_adi"],
+        where: { status: 1 },
+      });
 
       const modifiedData = findDenetimTipiByUnvan.map((item) => {
-        const unvan = item.unvanDenetimTipiLinks.map((item) => {
-          return {
-            unvan_id: item.unvan.unvan_id,
-            unvan_adi: item.unvan.unvan_adi,
-            kullanicilar: findAllUsers.filter((user) => user.unvan_id === item.unvan.unvan_id), 
-          };
+        const unvanlar = [];
+        const addedUnvanIds = []; 
+      
+        item.unvanDenetimTipiLinks.forEach((link) => {
+          const unvan_id = link.unvan.unvan_id;
+          
+          const existingIndex = addedUnvanIds.indexOf(unvan_id);
+          
+          if (existingIndex === -1) { 
+            addedUnvanIds.push(unvan_id); 
+            
+            unvanlar.push({
+              aktif: 1,
+              unvan_id: unvan_id,
+              unvan_adi: link.unvan.unvan_adi,
+              kullanicilar: findAllUsers.filter((user) => user.unvan_id === unvan_id), 
+            });
+          } else { 
+            if (link.aktif === 1) {
+              unvanlar[existingIndex].aktif = 1;
+            }
+          }
         });
+      
+        findAllUnvanlar.forEach((unvan) => {
+          if (addedUnvanIds.indexOf(unvan.unvan_id) === -1) {
+            unvanlar.push({
+              aktif: 0,
+              unvan_id: unvan.unvan_id,
+              unvan_adi: unvan.unvan_adi,
+              kullanicilar: findAllUsers.filter((user) => user.unvan_id === unvan.unvan_id),
+            });
+          }
+        });
+      
         return {
           denetim_tip_id: item.denetim_tip_id,
           denetim_tipi: item.denetim_tipi,
-          unvanlar: unvan,
+          unvanlar: unvanlar,
         };
       });
-
+      
       return res.status(200).send(modifiedData);
+      
     } catch (error) {
       console.error("Add Title Error:", error);
      return res.status(500).send(error.message);
