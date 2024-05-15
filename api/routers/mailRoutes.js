@@ -132,7 +132,26 @@ router.post("/deleteUnvanDenetimTipiLink", authenticateToken, async (req, res) =
   }
 });
 
+// Tüm Ünvanları listele
+router.get("/getAllUnvan", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const unvanModel = sequelize.define("unvan", unvan, {
+      timestamps: false,
+      freezeTableName: true,
+    });
 
+    const findAllUnvan = await unvanModel.findAll({
+      attributes: ["unvan_id", "unvan_adi"],
+      where: {status: 1,},
+    });
+
+    return res.status(200).send(findAllUnvan);
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    return res.status(500).send(error);
+  }
+});  
 
 // MAİL YONETIM SOL TARAF
 // Denetim Tipi ve Kullanici ID yi kullanarak kullaniciDenetimTipiLink tablosuna denetim_tipi ve kullanici tablolarını birleştirir.

@@ -26,6 +26,8 @@ class _MailPageState extends State<MailPage> {
   List<Map<String, dynamic>> _unvanHeader = [];
   List<Map<String, dynamic>> _selectedDenetimTipiPanelList = [];
   List<Map<String, dynamic>> _selectedDenetimTipiBody = [];
+  List<Map<String, dynamic>> _denetimTipineGoreTamObje = [];
+  List<Map<String, dynamic>> _unvanList = [];
 
   late int denetimTip;
 
@@ -38,6 +40,7 @@ class _MailPageState extends State<MailPage> {
     _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
     _getAllDataRight(_selectedDenetimTipi!);
     denetimTip = int.tryParse(_selectedDenetimTipi!) ?? 1;
+    _getAllUnvanList();
   }
 
   @override
@@ -134,7 +137,6 @@ class _MailPageState extends State<MailPage> {
 
       if (response.statusCode == 200) {
         print("Kullanıcı ve denetim tipi bağlantısı başarıyla eklendi.");
-        print("Selected Denetim Tipi: $_selectedDenetimTipi");
         _fetchAllUsers();
         _fetchaAllSelectedKullanici(_selectedDenetimTipi!);
       } else {
@@ -222,7 +224,10 @@ class _MailPageState extends State<MailPage> {
         List<Map<String, dynamic>> unvanDenetimData =
             List<Map<String, dynamic>>.from(json.decode(response.body));
         unvanDenetimData.forEach((data) {
-          data['isExpanded'] = false;
+          // set isExpanded property to false in each unvanlar array
+          data['unvanlar'].forEach((unvan) {
+            unvan['isExpanded'] = false;
+          });
         });
 
         setState(() {
@@ -242,10 +247,16 @@ class _MailPageState extends State<MailPage> {
           _selectedDenetimTipiBody = _selectedDenetimTipiPanelList
               .map((item) => {'unvanlar': item['unvanlar']})
               .toList();
+
+          _denetimTipineGoreTamObje = _unvanDenetimData
+              .where(
+                (item) => item['denetim_tip_id'] == int.parse(denetimTipId),
+              )
+              .toList();
         });
-        print("_selectedDenetimTipiBodyabc: $_selectedDenetimTipiBody");
-        print("Unvan Headerabc: $_unvanHeader , _selectedDenetimTipi: $_selectedDenetimTipi , ");
         print("Sağ tüm data: $_unvanDenetimData");
+        print(
+            "Sağ tüm data: $_denetimTipineGoreTamObje , _selectedDenetimTipi: $_selectedDenetimTipi");
       } else {
         throw Exception('Failed to load data');
       }
@@ -253,6 +264,54 @@ class _MailPageState extends State<MailPage> {
       print('Error: $e');
     }
   }
+
+Future<void> _getAllUnvanList() async {
+    try {
+      var token = await TokenHelper.getToken();
+      var response = await http.get(Uri.parse(ApiUrls.getAllUnvan),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': '$token'
+          });
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _unvanList =
+              List<Map<String, dynamic>>.from(json.decode(response.body));
+        });
+        print("Response Unvanlar: ${response.body}");
+      } else {
+        throw Exception("Hata: ${response.body}");
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> _linkUnvanDenetimTipi() async {
+    try {
+      var token = await TokenHelper.getToken();
+      var response = await http.post(Uri.parse(ApiUrls.linkUnvanDenetimTipi),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': '$token'
+          },
+          body: jsonEncode({
+            'unvan_id': 1,
+            'denetim_tip_id': 1,
+          }));
+          
+
+      if (response.statusCode == 200) {
+        print("Bağlantı başarıyla oluşturuldu. Response: ${response.body}");
+      } else {
+        throw Exception("Bağlantı oluşturulamadı. Hata: ${response.body}");
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -430,61 +489,155 @@ class _MailPageState extends State<MailPage> {
                               height: 320,
                               child: SingleChildScrollView(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
+                                  padding: const EdgeInsets.all(12.0),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "Ünvana Göre Mail Yönetimi",
-                                              style: TextStyle(
-                                                fontSize: Tokens.fontSize[4],
-                                                fontWeight:
-                                                    Tokens.fontWeight[5],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                                       ListView.builder(
                                         physics: NeverScrollableScrollPhysics(),
                                         shrinkWrap: true,
                                         itemCount:
-                                            _selectedDenetimTipiBody.length,
+                                            _denetimTipineGoreTamObje.length,
                                         itemBuilder:
                                             (BuildContext context, int index) {
-                                          final unvan =
-                                              _selectedDenetimTipiBody[index];
-                                          // for accordion button full data
-                                          // [{unvan_id: 5, unvan_adi: İnsan Kaynakları Grup Müdürü, kullanicilar: []}, {unvan_id: 6, unvan_adi: Süreç iyileştirme Müdürü, kullanicilar: []}, {unvan_id: 7, unvan_adi: Süreç İyileştirme Uzman Yardımcısı, kullanicilar: [{id: 1, ad: Atakan, soyad: Doğan, eposta: atakandogan2001@gmail.com, unvan_id: 7}]}]
-                                          final unvanlar = unvan['unvanlar'];
-
-                                          // for accordion button header
-                                          // [{İnsan Kaynakları Grup Müdürü}, {Süreç iyileştirme Müdürü}, {Süreç İyileştirme Uzman Yardımcısı}]
-                                          final unvan_adi = unvanlar
-                                              .map((item) => {
-                                                    item['unvan_adi'],
-                                                  })
-                                              .toList();
-                                          // for accordion button  expanded body
-                                          // [{[]}, {[]}, {[{id: 1, ad: Atakan, soyad: Doğan, eposta: atakandogan2001@gmail.com, unvan_id: 7}]}]
-                                          final kullanicilar = unvanlar
-                                              .map((item) => {
-                                                    item['kullanicilar'],
-                                                  })
-                                              .toList();
-
-                                          // print("selectedDenetimTipi $_selectedDenetimTipi  , abcd0: $unvan");
-                                          print(
-                                              "selectedDenetimTipi $_selectedDenetimTipi  , abcd1: $kullanicilar");
-                                          print(
-                                              "selectedDenetimTipi $_selectedDenetimTipi  , abcd2: $unvanlar");
-                                          print(
-                                              "selectedDenetimTipi $_selectedDenetimTipi  , abcd3: $unvan_adi");
-                                          return  Column(
+                                          final unvanlar =
+                                              _denetimTipineGoreTamObje[index]
+                                                  ['unvanlar'];
+                                          return Column(
                                             children: [
-                                              // Expansion panel
+                                              ListTile(
+                                                title: GestureDetector(
+                                                  child: Center(
+                                                    child: Text(
+                                                      _denetimTipineGoreTamObje[
+                                                                      index][
+                                                                  'denetim_tipi']
+                                                              .toString() +
+                                                          " Tipi Mail Ayarları",
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            Tokens.fontSize[4],
+                                                        fontWeight: Tokens
+                                                            .fontWeight[5],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      unvanlar.forEach((unvan) {
+                                                        unvan['isExpanded'] =
+                                                            !unvan[
+                                                                'isExpanded'];
+                                                      });
+                                                    });
+                                                  },
+                                                ),
+                                                // subtitle: Text(
+                                                //   "Ünvanlar",
+                                                //   style: TextStyle(
+                                                //     color: Themes.greyColor,
+                                                //   ),
+                                                // ),
+                                              ),
+                                              Divider(),
+                                              if (unvanlar.isNotEmpty)
+                                                ListView.builder(
+                                                  physics:
+                                                      NeverScrollableScrollPhysics(),
+                                                  shrinkWrap: true,
+                                                  itemCount: unvanlar.length,
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int index) {
+                                                    final unvan =
+                                                        unvanlar[index];
+                                                    return Column(
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {
+                                                              unvan['isExpanded'] =
+                                                                  !unvan[
+                                                                      'isExpanded'];
+                                                            });
+                                                          },
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(10.0),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  unvan[
+                                                                      'unvan_adi'],
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        Tokens.fontSize[
+                                                                            3],
+                                                                    fontWeight:
+                                                                        Tokens.fontWeight[
+                                                                            4],
+                                                                  ),
+                                                                ),
+                                                                Icon(
+                                                                  unvan['isExpanded']
+                                                                      ? Icons
+                                                                          .keyboard_arrow_up_rounded
+                                                                      : Icons
+                                                                          .keyboard_arrow_down_rounded,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        if (unvan['isExpanded'])
+                                                          unvan['kullanicilar']
+                                                                  .isEmpty
+                                                              ? ListTile(
+                                                                  title: Text(
+                                                                      "Kullanıcı Bulunamadı",
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Themes.accentColor)),
+                                                                )
+                                                              : ListView
+                                                                  .builder(
+                                                                  physics:
+                                                                      NeverScrollableScrollPhysics(),
+                                                                  shrinkWrap:
+                                                                      true,
+                                                                  itemCount: unvan[
+                                                                          'kullanicilar']
+                                                                      .length,
+                                                                  itemBuilder:
+                                                                      (BuildContext
+                                                                              context,
+                                                                          int index) {
+                                                                    final kullanici =
+                                                                        unvan['kullanicilar']
+                                                                            [
+                                                                            index];
+                                                                    return ListTile(
+                                                                      title:
+                                                                          Text(
+                                                                        kullanici['ad'] +
+                                                                            " " +
+                                                                            kullanici['soyad'],
+                                                                      ),
+                                                                      subtitle: Text(
+                                                                          kullanici[
+                                                                              'eposta']),
+                                                                    );
+                                                                  },
+                                                                ),
+                                                        Divider(),
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
                                             ],
                                           );
                                         },
