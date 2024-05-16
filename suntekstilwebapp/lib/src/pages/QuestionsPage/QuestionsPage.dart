@@ -229,9 +229,7 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
-              SizedBox(
-                height: 20,
-              ),
+             
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
