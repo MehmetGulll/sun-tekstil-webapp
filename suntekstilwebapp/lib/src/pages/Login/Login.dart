@@ -55,6 +55,9 @@ class Login extends StatelessWidget {
             return ErrorDialog(
               errorMessage: errorMessage,
               errorIcon: Icons.person_off,
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
             );
           });
     }

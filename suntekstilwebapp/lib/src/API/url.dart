@@ -20,7 +20,7 @@ class ApiUrls {
   static const String logout = 'http://localhost:5000/logout';
   static const String changePassword = 'http://localhost:5000/changePassword';
   static const String getUsers = 'http://localhost:5000/getUsers';
-  static const String updateOfficalUser = 'http://localhost:5000/updateUserStatus';
+  static const String updateOfficalUser = 'http://localhost:5000/updateOfficalUser';
   static const String filteredQuestion = 'http://localhost:5000/filteredQuestion';
   static const String filteredStore = 'http://localhost:5000/filteredStore';
   static const String filteredReport = 'http://localhost:5000/filteredReport';

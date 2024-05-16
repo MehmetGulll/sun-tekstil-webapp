@@ -6,8 +6,9 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 class SuccessDialog extends StatefulWidget {
   final String successMessage;
    final IconData successIcon;
+   final VoidCallback onPressed;
 
-  SuccessDialog({required this.successMessage, required this.successIcon});
+  SuccessDialog({required this.successMessage, required this.successIcon, required this.onPressed});
 
   @override
   _SuccessDialogState createState() => _SuccessDialogState();
@@ -73,7 +74,7 @@ class _SuccessDialogState extends State<SuccessDialog>
               CustomButton(
                 buttonText: 'Tamam',
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/home');
+                  widget.onPressed();
                 },
               ),
             ],
