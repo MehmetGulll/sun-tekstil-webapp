@@ -6,9 +6,13 @@ import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 
 class AddLocation extends StatefulWidget {
   @override
@@ -40,14 +44,20 @@ Widget buildColumn(BuildContext context, String label, List<String> items,
   );
 }
 
-class _AddLocationState extends State<AddLocation> { 
+class _AddLocationState extends State<AddLocation> {
+  Map<String, int> storeType = {'AVM': 1, 'CADDE': 2};
+
   final TextEditingController storeCodeController = TextEditingController();
   final TextEditingController storeNameController = TextEditingController();
   final TextEditingController storeCityController = TextEditingController();
-  final TextEditingController storePhoneNumberController = TextEditingController();
+  final TextEditingController storePhoneNumberController =
+      TextEditingController();
   final TextEditingController storeWidthController = TextEditingController();
+   TextEditingController storeTypeController = TextEditingController();
+   final TextEditingController storeEmailController = TextEditingController();
   @override
-  void dispose() {// burası dropdown değişince input içi değişmesin diye konuldu
+  void dispose() {
+    // burası dropdown değişince input içi değişmesin diye konuldu
     storeCodeController.dispose();
     storeNameController.dispose();
     storeCityController.dispose();
@@ -65,36 +75,66 @@ class _AddLocationState extends State<AddLocation> {
   String? _chosenStoreType;
   String? _chosenManagerType;
   List<String> _countryList = ['Country 1', 'Country 2', 'Country 3'];
-  List<String> _storeTypeList = ['1 ', '2'];
   List<String> _regionList = ['Region 1', 'Region 2', 'Region 3'];
   List<String> _storeManagerType = [
     '1',
     '2',
   ];
   List<String> _countyList = ['County 1', 'County 2', 'County 3'];
-  Future<void>addStore(BuildContext context) async{
+  Future<void> addStore(BuildContext context) async {
+    final auth = Provider.of<Auth>(context, listen: false);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int currentUserId = prefs.getInt("currentUserId") ?? 0;
+
+    int? selectedStoreType = storeType[storeTypeController.text];
+
     print(storeCodeController);
     print(storeNameController);
-    print(storeCityController);
-    print(_chosenStoreType);
+    print(storeTypeController);
     print(storeCityController);
     print(storePhoneNumberController);
     print(storeWidthController);
-    print(storeWidthController);
-    final response = await http.post(Uri.parse(ApiUrls.addStore), body:{
-      'storeCode':storeCodeController.text,
-      'storeName':storeNameController.text,
-      'storeType':_chosenStoreType,
-      'city':storeCityController.text,
-      'storePhone':storePhoneNumberController.text,
-      'storeWidth':storeWidthController.text,
-      'storeManager':_chosenManagerType
-    } );
-    if(response.statusCode ==200){
+    print(currentUserId);
+    print(storeEmailController);
+    final response = await http.post(Uri.parse(ApiUrls.addStore), body: {
+      'storeCode': storeCodeController.text,
+      'storeName': storeNameController.text,
+      'storeType': selectedStoreType.toString(),
+      'city': storeCityController.text,
+      'storePhone': storePhoneNumberController.text,
+      'storeWidth': storeWidthController.text,
+      'addId': currentUserId.toString(),
+      'storeEmail':storeEmailController.text
+    });
+    if (response.statusCode == 200) {
       print("Mağaza eklendi");
-    }
-    else{
+       String successMessage = "Mağaza Başarıyla Eklendi!!";
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessDialog(
+              successMessage: successMessage,
+              successIcon: Icons.check,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/stores');
+              },
+            );
+          });
+    } else {
       print("Bir hata oluştu");
+       String errorMessage = "Bir hata oluştu!!";
+      print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     }
   }
 
@@ -129,9 +169,11 @@ class _AddLocationState extends State<AddLocation> {
                       keyboardType: TextInputType.text)
                 ],
               ),
-              SizedBox(height: 30,),
-              buildColumn(context, "Mağaza Tipi", _storeTypeList,
-                  (value) => setState(() => _chosenStoreType = value)),
+              SizedBox(
+                height: 30,
+              ),
+              buildColumn(context, "Mağaza Tipi", storeType.keys.toList(),
+                  (value) => setState(() => storeTypeController.text = value!)),
               SizedBox(
                 height: 30,
               ),
@@ -173,12 +215,17 @@ class _AddLocationState extends State<AddLocation> {
               SizedBox(
                 height: 30,
               ),
-              buildColumn(context, "Mağaza Müdürü", _storeManagerType,
-                  (value) => setState(() => _chosenManagerType = value)),
-              SizedBox(
-                height: 30,
+              Column(
+                children: [
+                  Text("Mağaza Email Adresi",
+                      style: TextStyle(fontSize: Tokens.fontSize[4])),
+                  CustomInput(
+                      controller: storeEmailController,
+                      hintText: 'Mağaza Email Adres',
+                      keyboardType: TextInputType.text)
+                ],
               ),
-             
+              SizedBox(height:20 ,),
               Container(
                   margin: EdgeInsets.symmetric(vertical: 20),
                   child: CustomButton(
