@@ -144,8 +144,7 @@ class _OfficalUsers extends State<OfficalUsers> {
   Future<void> uploadImage(Uint8List? bytes, String fileName) async {
     var request = http.MultipartRequest(
         'POST', Uri.parse('http://localhost:5000/upload'));
-    request.files
-        .add(http.MultipartFile.fromBytes('photo', bytes!, filename: fileName));
+    request.files.add(http.MultipartFile.fromBytes('photo', bytes!, filename: fileName));
     var res = await request.send();
     if (res.statusCode == 200) {
       print("Upload successful");
