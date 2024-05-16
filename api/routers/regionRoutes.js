@@ -4,11 +4,20 @@ const Joi = require("joi");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
 const { bolge, kullanici } = require("../helpers/sequelizemodels");
-
+const { Op } = require("sequelize");
 
 // TÜM MAĞAZA BÖLGE LİSTESİNİ LİSTELER
-router.get("/getAllRegion", authenticateToken, async (req, res) => {
+router.post("/getAllRegion", authenticateToken, async (req, res) => {
   try {
+    const {error, value} = Joi.object({
+      page: Joi.number().optional(),
+      perPage: Joi.number().optional().allow(null,""),
+      searchTerm: Joi.string().optional()
+    }).validate(req.body);
+
+    if (error) return res.status(400).send(error);
+    const { page = 1, perPage = 10, searchTerm } = value;
+
     const sequelize = await initializeSequelize();
     const bolgeModel = sequelize.define("bolge", bolge, {
       timestamps: false,
@@ -25,11 +34,23 @@ router.get("/getAllRegion", authenticateToken, async (req, res) => {
       foreignKey: "bolge_muduru",
       targetKey: "id",
     });
+    const whereObj = {
+      status: 1,
+    };
+    
+    if (searchTerm) {
+      whereObj.bolge_adi = {
+        [Op.like]: `%${searchTerm}%`,
+      };
+    }
+    if (searchTerm === "" || searchTerm === null) {
+      delete whereObj.bolge_adi;
+    }
 
-    const allRegion = await bolgeModel.findAll({
-      where: {
-        status: 1,
-      },
+
+
+    const allRegion = await bolgeModel.findAndCountAll({
+      where: whereObj,
       include: [
         {
           model: kullaniciModel,
@@ -37,18 +58,20 @@ router.get("/getAllRegion", authenticateToken, async (req, res) => {
           attributes: ["ad", "soyad"],
         },
       ],
+      limit: perPage,
+      offset: (page - 1) * perPage,
     });
 
     if (!allRegion || allRegion.length === 0) {
       return res.status(404).send("No Region Found");
     }
 
-    allRegion.map((region) => {
+    allRegion.rows.forEach((region) => {
       region.bolge_muduru = `${region.bolgeMuduru.ad} ${region.bolgeMuduru.soyad}`;
       delete region.dataValues.bolgeMuduru;
     });
 
-    return res.status(200).send(allRegion);
+    return res.status(200).send({allRegion, total: allRegion.count, page, perPage})
   } catch (error) {
     console.error("Get All Inspections Error:", error);
     return res.status(500).send(error);
