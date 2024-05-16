@@ -10,6 +10,7 @@ import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class Login extends StatelessWidget {
   final usernameController = TextEditingController();
@@ -62,88 +63,97 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: EdgeInsets.symmetric(horizontal: 500, vertical: 50),
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            AspectRatio(
-              aspectRatio: 1 / 0.4,
-              child: FractionallySizedBox(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/homeImage.jpeg'),
-                        fit: BoxFit.cover,
+      body: RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: (event) {
+          if (event is RawKeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.enter) {
+            login(context);
+          }
+        },
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 500, vertical: 50),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              AspectRatio(
+                aspectRatio: 1 / 0.4,
+                child: FractionallySizedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/homeImage.jpeg'),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    "Kullanıcı Adı",
-                    style: TextStyle(
-                        fontSize: Tokens.fontSize[4],
-                        fontWeight: Tokens.fontWeight[6]),
-                  ),
-                ),
-                Expanded(
-                    flex: 3,
-                    child: CustomInput(
-                        controller: usernameController,
-                        hintText: "Kullanıcı Adı",
-                        keyboardType: TextInputType.text)),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Text("Şifre",
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "Kullanıcı Adı",
                       style: TextStyle(
                           fontSize: Tokens.fontSize[4],
-                          fontWeight: Tokens.fontWeight[6])),
-                ),
-                Expanded(
-                    flex: 3,
-                    child: CustomInput(
-                      controller: passwordController,
-                      hintText: "Şifre",
-                      keyboardType: TextInputType.visiblePassword,
-                      obscureText: true,
-                    )),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomButton(
-                    buttonText: "Giriş", onPressed: () => login(context)),
-                SizedBox(
-                  width: 20,
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            )
-          ],
+                          fontWeight: Tokens.fontWeight[6]),
+                    ),
+                  ),
+                  Expanded(
+                      flex: 3,
+                      child: CustomInput(
+                          controller: usernameController,
+                          hintText: "Kullanıcı Adı",
+                          keyboardType: TextInputType.text)),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Text("Şifre",
+                        style: TextStyle(
+                            fontSize: Tokens.fontSize[4],
+                            fontWeight: Tokens.fontWeight[6])),
+                  ),
+                  Expanded(
+                      flex: 3,
+                      child: CustomInput(
+                        controller: passwordController,
+                        hintText: "Şifre",
+                        keyboardType: TextInputType.visiblePassword,
+                        obscureText: true,
+                      )),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomButton(
+                      buttonText: "Giriş", onPressed: () => login(context)),
+                  SizedBox(
+                    width: 20,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              )
+            ],  
+          ),
         ),
       ),
     );

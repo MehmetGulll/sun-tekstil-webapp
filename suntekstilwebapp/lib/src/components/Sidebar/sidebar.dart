@@ -148,8 +148,8 @@ class _SidebarState extends State<Sidebar> {
       ),
       onTap: () {
         Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/sendMail') {
-          Navigator.pushReplacementNamed(context, '/sendMail');
+        if (ModalRoute.of(context)?.settings.name != '/mailManagement') {
+          Navigator.pushReplacementNamed(context, '/mailManagement');
         }
       },
     );

@@ -94,43 +94,73 @@ router.post("/deleteUnvanDenetimTipiLink", authenticateToken, async (req, res) =
   }
   try {
     const schema = Joi.object({
-      id: Joi.number().required(),
+      unvan_id: Joi.number().required(),
+      denetim_tip_id: Joi.number().required(),
     });
 
     const { error } = schema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const { id } = req.body;
+    const { unvan_id, denetim_tip_id } = req.body;
 
-    const sequelize = await initializeSequelize();
-    const unvanDenetimTipiLinkModel = sequelize.define(
-      "unvanDenetimTipiLink",
-      unvanDenetimTipiLink,
-      {
-        timestamps: false,
-        freezeTableName: true,
-      }
-    ); 
-    const findData = await unvanDenetimTipiLinkModel.findOne({
-      where: {
-        id,
-      },
-    });
+    try {
+      const sequelize = await initializeSequelize();
+      const unvanDenetimTipiLinkModel = sequelize.define(
+        "unvanDenetimTipiLink",
+        unvanDenetimTipiLink,
+        {
+          timestamps: false,
+          freezeTableName: true,
+        }
+      );
+      const findData = await unvanDenetimTipiLinkModel.findOne({
+        where: {
+          [Op.and]: [{ unvan_id }, { denetim_tip_id }]
+        },
+      });
 
-    if (!findData) return res.status(404).send("Veri bulunamadı.");
+      if (!findData) return res.status(404).send("Veri bulunamadı.");
 
-    const deleteUnvanDenetimTipiLink = await unvanDenetimTipiLinkModel.destroy({
-      where: {
-        id,
-      },
-    }); 
+      const deleteUnvanDenetimTipiLink = await unvanDenetimTipiLinkModel.destroy({
+        where: {
+          id: findData.id,
+        },
+      });
 
-    return res.status(200).send(deleteUnvanDenetimTipiLink);
+      if (!deleteUnvanDenetimTipiLink) return res.status(404).send("Veri silinemedi.");
+
+      return res.status(200).send("Başarıyla silindi.");
+    } catch (error) {
+      console.error("Delete Unvan Denetim Tipi Link Error:", error);
+      return res.status(500).send("Sunucu hatası");
+    }
   } catch (error) {
-    console.error("Delete Unvan Denetim Tipi Link Error:", error);
-    return res.status(500).send
+    console.error("Validation Error:", error);
+    return res.status(500).send("Sunucu hatası");
   }
 });
+
+
+// Tüm Ünvanları listele
+router.get("/getAllUnvan", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const unvanModel = sequelize.define("unvan", unvan, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const findAllUnvan = await unvanModel.findAll({
+      attributes: ["unvan_id", "unvan_adi"],
+      where: {status: 1,},
+    });
+
+    return res.status(200).send(findAllUnvan);
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    return res.status(500).send(error);
+  }
+});  
 
 // MAİL YONETIM SOL TARAF
 // Denetim Tipi ve Kullanici ID yi kullanarak kullaniciDenetimTipiLink tablosuna denetim_tipi ve kullanici tablolarını birleştirir.
@@ -214,13 +244,14 @@ router.post("/deleteKullaniciDenetimTipiLink", authenticateToken, async (req, re
   }
   try {
     const schema = Joi.object({
-      id: Joi.number().required(),
+      kullanici_id: Joi.number().required(),
+      denetim_tip_id: Joi.number().required(),
     });
 
     const { error } = schema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const { id } = req.body;
+    const { kullanici_id, denetim_tip_id } = req.body;
 
     const sequelize = await initializeSequelize();
     const kullaniciDenetimTipiLinkModel = sequelize.define(
@@ -234,26 +265,102 @@ router.post("/deleteKullaniciDenetimTipiLink", authenticateToken, async (req, re
 
     const findData = await kullaniciDenetimTipiLinkModel.findOne({
       where: {
-        id,
+          [Op.and]: [{kullanici_id}, {denetim_tip_id}]
       },
     });
+
 
     if (!findData) return res.status(404).send("Veri bulunamadı.");
 
     const deleteKullaniciDenetimTipiLink = await kullaniciDenetimTipiLinkModel.destroy({
       where: {
-        id,
+        [Op.and]: [{kullanici_id}, {denetim_tip_id}]
       },
     });
 
-    return res.status(200).send(deleteKullaniciDenetimTipiLink);
+    res.status(200).send("Veri başarıyla silindi.");
   } catch (error) {
     console.error("Delete Kullanici Denetim Tipi Link Error:", error);
     return res.status(500).send(error);
   }
 });
 
-// linkKullaniciDenetimTipi verilerini güncelleme 
+// Sol taraf kullanıcılarını listeler
+router.get("/getLinkKullaniciDenetimTipiKullanicilari", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const kullaniciDenetimTipiLinkModel = sequelize.define(
+      "kullaniciDenetimTipiLink",
+      kullaniciDenetimTipiLink,{
+        timestamps: false,
+        freezeTableName: true,
+      }
+    );
+
+    denetimTipiModel.hasMany(kullaniciDenetimTipiLinkModel, {
+      foreignKey: "denetim_tip_id",
+    });
+
+    kullaniciModel.hasMany(kullaniciDenetimTipiLinkModel, {
+      foreignKey: "kullanici_id",
+    });
+
+    kullaniciDenetimTipiLinkModel.belongsTo(denetimTipiModel, {
+      foreignKey: "denetim_tip_id",
+    });
+
+    kullaniciDenetimTipiLinkModel.belongsTo(kullaniciModel, {
+      foreignKey: "kullanici_id",
+    });
+
+
+
+    const findAllUsersRelatedDenetimTipi = await kullaniciDenetimTipiLinkModel.findAll({
+      where: {
+        status: 1,
+      },
+      attributes: ["id", "denetim_tip_id", "kullanici_id"],
+      include: [
+        {
+          model: denetimTipiModel,
+          attributes: ["denetim_tip_id", "denetim_tipi"],
+        },
+        {
+          model: kullaniciModel,
+          attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
+        },
+      ],
+    });
+
+    const modifiedData = findAllUsersRelatedDenetimTipi.map((item) => { 
+      return {
+        id: item.id,
+        kullanici_id: item.kullanici_id,
+        kullanici: item.kullanici.ad + " " + item.kullanici.soyad,
+        eposta: item.kullanici.eposta,
+        denetim_tip_id: item.denetim_tip_id,
+        denetim_tipi: item.denetim_tipi.denetim_tipi,
+      };
+    });
+
+    return res.status(200).send(modifiedData);
+  } catch (error) {
+    console.error("Get Link Kullanici Denetim Tipi Kullanicilari Error:", error);
+    return
+  }
+});
+
+// linkKullaniciDenetimTipi verilerini güncelleme   SİLİNECEK 
 router.post("/updateKullaniciDenetimTipiLink", authenticateToken, async (req, res) => {
   if (req.user.rol_id !== 1 && req.user.rol_id !== 2) {
     return res.status(403).send("Verileri güncelleme yetkiniz yok!");
@@ -390,6 +497,11 @@ router.get("/getAllUsersByRelatedDenetimTipi",authenticateToken,async (req, res)
         targetKey: "unvan_id",
       });
 
+      const findAllUsers = await kullaniciModel.findAll({
+        attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
+        order: [["unvan_id", "ASC"]],
+      });
+
       const findDenetimTipiByUnvan = await denetimTipiModel.findAll({
         include: [
           {
@@ -398,41 +510,66 @@ router.get("/getAllUsersByRelatedDenetimTipi",authenticateToken,async (req, res)
               {
                 model: unvanModel,
                 attributes: ["unvan_id", "unvan_adi"],
-                include: [
-                  {
-                    model: kullaniciModel,
-                    attributes: ["id", "ad", "soyad", "eposta", "unvan_id"],
-                  },
-                ],
               },
             ],
           },
         ],
         attributes: ["denetim_tip_id", "denetim_tipi"],
-        
       });
 
-      // return res.send(findDenetimTipiByUnvan)
+      const findAllUnvanlar = await unvanModel.findAll({
+        attributes: ["unvan_id", "unvan_adi"],
+        where: { status: 1 },
+      });
 
       const modifiedData = findDenetimTipiByUnvan.map((item) => {
-        const unvan = item.unvanDenetimTipiLinks.map((item) => {
-          return {
-            unvan_id: item.unvan.unvan_id,
-            unvan_adi: item.unvan.unvan_adi,
-            kullanici: item.unvan.kullanici,
-          };
+        const unvanlar = [];
+        const addedUnvanIds = []; 
+      
+        item.unvanDenetimTipiLinks.forEach((link) => {
+          const unvan_id = link.unvan.unvan_id;
+          
+          const existingIndex = addedUnvanIds.indexOf(unvan_id);
+          
+          if (existingIndex === -1) { 
+            addedUnvanIds.push(unvan_id); 
+            
+            unvanlar.push({
+              aktif: 1,
+              unvan_id: unvan_id,
+              unvan_adi: link.unvan.unvan_adi,
+              kullanicilar: findAllUsers.filter((user) => user.unvan_id === unvan_id), 
+            });
+          } else { 
+            if (link.aktif === 1) {
+              unvanlar[existingIndex].aktif = 1;
+            }
+          }
         });
+      
+        findAllUnvanlar.forEach((unvan) => {
+          if (addedUnvanIds.indexOf(unvan.unvan_id) === -1) {
+            unvanlar.push({
+              aktif: 0,
+              unvan_id: unvan.unvan_id,
+              unvan_adi: unvan.unvan_adi,
+              kullanicilar: findAllUsers.filter((user) => user.unvan_id === unvan.unvan_id),
+            });
+          }
+        });
+      
         return {
           denetim_tip_id: item.denetim_tip_id,
           denetim_tipi: item.denetim_tipi,
-          unvan: unvan,
+          unvanlar: unvanlar,
         };
       });
-
+      
       return res.status(200).send(modifiedData);
+      
     } catch (error) {
       console.error("Add Title Error:", error);
-      return res.status.send(error);
+     return res.status(500).send(error.message);
     }
   }
 );
