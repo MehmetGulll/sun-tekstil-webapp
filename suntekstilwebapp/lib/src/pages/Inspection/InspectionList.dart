@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'dart:typed_data';
 
 class InspectionPage extends StatefulWidget {
   @override
@@ -137,7 +138,6 @@ class _InspectionPageState extends State<InspectionPage> {
                     ),
                   ),
                 ),
-                
                 SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: () async {
@@ -415,6 +415,27 @@ class _InspectionScreenState extends State<InspectionScreen> {
     }
   }
 
+  Future<void> uploadImage(Uint8List? bytes, String fileName, int soruId) async {
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('http://localhost:5000/upload'));
+    request.files
+        .add(http.MultipartFile.fromBytes('photo', bytes!, filename: fileName));
+    var res = await request.send();
+    if (res.statusCode == 200) {
+      var responseData = await res.stream.bytesToString();
+      var publicId = jsonDecode(responseData)['public_id'];
+      print("Upload successful. Public ID: $publicId");
+      // set the publicId to the actionMap aksiyon_resim 
+      setState(() {
+         _actionMap[soruId] ??= {};
+         _actionMap[soruId]!['aksiyon_gorsel'] = publicId;
+      });
+
+    } else {
+      print("Upload failed");
+    }
+  }
+
   void _answerInspection(Map<String, dynamic> inspection) async {
     List<Map<String, dynamic>> requestBodyList = [];
     _inspectionQuestions.forEach((question) {
@@ -429,12 +450,11 @@ class _InspectionScreenState extends State<InspectionScreen> {
       if (_actionMap.containsKey(soruId)) {
         answer['aksiyon'] = [_actionMap[soruId]];
       }
-
       requestBodyList.add(answer);
     });
 
     String? token = await TokenHelper.getToken();
-    final response = await http.post(
+    final request = await http.post(
       Uri.parse(ApiUrls.answerInspection),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -446,10 +466,11 @@ class _InspectionScreenState extends State<InspectionScreen> {
       }),
     );
 
-    if (response.statusCode == 200) {
-      print('Inspection answered successfully: ${response.body}');
+    if (request.statusCode == 201) {
+      print('Inspection answered successfully: ${request.body}');
+      Navigator.pop(context);
     } else {
-      print('Error: ${response.body}');
+      print('Failed to answer inspection: ${request.body}');
       throw Exception('Failed to answer inspection');
     }
   }
@@ -502,19 +523,6 @@ class _InspectionScreenState extends State<InspectionScreen> {
     );
   }
 
-  Future<void> uploadFile(String filePath, String fileName) async {
-    var request = http.MultipartRequest(
-        'POST', Uri.parse('http://your-backend-url.com/upload'));
-    request.files.add(await http.MultipartFile.fromPath('photo', filePath,
-        filename: fileName));
-    var res = await request.send();
-    if (res.statusCode == 200) {
-      print("Upload successful");
-    } else {
-      print("Upload failed");
-    }
-  }
-
   Widget _buildQuestionCard(Map<String, dynamic> question, int questionNumber) {
     final int soruId = question['soru_id'];
     final bool isActionVisible = _actionVisibilityMap[soruId] ?? false;
@@ -554,15 +562,15 @@ class _InspectionScreenState extends State<InspectionScreen> {
                   ],
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    uploadFile(_filePath, _fileName);
-                  },
                   // onPressed: () {
-                  //   setState(() {
-                  //     _actionVisibilityMap[soruId] =
-                  //         !_actionVisibilityMap[soruId]!;
-                  //   });
+                  //   uploadFile(_filePath, _fileName);
                   // },
+                  onPressed: () {
+                    setState(() {
+                      _actionVisibilityMap[soruId] =
+                          !_actionVisibilityMap[soruId]!;
+                    });
+                  },
                   child: Text('Aksiyon Oluştur'),
                 ),
               ],
@@ -577,21 +585,21 @@ class _InspectionScreenState extends State<InspectionScreen> {
   String _filePath = '';
   String _fileName = '';
 
-  void _openFilePicker() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+  // void _openFilePicker() async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-    if (result != null) {
-      setState(() {
-        List<int> bytes = result.files.first.bytes!;
-        _filePath = result.files.first.path!;
-        _fileName = result.files.first.name!;
-        print("result is: $result");
-        print("result files first bytes : ${result.files.first.bytes}");
-        print("_filePath: $_filePath");
-        print("_fileName: $_fileName");
-      });
-    }
-  }
+  //   if (result != null) {
+  //     setState(() {
+  //       List<int> bytes = result.files.first.bytes!;
+  //       _filePath = result.files.first.path!;
+  //       _fileName = result.files.first.name!;
+  //       print("result is: $result");
+  //       print("result files first bytes : ${result.files.first.bytes}");
+  //       print("_filePath: $_filePath");
+  //       print("_fileName: $_fileName");
+  //     });
+  //   }
+  // }
 
   Widget _buildActionAccordion(int soruId) {
     return Padding(
@@ -665,19 +673,19 @@ class _InspectionScreenState extends State<InspectionScreen> {
               SizedBox(width: 8.0),
               // Resim ekleme işlevi ve eklenen resmi gösterme
               ElevatedButton(
-                onPressed: () {
-                  _openFilePicker();
+                onPressed: () async {
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
+
+                  if (result != null) {
+                    Uint8List fileBytes = result.files.first.bytes!;
+                    String fileName = result.files.first.name;
+                    uploadImage(fileBytes, fileName, soruId);
+                  } else {
+                    print('No file selected');
+                  }
                 },
-                child: Text('Dosya Seç'),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Dosya Yolu:',
-                style: TextStyle(fontSize: 20),
-              ),
-              Text(
-                _filePath,
-                style: TextStyle(fontSize: 16),
+                child: Text('Select a file'),
               ),
             ],
           ),

@@ -13,6 +13,7 @@ const {
   magaza,
   kullanici,
   unvan,
+  image,
 } = require("../helpers/sequelizemodels");
 const configureCloudinaryMulter = require("../helpers/cloudinaryMulter");
 const { format } = require("path");
@@ -350,7 +351,7 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
 router.post(
   "/answerInspection",
   authenticateToken,
-  configureCloudinaryMulter(cloudinary).array("aksiyon_gorsel"),
+  // configureCloudinaryMulter(cloudinary).array("aksiyon_gorsel"),
   async (req, res) => {
     try {
       const { error, value } = Joi.object({
@@ -364,9 +365,7 @@ router.post(
                 .items(
                   Joi.object({
                     aksiyon_konu: Joi.string().required(),
-                    aksiyon_gorsel: Joi.array().items(
-                      Joi.string().optional()
-                    ).optional(),
+                    aksiyon_gorsel: Joi.string().optional(),
                     aksiyon_sure: Joi.number().required(),
                     aksiyon_oncelik: Joi.number().required(),
                   })
@@ -414,6 +413,11 @@ router.post(
       soruModel.belongsTo(denetimTipiModel, {
         foreignKey: "denetim_tip_id",
       });
+      
+      const imageModel = sequelize.define("image", image, {
+        timestamps: false,
+        freezeTableName: true,
+      });
 
       const existingInspection = await denetimModel.findOne({
         where: { denetim_id },
@@ -440,7 +444,7 @@ router.post(
       const denetimTipiAdi =
         sorular[0].dataValues.denetim_tipi.dataValues.denetim_tipi;
 
-      // Tüm cevaplanan soruları bir kerede denetim_sorulari tablosuna ekleyelim
+      // Tüm cevaplanan soruları bir kerede denetim_sorulari tablosuna ekler
       const denetimSorular = [];
       for (let i = 0; i < cevaplar.length; i++) {
         const cevap = cevaplar[i];
@@ -465,39 +469,30 @@ router.post(
         if (cevap.aksiyon && cevap.aksiyon.length > 0) {
           for (let j = 0; j < cevap.aksiyon.length; j++) {
             const aksiyon = cevap.aksiyon[j];
-            const uploadedAksiyonGorselIds = [];
-            for (const image of aksiyon.aksiyon_gorsel) {
-              const file = fs.readFileSync(image);
-              console.log("image", image);
-              console.log("file", file);
-              const encodedImage = file.toString('base64');
-              const uploadAksiyonGorsel = await cloudinary.uploader.upload(
-                `data:image/png;base64,${encodedImage}`,
-                {
-                  folder: "action-images",
-                  use_filename: true,
-                  unique_filename: true,
-                  overwrite: false,
-                  tags: [denetimTipiAdi],
-                  transformation: [
-                    { width: 1000, crop: "scale" },
-                    { quality: "auto" },
-                    { fetch_format: "auto" },
-                  ],
-                }
-              );
-              uploadedAksiyonGorselIds.push(uploadAksiyonGorsel.public_id);
-            }
+            await imageModel.update({
+              aksiyon_id: aksiyon.aksiyon_id,
+            },
+            {
+              where: {
+                public_id: aksiyon.aksiyon_gorsel,
+              },
+            });
+            const findImage = await imageModel.findOne({
+              where: {
+                public_id: aksiyon.aksiyon_gorsel,
+              },
+            });
             await aksiyonModel.create({
               ds_id,
               aksiyon_konu: aksiyon.aksiyon_konu,
-              aksiyon_gorsel: uploadedAksiyonGorselIds.join(","),
+              aksiyon_gorsel: findImage.image_id,
               aksiyon_acilis_tarihi: new Date().toISOString().split("T")[0],
               aksiyon_sure: aksiyon.aksiyon_sure,
               aksiyon_oncelik: aksiyon.aksiyon_oncelik,
               aksiyon_olusturan_id: req.user.id,
               status: 1,
             });
+            
           }
         }
       }
@@ -514,12 +509,63 @@ router.post(
         }
       );
 
-      return res.status(201).send(`Denetim Soruları Başarıyla Cevaplandı!`);
+      return res.status(201).send(`Denetim Soruları Başarıyla Cevaplandıasdasdaasdasdasdadsd!`);
     } catch (error) {
       console.error("Answer Inspection Error:", error);
-      return res.status(500).send(error);
+      return res.status(500).send("Error occurred while answering inspection: " + error.message);
+      
     }
   }
 );
+
+// update inspection status 
+router.post("/updateInspectionStatus", authenticateToken, async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      denetim_id: Joi.number().required(),
+      status: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) return res.status(400).send(error);
+
+    const { denetim_id, status } = value;
+
+    const sequelize = await initializeSequelize();
+    const denetimModel = sequelize.define("denetim", denetim, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const existingInspection = await denetimModel.findOne({
+      where: { denetim_id },
+    });
+
+    if (!existingInspection)
+      return res.status(404).send("Denetim Bulunamadı!");
+
+    if (existingInspection.status === status)
+      return res
+        .status(400)
+        .send("Denetim Zaten Bu Durumda! Güncelleme Yapılmadı!");
+
+    const updatedInspection = await denetimModel.update(
+      { status },
+      {
+        where: {
+          denetim_id,
+        },
+      }
+    );
+
+    if (updatedInspection[0] === 0) {
+      return res.status(404).send("Denetim Bulunamadı!");
+    }
+
+    return res.status(200).send(`Denetim Başarıyla Güncellendi!`);
+  } catch (error) {
+    console.error("Update Inspection Status Error:", error);
+    return res.status(500).send(error);
+  }
+}); 
 
 module.exports = router;

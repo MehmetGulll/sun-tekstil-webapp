@@ -365,6 +365,10 @@ const aksiyon = {
   aksiyon_gorsel: {
     type: DataTypes.STRING,
     allowNull: true,
+    references: {
+      model: "image",
+      key: "image_id",
+    },
   },
   aksiyon_acilis_tarihi: {
     type: DataTypes.STRING,
@@ -513,6 +517,19 @@ const kullaniciDenetimTipiLink = {
   },
 };
 
+const image = {
+  image_id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
+  },
+  public_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+};
+
 module.exports = {
   bolge,
   denetim,
@@ -527,5 +544,6 @@ module.exports = {
   aksiyon,
   unvan,
   unvanDenetimTipiLink,
-  kullaniciDenetimTipiLink
+  kullaniciDenetimTipiLink,
+  image,
 };
