@@ -12,12 +12,18 @@ import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/pages/SuccessRate/SuccessRate.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class Home extends StatelessWidget {
   Future<Widget> fetchData(BuildContext context, String token) async {
     try {
-      Map<String, dynamic> decodedToken = decodeJwt(token);
-      int intId = decodedToken['id'];
+       String? token = await TokenHelper.getToken();
+      print("tokenim $token");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int intId = prefs.getInt('rol') ?? 0;
+      print("Kullanici yetki id $intId");
+
       final url = Uri.parse('${ApiUrls.getLastThreeInspections}/$intId');
       final response = await http.get(url, headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -69,7 +75,7 @@ class Home extends StatelessWidget {
       }
     } catch (error) {
       print('Error occurred: $error');
-      return Text('Error fetching data: $error');
+      return Text('Henüz Denetim Yapılmadı');
     }
   }
 
@@ -125,33 +131,34 @@ class Home extends StatelessWidget {
     return FutureBuilder<String?>(
       future: TokenHelper.getToken(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error fetching token: ${snapshot.error}');
-        } else {
-          String? token = snapshot.data;
-          return FutureBuilder(
-            future: fetchData(context, token!),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error fetching data: ${snapshot.error}');
-              } else {
-                Widget announcementCard = snapshot.data as Widget;
-                return FutureBuilder(
-                  future: ziyaretSayisi(),
-                  builder: (context, ziyaretSnapshot) {
-                    if (ziyaretSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (ziyaretSnapshot.hasError) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error fetching token: ${snapshot.error}');
+          } else {
+            String? token = snapshot.data;
+            return FutureBuilder(
+              future: fetchData(context, token!),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error fetching data: ${snapshot.error}');
+                } else {
+                  Widget announcementCard = snapshot.data as Widget;
+                  return FutureBuilder(
+                    future: ziyaretSayisi(),
+                    builder: (context, ziyaretSnapshot) {
+                      if (ziyaretSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (ziyaretSnapshot.hasError) {
                       return Text(
                           'Error fetching data: ${ziyaretSnapshot.error}');
                     } else {
                       Map<String, dynamic> ziyaretData =
                           ziyaretSnapshot.data as Map<String, dynamic>;
+                      
                       return FutureBuilder(
                         future: kronikSorular(),
                         builder: (context, kronikSnapshot) {
@@ -164,6 +171,7 @@ class Home extends StatelessWidget {
                           } else {
                             Map<String, dynamic> kronikSorularData =
                                 kronikSnapshot.data as Map<String, dynamic>;
+
                             return CustomScaffold(
                               body: Padding(
                                 padding: const EdgeInsets.all(16.0),
@@ -357,7 +365,7 @@ class Home extends StatelessWidget {
                                                                               MainAxisAlignment.center,
                                                                           children: [
                                                                             Text(
-                                                                              '${ziyaretData['completionPercentage'].toStringAsFixed(2)}%',
+                                                                               '${ziyaretData['completionPercentage'] != null ? ziyaretData['completionPercentage'].toStringAsFixed(2) : '0.00'}%',
                                                                               style: TextStyle(
                                                                                 color: Themes.cardTextColor,
                                                                                 fontSize: Tokens.fontSize[6],

@@ -27,8 +27,10 @@ class Login extends StatelessWidget {
       Map<String, dynamic> responseBody = jsonDecode(response.body);
       String token = responseBody['token'];
       String username = responseBody['user']['kullanici_adi'];
+      int rol = responseBody['user']['rol_id'];
       int currentUserId = responseBody['user']['id'];
 
+      print("rol kısmı $rol");
       print(responseBody['token']);
       print("username");
       print(username);
@@ -42,6 +44,7 @@ class Login extends StatelessWidget {
       await prefs.setString("token", token);
       await prefs.setString("username", username);
       await prefs.setInt("currentUserId", currentUserId);
+      await prefs.setInt("rol",rol);
 
       Navigator.pushReplacementNamed(context, '/home');
     } else {
