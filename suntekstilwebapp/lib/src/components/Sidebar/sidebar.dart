@@ -79,8 +79,8 @@ class _SidebarState extends State<Sidebar> {
         }
       },
     );
-    final RegionsTile = ListTile(
-      leading: Icon(Icons.map),
+    final StoreTile = ListTile(
+      leading: Icon(Icons.store),
       title: Text(
         'Mağazalar',
         style: TextStyle(color: Themes.whiteColor),
@@ -89,6 +89,19 @@ class _SidebarState extends State<Sidebar> {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/stores') {
           Navigator.pushReplacementNamed(context, '/stores');
+        }
+      },
+    );
+    final RegionsTile = ListTile(
+      leading: Icon(Icons.map),
+      title: Text(
+        'Bölgeler',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        if (ModalRoute.of(context)?.settings.name != '/regions') {
+          Navigator.pushReplacementNamed(context, '/regions');
         }
       },
     );
@@ -189,6 +202,7 @@ class _SidebarState extends State<Sidebar> {
                   drawerHeader,
                   homeTile,
                   QuestionsExpansionTile,
+                  StoreTile,
                   RegionsTile,
                   UserManagementTile,
                   ReportsTile,

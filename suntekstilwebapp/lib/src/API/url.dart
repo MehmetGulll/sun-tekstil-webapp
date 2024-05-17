@@ -39,6 +39,7 @@ class ApiUrls {
   static const String getAllUsersByRelatedDenetimTipi ='http://localhost:5000/getAllUsersByRelatedDenetimTipi';
   static const String linkUnvanDenetimTipi ='http://localhost:5000/linkUnvanDenetimTipi';
   static const String deleteUnvanDenetimTipiLink ='http://localhost:5000/deleteUnvanDenetimTipiLink';
-
+  static const String getAllRegion = "http://localhost:5000/getAllRegion";
+  static const String updateRegion = "http://localhost:5000/updateRegion";
 
 }

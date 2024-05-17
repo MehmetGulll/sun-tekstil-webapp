@@ -9,10 +9,10 @@ const { Op } = require("sequelize");
 // TÜM MAĞAZA BÖLGE LİSTESİNİ LİSTELER
 router.post("/getAllRegion", authenticateToken, async (req, res) => {
   try {
-    const {error, value} = Joi.object({
+    const { error, value } = Joi.object({
       page: Joi.number().optional(),
-      perPage: Joi.number().optional().allow(null,""),
-      searchTerm: Joi.string().optional()
+      perPage: Joi.number().optional().allow(null, ""),
+      searchTerm: Joi.string().optional(),
     }).validate(req.body);
 
     if (error) return res.status(400).send(error);
@@ -34,10 +34,8 @@ router.post("/getAllRegion", authenticateToken, async (req, res) => {
       foreignKey: "bolge_muduru",
       targetKey: "id",
     });
-    const whereObj = {
-      status: 1,
-    };
-    
+    const whereObj = {};
+
     if (searchTerm) {
       whereObj.bolge_adi = {
         [Op.like]: `%${searchTerm}%`,
@@ -46,8 +44,6 @@ router.post("/getAllRegion", authenticateToken, async (req, res) => {
     if (searchTerm === "" || searchTerm === null) {
       delete whereObj.bolge_adi;
     }
-
-
 
     const allRegion = await bolgeModel.findAndCountAll({
       where: whereObj,
@@ -71,14 +67,16 @@ router.post("/getAllRegion", authenticateToken, async (req, res) => {
       delete region.dataValues.bolgeMuduru;
     });
 
-    return res.status(200).send({allRegion, total: allRegion.count, page, perPage})
+    return res
+      .status(200)
+      .send({ allRegion, total: allRegion.count, page, perPage });
   } catch (error) {
     console.error("Get All Inspections Error:", error);
     return res.status(500).send(error);
   }
 });
 
-// YENİ BÖLGE EKLER 
+// YENİ BÖLGE EKLER
 router.post("/addRegion", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -124,10 +122,12 @@ router.post("/addRegion", authenticateToken, async (req, res) => {
 });
 
 // BÖLGE BİLGİLERİNİ GÜNCELLER
-router.post("/updateRegionStatus", authenticateToken, async (req, res) => {
+router.post("/updateRegion", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
       bolge_id: Joi.number().required(),
+      bolge_adi: Joi.string().required(),
+      bolge_muduru: Joi.string(),
       status: Joi.number().required(),
     }).validate(req.body);
 
@@ -151,14 +151,12 @@ router.post("/updateRegionStatus", authenticateToken, async (req, res) => {
       return res.status(404).send("Bölge Bulunamadı!");
     }
 
-    if (region.status === value.status) {
-      return res.status(400).send("Bölge zaten bu durumda!");
-    }
 
     await bolgeModel.update(
       {
         status: value.status,
-        bolge_muduru: req.user.id 
+        bolge_adi:value.bolge_adi,
+        bolge_muduru: req.user.id,
       },
       {
         where: {
@@ -167,12 +165,17 @@ router.post("/updateRegionStatus", authenticateToken, async (req, res) => {
       }
     );
 
-    return res.status(200).send(`${region.bolge_adi} Bölgesi ${value.status===1 ? "Aktif" : "Pasif"}  Olarak Güncellendi.`);
+    return res
+      .status(200)
+      .send(
+        `${region.bolge_adi} Bölgesi ${
+          value.status === 1 ? "Aktif" : "Pasif"
+        }  Olarak Güncellendi.`
+      );
   } catch (error) {
     console.error("Update Region Status Error:", error);
     return res.status(500).send(error);
   }
 });
-
 
 module.exports = router;
