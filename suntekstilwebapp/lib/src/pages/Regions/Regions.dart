@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:suntekstilwebapp/src/components/Card/Card.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
@@ -26,6 +27,8 @@ class _RegionsState extends State<Regions> {
   List<Map<String, dynamic>> _regions = [];
   final TextEditingController regionNameController = TextEditingController();
   final TextEditingController regionManagerController = TextEditingController();
+  final TextEditingController addRegionCodeController = TextEditingController();
+  final TextEditingController addRegionNameController = TextEditingController();
   Future<List<dynamic>> getRegions() async {
     try {
       String? token = await TokenHelper.getToken();
@@ -63,7 +66,7 @@ class _RegionsState extends State<Regions> {
           body: jsonEncode(<String, String>{
             "bolge_id": id.toString(),
             "bolge_adi": regionName,
-            "status":  _regionStateList[chosenRegionState] ?? 'Aktif'
+            "status": _regionStateList[chosenRegionState] ?? 'Aktif'
           }));
       if (response.statusCode == 200) {
         print("Başarıyla güncellendi");
@@ -97,6 +100,136 @@ class _RegionsState extends State<Regions> {
     } catch (e) {
       print("Hata $e");
     }
+  }
+
+  Future<void> addRegion(BuildContext context) async {
+    try {
+      String? token = await TokenHelper.getToken();
+      print(addRegionCodeController);
+      print(addRegionNameController);
+      final response = await http.post(Uri.parse(ApiUrls.addRegion),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': '$token'
+          },
+          body: jsonEncode(<String, String>{
+            "bolge_adi": addRegionNameController.text,
+            "bolge_kodu": addRegionCodeController.text
+          }));
+      if (response.statusCode == 201) {
+        print("Başarıyla eklendi");
+        String successMessage = "Bölge Ekleme Başarılı!!";
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return SuccessDialog(
+                successMessage: successMessage,
+                successIcon: Icons.check,
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/regions');
+                },
+              );
+            });
+      } else if (response.statusCode == 400) {
+        String errorMessage = response.body;
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ErrorDialog(
+                errorMessage: errorMessage,
+                errorIcon: Icons.error,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              );
+            });
+      }else{
+         String errorMessage = "Bir hata oluştu!!";
+        print("Hata");
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ErrorDialog(
+                errorMessage: errorMessage,
+                errorIcon: Icons.error,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              );
+            });
+      }
+    } catch (e) {
+      print("Hata : $e");
+    }
+  }
+
+  void showNewRegionModal(
+      BuildContext context, Color backgroundColor, String text) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomModal(
+              backgroundColor: backgroundColor,
+              text: text,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Yeni Mağaza Ekle",
+                        style: TextStyle(
+                            fontSize: Tokens.fontSize[9],
+                            fontWeight: Tokens.fontWeight[6]),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: Icon(Icons.close))
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  CustomInput(
+                    controller: addRegionCodeController,
+                    hintText: 'Bölge Kodu',
+                    keyboardType: TextInputType.name,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  CustomInput(
+                    controller: addRegionNameController,
+                    hintText: 'Bölge Adı',
+                    keyboardType: TextInputType.name,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 600),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: CustomButton(
+                              buttonText: "Bölge Ekle",
+                              onPressed: () async {
+                                print("Onaya basıldı");
+                                addRegion(context);
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                        ]),
+                  )
+                ],
+              ));
+        });
   }
 
   void showModal(
@@ -139,7 +272,6 @@ class _RegionsState extends State<Regions> {
               SizedBox(
                 height: 20,
               ),
-              
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -185,7 +317,7 @@ class _RegionsState extends State<Regions> {
     );
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return CustomScaffold(
       body: Container(
@@ -213,104 +345,103 @@ class _RegionsState extends State<Regions> {
               color: Themes.cardBackgroundColor,
               children: [
                 Expanded(
-          
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            Expanded(
-                              child: Container(
-                                height: 50,
-                                child: TextField(
-                                  controller: _searchTextController,
-                                  decoration: InputDecoration(
-                                    hintText: "Yeni Bölge Ekleyiniz...",
-                                    suffixIcon: IconButton(
-                                      icon: Icon(Icons.send),
-                                      onPressed: () {
-                                        setState(() {});
-                                      },
-                                    ),
-                                  ),
-                                  onChanged: (text) {},
-                                ),
-                              ),
-                            ),
+                            Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 50),
+                                child: CustomButton(
+                                    buttonText: "Yeni Bölge Ekle",
+                                    onPressed: () {
+                                      showNewRegionModal(
+                                        context,
+                                        Themes.whiteColor,
+                                        "",
+                                      );
+                                    })),
                           ],
                         ),
-                        FutureBuilder<List<dynamic>>(
-                          future: getRegions(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<List<dynamic>> snapshot) {
-                            if (snapshot.hasData) {
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: snapshot.data!.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  var region = snapshot.data![index];
-                                  return Card(
-                                    child: ListTile(
-                                      title: Text(region['bolge_adi']),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text("Bölge Müdürü:"),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                region['bolge_muduru'],
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        Tokens.fontWeight[6]),
-                                              ),
-                                            ],
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Expanded( // Bu satırı ekledik
+                          child: FutureBuilder<List<dynamic>>(
+                            future: getRegions(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<List<dynamic>> snapshot) {
+                              if (snapshot.hasData) {
+                                return ListView.builder(
+                            
+                            
+                                  shrinkWrap: true,
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    var region = snapshot.data![index];
+                                    return Card(
+                                      child: ListTile(
+                                        title: Text(region['bolge_adi']),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text("Bölge Müdürü:"),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text(
+                                                  region['bolge_muduru'],
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          Tokens.fontWeight[6]),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Durum:"),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text(
+                                                  region['status'] == 1
+                                                      ? 'Aktif'
+                                                      : 'Pasif',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          Tokens.fontWeight[6]),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                        trailing: Container(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: CustomButton(
+                                            buttonText: 'Düzenle',
+                                            textColor: Themes.blueColor,
+                                            buttonColor: Themes.whiteColor,
+                                            onPressed: () {
+                                              showModal(context,
+                                                  Themes.whiteColor, "", region);
+                                            },
                                           ),
-                                          Row(
-                                            children: [
-                                              Text("Durum:"),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                region['status'] == 1
-                                                    ? 'Aktif'
-                                                    : 'Pasif',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        Tokens.fontWeight[6]),
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                      trailing: Container(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CustomButton(
-                                          buttonText: 'Düzenle',
-                                          textColor: Themes.blueColor,
-                                          buttonColor: Themes.whiteColor,
-                                          onPressed: () {
-                                            showModal(context,
-                                                Themes.whiteColor, "", region);
-                                          },
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                            } else if (snapshot.hasError) {
-                              return Text('Bir hata oluştu');
-                            } else {
-                              return CircularProgressIndicator();
-                            }
-                          },
+                                    );
+                                  },
+                                );
+                              } else if (snapshot.hasError) {
+                                return Text('Bir hata oluştu');
+                              } else {
+                                return CircularProgressIndicator();
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -324,3 +455,4 @@ class _RegionsState extends State<Regions> {
     );
   }
 }
+
