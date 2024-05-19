@@ -18,7 +18,7 @@ import 'package:flutter/services.dart';
 class Home extends StatelessWidget {
   Future<Widget> fetchData(BuildContext context, String token) async {
     try {
-       String? token = await TokenHelper.getToken();
+      String? token = await TokenHelper.getToken();
       print("tokenim $token");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       int intId = prefs.getInt('rol') ?? 0;
@@ -79,6 +79,19 @@ class Home extends StatelessWidget {
     }
   }
 
+  List<Map<String, dynamic>> _stores = [];
+  Future<int> _getStoresCount() async {
+    var url = Uri.parse(ApiUrls.storesUrl);
+    var data = await http.get(url);
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
+
+    _stores = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    int storesCount = _stores.length;
+
+    return storesCount;
+  }
+
   Future<Map<String, dynamic>> ziyaretSayisi() async {
     try {
       String? token = await TokenHelper.getToken();
@@ -131,34 +144,34 @@ class Home extends StatelessWidget {
     return FutureBuilder<String?>(
       future: TokenHelper.getToken(),
       builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text('Error fetching token: ${snapshot.error}');
-          } else {
-            String? token = snapshot.data;
-            return FutureBuilder(
-              future: fetchData(context, token!),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error fetching data: ${snapshot.error}');
-                } else {
-                  Widget announcementCard = snapshot.data as Widget;
-                  return FutureBuilder(
-                    future: ziyaretSayisi(),
-                    builder: (context, ziyaretSnapshot) {
-                      if (ziyaretSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (ziyaretSnapshot.hasError) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error fetching token: ${snapshot.error}');
+        } else {
+          String? token = snapshot.data;
+          return FutureBuilder(
+            future: fetchData(context, token!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error fetching data: ${snapshot.error}');
+              } else {
+                Widget announcementCard = snapshot.data as Widget;
+                return FutureBuilder(
+                  future: ziyaretSayisi(),
+                  builder: (context, ziyaretSnapshot) {
+                    if (ziyaretSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (ziyaretSnapshot.hasError) {
                       return Text(
                           'Error fetching data: ${ziyaretSnapshot.error}');
                     } else {
                       Map<String, dynamic> ziyaretData =
                           ziyaretSnapshot.data as Map<String, dynamic>;
-                      
+
                       return FutureBuilder(
                         future: kronikSorular(),
                         builder: (context, kronikSnapshot) {
@@ -365,7 +378,7 @@ class Home extends StatelessWidget {
                                                                               MainAxisAlignment.center,
                                                                           children: [
                                                                             Text(
-                                                                               '${ziyaretData['completionPercentage'] != null ? ziyaretData['completionPercentage'].toStringAsFixed(2) : '0.00'}%',
+                                                                              '${ziyaretData['completionPercentage'] != null ? ziyaretData['completionPercentage'].toStringAsFixed(2) : '0.00'}%',
                                                                               style: TextStyle(
                                                                                 color: Themes.cardTextColor,
                                                                                 fontSize: Tokens.fontSize[6],
@@ -498,27 +511,83 @@ class Home extends StatelessWidget {
                                                           children: [
                                                             Icon(
                                                               Icons
-                                                                  .question_answer_outlined,
+                                                                  .location_city,
                                                               size: 30,
                                                               color: Themes
                                                                   .cardTextColor,
                                                             ),
                                                             SizedBox(width: 8),
-                                                            Text(
-                                                              "En Az Aksiyonu Olan Sorular",
-                                                              maxLines: 2,
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: Themes
-                                                                    .cardTextColor,
-                                                                fontSize: Tokens
-                                                                    .fontSize[3],
-                                                                fontWeight: Tokens
-                                                                    .fontWeight[7],
-                                                              ),
-                                                            ),
+                                                            FutureBuilder(
+                                                                future:
+                                                                    _getStoresCount(),
+                                                                builder: (BuildContext
+                                                                        context,
+                                                                    AsyncSnapshot<
+                                                                            int>
+                                                                        snapshot) {
+                                                                  if (snapshot
+                                                                          .connectionState ==
+                                                                      ConnectionState
+                                                                          .waiting) {
+                                                                    return CircularProgressIndicator();
+                                                                  } else if (snapshot
+                                                                      .hasError) {
+                                                                    return Text(
+                                                                        'Hata:${snapshot.error}');
+                                                                  } else {
+                                                                    String
+                                                                        message =
+                                                                        '';
+                                                                    if (snapshot
+                                                                            .data !=
+                                                                        null) {
+                                                                      if (snapshot
+                                                                          .data==0
+                                                                          ) {
+                                                                        message =
+                                                                            'Aktif Lokasyon Bulunamadı';
+                                                                      } else {
+                                                                        message =
+                                                                            'Aktif Lokasyon Sayısı: ${snapshot.data}';
+                                                                      }
+                                                                    }
+                                                                    return Column(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Aktif Lokasyon Sayısı",
+                                                                          maxLines:
+                                                                              2,
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style:
+                                                                              TextStyle(
+                                                                            color:
+                                                                                Themes.cardTextColor,
+                                                                            fontSize:
+                                                                                Tokens.fontSize[3],
+                                                                            fontWeight:
+                                                                                Tokens.fontWeight[7],
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              100,
+                                                                        ),
+                                                                        Text(
+                                                                          message,
+                                                                          maxLines:
+                                                                              2,
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style: TextStyle(
+                                                                              color: Themes.cardTextColor,
+                                                                              fontSize: Tokens.fontSize[2],
+                                                                              fontWeight: Tokens.fontWeight[5]),
+                                                                        )
+                                                                      ],
+                                                                    );
+                                                                  }
+                                                                })
                                                           ],
                                                         ),
                                                       ],
