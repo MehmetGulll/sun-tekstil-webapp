@@ -6,6 +6,8 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'dart:convert';
@@ -53,7 +55,10 @@ class _StoresState extends State<Stores> {
   TextEditingController filteredStoreNameController = TextEditingController();
   TextEditingController filteredStoreCityController = TextEditingController();
   bool isFiltered = false;
+  String? _chosenStoreType;
+  String? _chosenStoreState;
   Map<String, String> _storeTypeList = {'AVM': '1', 'CADDE': '2'};
+  Map<String, String> _storeStateList = {'Aktif': '1', 'Pasif': '0'};
   Map<String, String?> selectedValues = {
     'storeCode': '',
     'storeName': '',
@@ -91,9 +96,11 @@ class _StoresState extends State<Stores> {
   Future<void> updateStore(
       BuildContext context, int id, Map<String, dynamic> store) async {
     try {
-      var currentStatus = store['status'];
-      var newStatus = currentStatus == 0 ? 1 : 0;
-      store['status'] = newStatus;
+      String storeCode = storeCodeController.text;
+      String storeName = storeNameController.text;
+      String storeType = _chosenStoreType ?? 'AVM';
+      String storeCity = storeCityController.text;
+      String storeStatus = _chosenStoreState ?? 'Aktif';
       print(id);
       print("status no");
       print(store['status']);
@@ -108,22 +115,48 @@ class _StoresState extends State<Stores> {
           'storeId': id.toString(),
           'storeCode': storeCodeController.text,
           'storeName': storeNameController.text,
-          'storeType': storeTypeController.text,
+          'storeType': _storeTypeList[storeType] ?? 'AVM',
           'city': storeCityController.text,
           'storePhone': storePhoneController.text,
-          'status': newStatus.toString()
+          'status': _storeStateList[storeStatus] ?? 'Aktif'
         }),
       );
 
       if (response.statusCode == 200) {
         print("Mağaza başarıyla güncellendi");
-        setState(() {
-          var updatedStores =
-              _stores.firstWhere((q) => q['storesId'] == store['storesId']);
-          updatedStores['status'] = newStatus;
-        });
-      } else {
+
+        String successMessage = "Güncelleme Başarılı!!";
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return SuccessDialog(
+                successMessage: successMessage,
+                successIcon: Icons.check,
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/stores');
+                },
+              );
+            });
+      //   setState(() {
+      //     var updatedStores =
+      //         _stores.firstWhere((q) => q['storesId'] == store['storesId']);
+      //     updatedStores['status'] = _storeStateList;
+      //   });
+      // } else {
         print("Bir hata oluştu");
+        String errorMessage = "Bir hata oluştu!!";
+        print("Hata");
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ErrorDialog(
+                errorMessage: errorMessage,
+                errorIcon: Icons.error,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              );
+            });
       }
     } catch (e) {
       print('Bir hata oluştu: $e');
@@ -178,12 +211,6 @@ class _StoresState extends State<Stores> {
     }).toList();
   }
 
-  String? _chosenStoreCode;
-  String? _chosenStoreName;
-  String? _chosenStoreType;
-  String? _chosenStoreCity;
-  String? _chosenStorePhone;
-
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map store) {
     storeCodeController.text = store['storeCode'].toString();
@@ -236,14 +263,6 @@ class _StoresState extends State<Stores> {
                 height: 20,
               ),
               CustomInput(
-                controller: storeTypeController,
-                hintText: 'Mağaza Tipi',
-                keyboardType: TextInputType.text,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
                 controller: storeCityController,
                 hintText: 'Şehir',
                 keyboardType: TextInputType.text,
@@ -265,13 +284,37 @@ class _StoresState extends State<Stores> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
+                      "Mağaza Tipi",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      selectedItem: store['storeType'] == 1 ? 'AVM' : 'CADDE',
+                      items: ['AVM', 'CADDE'],
+                      onChanged: (String? value) {
+                        _chosenStoreType = value;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
                       "Durum",
                       style: TextStyle(fontSize: Tokens.fontSize[2]),
                     ),
                     CustomDropdown(
                       selectedItem: store['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
-                      onChanged: (String? value) {},
+                      onChanged: (String? value) {
+                        _chosenStoreState = value;
+                      },
                     ),
                   ],
                 ),
@@ -440,7 +483,7 @@ class _StoresState extends State<Stores> {
                                   Container(
                                     padding: EdgeInsets.all(8.0),
                                     child: Text(
-                                      store['storeType'].toString(),
+                                      store['storeType'] == 1 ? 'AVM' : 'CADDE',
                                       style: TextStyle(
                                           fontWeight: Tokens.fontWeight[2]),
                                     ),

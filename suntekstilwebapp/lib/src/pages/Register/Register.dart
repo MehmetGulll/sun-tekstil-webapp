@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
@@ -46,17 +48,47 @@ class _RegisterState extends State<Register> {
       'userRole': userRoles[_chosenUserRole]
     });
     if (response.statusCode == 200) {
-      setState(() {
-        isModalVisible = true;
-      });
-      modalMessage = "Kayıt Başarılı";
+      print("Başarıyla güncellendi");
+      String successMessage = "Kayıt Başarılı!!";
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessDialog(
+              successMessage: successMessage,
+              successIcon: Icons.check,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/officalUsers');
+              },
+            );
+          });
     } else if (response.statusCode == 400) {
-      setState(() {
-        isModalVisible = true;
-        modalMessage = "Bu kullanıcı adı zaten kayıtlı";
-      });
+      String errorMessage = "Kullanıcı zaten kayıtlı!!";
+      print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     } else {
-      print("Kayıt Başarısız");
+      String errorMessage = "Bir hata oluştu!!";
+      print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     }
   }
 

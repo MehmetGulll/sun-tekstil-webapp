@@ -10,7 +10,9 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
-
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
@@ -57,7 +59,9 @@ class _QuestionsState extends State<Questions> {
   final TextInputType keyboardType = TextInputType.text;
   bool isFiltered = false;
   String? _chosenQuestionType;
+  String? _chosenQuestionState;
   Map<String, String> _questionTypeList = {'Evet': '1', 'Hayır': '0'};
+  Map<String, String> _questionStateList = {'Aktif': '1', 'Pasif': '0'};
   Future<List<Map<String, dynamic>>> _getQuestions() async {
     if (!isFiltered) {
       String? token = await TokenHelper.getToken();
@@ -68,7 +72,7 @@ class _QuestionsState extends State<Questions> {
       var jsonData = json.decode(data.body) as List;
       print("Bütün data");
       print(jsonData);
-        _questions.clear();
+      _questions.clear();
       _questions =
           jsonData.map((item) => item as Map<String, dynamic>).toList();
     }
@@ -92,9 +96,14 @@ class _QuestionsState extends State<Questions> {
 
   Future<void> updateQuestion(
       BuildContext context, int id, Map<String, dynamic> question) async {
-    var currentStatus = question['status'];
-    var newStatus = currentStatus == 0 ? 1 : 0;
-    question['status'] = newStatus;
+    String questionName = questionNameController.text;
+    String questionPoint = questionPointController.text;
+    String chosenQuestionType = _chosenQuestionType ?? 'Evet';
+    String chosenQuestionState = _chosenQuestionState ?? 'Aktif';
+    print("isim $questionName");
+    print("yeni puan $questionPoint");
+    print("seçilen tip: $chosenQuestionType");
+
     print(id);
     print("status");
     print(question['status']);
@@ -108,19 +117,46 @@ class _QuestionsState extends State<Questions> {
       },
       body: jsonEncode(<String, String>{
         'soru_id': question['questionId'].toString(),
-        'status': newStatus.toString()
+        'soru_adi': questionName,
+        'soru_puan': questionPoint,
+        'soru_cevap': _questionTypeList[chosenQuestionType] ?? 'Evet',
+        'status': _questionStateList[chosenQuestionState] ?? 'Aktif'
       }),
     );
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
-      Navigator.pop(context);
+      String successMessage = "Güncelleme Başarılı!!";
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessDialog(
+              successMessage: successMessage,
+              successIcon: Icons.check,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/questions');
+              },
+            );
+          });
+
       setState(() {
         var updatedQuestion = _questions
             .firstWhere((q) => q['questionId'] == question['questionId']);
-        updatedQuestion['status'] = newStatus;
+        updatedQuestion['status'] = _questionStateList;
       });
     } else {
+      String errorMessage = "Bir hata oluştu!!";
       print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     }
   }
 
@@ -143,6 +179,7 @@ class _QuestionsState extends State<Questions> {
       print("Hata");
     }
   }
+
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map question) {
     questionIdController.text = question['questionId'].toString();
@@ -177,14 +214,6 @@ class _QuestionsState extends State<Questions> {
                 height: 20,
               ),
               CustomInput(
-                controller: questionIdController,
-                hintText: 'Soru Kodu',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
                 controller: questionNameController,
                 hintText: 'Soru',
                 keyboardType: TextInputType.name,
@@ -200,9 +229,7 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
-              SizedBox(
-                height: 20,
-              ),
+             
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -216,7 +243,9 @@ class _QuestionsState extends State<Questions> {
                       selectedItem:
                           question['questionAnswer'] == 1 ? 'Evet' : 'Hayır',
                       items: ['Evet', 'Hayır'],
-                      onChanged: (String? value) {},
+                      onChanged: (String? value) {
+                        _chosenQuestionType = value;
+                      },
                     ),
                   ],
                 ),
@@ -236,7 +265,9 @@ class _QuestionsState extends State<Questions> {
                     CustomDropdown(
                       selectedItem: question['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
-                      onChanged: (String? value) {},
+                      onChanged: (String? value) {
+                        _chosenQuestionState = value;
+                      },
                     ),
                   ],
                 ),
@@ -247,7 +278,7 @@ class _QuestionsState extends State<Questions> {
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Expanded(
                     child: CustomButton(
-                      buttonText: "Düzenle",
+                      buttonText: "Onay",
                       onPressed: () async {
                         print("Butona basıldı");
                         await updateQuestion(context, question['questionId'],
@@ -323,15 +354,18 @@ class _QuestionsState extends State<Questions> {
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/addQuestion');
                       }),
-                      SizedBox(width: 20,),
-                  CustomButton(buttonText: 'Filtreleri Sil',buttonColor: Themes.secondaryColor, onPressed: ()async{
-                    print("Filterleri temizleme");
-                    isFiltered=false;
-                   await _getQuestions();
-                   setState(() {
-                     
-                   });
-                  })
+                  SizedBox(
+                    width: 20,
+                  ),
+                  CustomButton(
+                      buttonText: 'Filtreleri Sil',
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () async {
+                        print("Filterleri temizleme");
+                        isFiltered = false;
+                        await _getQuestions();
+                        setState(() {});
+                      })
                 ],
               ),
               Padding(
@@ -474,7 +508,6 @@ class _QuestionsState extends State<Questions> {
                   },
                 ),
               ),
-   
             ],
           ),
         ),

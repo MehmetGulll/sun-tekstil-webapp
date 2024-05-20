@@ -7,8 +7,9 @@ import 'package:suntekstilwebapp/src/constants/tokens.dart';
 class ErrorDialog extends StatefulWidget {
   final String errorMessage;
   final IconData errorIcon;
+  final VoidCallback onPressed;
 
-  ErrorDialog({required this.errorMessage, required this.errorIcon});
+  ErrorDialog({required this.errorMessage, required this.errorIcon, required this.onPressed});
 
   @override
   _ErrorDialogState createState() => _ErrorDialogState();
@@ -73,8 +74,8 @@ class _ErrorDialogState extends State<ErrorDialog>
               ),
               CustomButton(
                 buttonText: 'Tamam',
-                onPressed: () {
-                  Navigator.pop(context);
+                 onPressed: () {
+                  widget.onPressed();
                 },
               ),
             ],

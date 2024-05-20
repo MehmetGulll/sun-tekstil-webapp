@@ -5,6 +5,8 @@ import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Checkbox/Checkbox.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
@@ -45,6 +47,19 @@ Widget buildColumn(BuildContext context, String label, List<String> items,
 }
 
 class _OfficalUsers extends State<OfficalUsers> {
+  TextEditingController adController = TextEditingController();
+  TextEditingController soyadController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController unvanController = TextEditingController();
+  Map<String, int> roller = {
+    'Admin': 1,
+    'Marka Yöneticisi': 2,
+    'Bölge Müdürü': 3,
+    'Görsel Yönetici': 4,
+    'Mağaza Müdürü': 5,
+    'Yetkisiz': 6,
+  };
+
   List<Map<String, dynamic>> _users = [];
   Future<List<Map<String, dynamic>>> _getUsers() async {
     var url = Uri.parse(ApiUrls.getUsers);
@@ -64,27 +79,65 @@ class _OfficalUsers extends State<OfficalUsers> {
 
   Future<void> updateUser(
       BuildContext context, int id, Map<String, dynamic> user) async {
-    var currentStatus = user['status'];
-    var newStatus = currentStatus == 0 ? 1 : 0;
-    user['status'] = newStatus;
+    var currentStatus = user['status'] == 1 ? 'Pasif' : 'Aktif';
+    var newStatus = currentStatus == 'Aktif' ? 0 : 1;
+    var currentUnvan = user['rol_adi'];
+    print(user['id']);
+    print(adController.text);
+    print(soyadController.text);
+    print(emailController.text);
+    print(roller[unvanController.text]);
+    print(newStatus);
     String? token = await TokenHelper.getToken();
     final response = await http.post(
-      Uri.parse('${ApiUrls.updateOfficalUser}/$id'),
+      Uri.parse('${ApiUrls.updateOfficalUser}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': '$token'
       },
-      body: jsonEncode(<String, String>{'status': newStatus.toString()}),
+      body: jsonEncode(<String, String>{
+        'userId': id.toString(),
+        'newAd': adController.text,
+        'newSoyad': soyadController.text,
+        'newEmail': emailController.text,
+        'newStatus': newStatus.toString(),
+        'newRol': roller[unvanController.text].toString()
+      }),
     );
     if (response.statusCode == 200) {
       print("Başarıyla güncellendi");
-      Navigator.pop(context);
+      String successMessage = "Güncelleme Başarılı!!";
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessDialog(
+              successMessage: successMessage,
+              successIcon: Icons.check,
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/officalUsers');
+              },
+            );
+          });
+
       setState(() {
         var updatedUser = _users.firstWhere((u) => u['id'] == user['id']);
         updatedUser['status'] = newStatus;
       });
     } else {
       print("Hata");
+      String errorMessage = "Bir hata oluştu!!";
+      print("Hata");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ErrorDialog(
+              errorMessage: errorMessage,
+              errorIcon: Icons.error,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            );
+          });
     }
   }
 
@@ -118,6 +171,10 @@ String? _fileName;
 
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map user) {
+    adController.text = user['ad'];
+    soyadController.text = user['soyad'];
+    emailController.text = user['eposta'];
+    unvanController.text = user['rol_adi'];
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -145,6 +202,30 @@ String? _fileName;
               SizedBox(
                 height: 20,
               ),
+              CustomInput(
+                controller: adController,
+                hintText: 'Ad',
+                keyboardType: TextInputType.name,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: soyadController,
+                hintText: 'Soyad',
+                keyboardType: TextInputType.text,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CustomInput(
+                controller: emailController,
+                hintText: 'E mail',
+                keyboardType: TextInputType.text,
+              ),
+              SizedBox(
+                height: 20,
+              ),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -157,7 +238,32 @@ String? _fileName;
                     CustomDropdown(
                       selectedItem: user['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
-                      onChanged: (String? value) {},
+                      onChanged: (String? value) {
+                        user['status'] = value == 'Aktif' ? 1:0;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Unvan",
+                      style: TextStyle(fontSize: Tokens.fontSize[2]),
+                    ),
+                    CustomDropdown(
+                      selectedItem: unvanController.text,
+                      items: roller.keys.toList(),
+                      onChanged: (String? value) {
+                        unvanController.text = value!;
+                        print("unvan id $value");
+                      },
                     ),
                   ],
                 ),

@@ -89,8 +89,14 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { userName, userSurname, user_name, userEposta, userPassword, userRole } =
-    req.body;
+  const {
+    userName,
+    userSurname,
+    user_name,
+    userEposta,
+    userPassword,
+    userRole,
+  } = req.body;
   const saltRounds = 10;
   try {
     const pool = await sql.connect(config);
@@ -215,46 +221,30 @@ exports.getOfficalUsers = async (req, res) => {
     return res.status(500).send(error);
   }
 };
-exports.updateOfficalUserStatus = async (req, res) => {
+
+exports.updateOfficalUser = async(req,res)=>{
   try {
-    const { id } = req.params;
-    const { error, value } = Joi.object({
-      status: Joi.number().required(),
-    }).validate(req.body);
-
-    if (error) {
-      return res.status(400).send(error.details[0].message);
-    }
-
-    const { status } = value;
-
+    const {userId, newAd, newSoyad, newEmail, newStatus, newRol} = req.body;
+    console.log(userId, newAd, newSoyad, newEmail, newStatus, newRol);
     const sequelize = await initializeSequelize();
-    const kullaniciModel = sequelize.define("kullanici", kullanici, {
-      timestamps: false,
-      freezeTableName: true,
+    const kullaniciModel = sequelize.define("kullanici",kullanici,{
+      timestamps:false,
+      freezeTableName:true
     });
-
-    const user = await kullaniciModel.findOne({
-      where: {
-        id,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).send("Kullanıcı bulunamadı!");
-    }
-
-    await kullaniciModel.update(
-      { status },
-      {
-        where: {
-          id,
-        },
-      }
-    );
-
-    return res.status(200).send("Kullanıcı durumu başarıyla güncellendi.");
+    const rolModel = sequelize.define("rol",rol,{
+      timestamps:false,
+      freezeTableName:true
+    })
+    const userToUpdate = await kullaniciModel.findOne({where:{id:userId}});
+    userToUpdate.ad=newAd,
+    userToUpdate.soyad=newSoyad,
+    userToUpdate.eposta = newEmail,
+    userToUpdate.status=newStatus,
+    userToUpdate.rol = newRol,
+    await userToUpdate.save();
+    return res.status(200).send({message:"Kullanıcı başarıyla güncellendi!"});
   } catch (error) {
-    console.log("Error", error);
+    console.log("Error",error);
+    return res.status(500).send(error);
   }
-};
+}

@@ -39,6 +39,8 @@ exports.addStore = async (req, res) => {
       storePhone,
       storeWidth,
       storeManager,
+      addId,
+      storeEmail
     } = req.body;
     const today = new Date();
     const formattedDate =
@@ -57,15 +59,18 @@ exports.addStore = async (req, res) => {
       .input("regionId", sql.NVarChar, "1")
       .input("storePhone", sql.NVarChar, storePhone)
       .input("storeWidth", sql.Int, storeWidth)
-      .input("storeManager", sql.Int, storeManager)
+      .input("storeManager", sql.Int, 1)
       .input("openingDate", sql.NVarChar, formattedDate)
+      .input("status", sql.Int, 1)
+      .input("addId", sql.Int, addId)
+      .input("storeEmail",sql.NVarChar,storeEmail)
       .query(
-        `INSERT INTO magaza (magaza_kodu, magaza_adi, magaza_tipi,bolge_id, sehir, magaza_telefon, magaza_metre, magaza_muduru,acilis_tarihi) VALUES (@storeCode, @storeName, @storeType,@regionId ,@city, @storePhone, @storeWidth, @storeManager,@openingDate)`
+        `INSERT INTO magaza (magaza_kodu, magaza_adi, magaza_tipi,bolge_id, sehir, magaza_telefon, magaza_metre, magaza_muduru,acilis_tarihi,status,ekleyen_id, magaza_eposta) VALUES (@storeCode, @storeName, @storeType,@regionId ,@city, @storePhone, @storeWidth, @storeManager,@openingDate,@status,@addId,@storeEmail)`
       );
     res.status(200).send({ message: "Mağaza başarıyla eklendi" });
   } catch (error) {
     console.log("Error", error);
-    res.status(500).send({ message: "Sunucu Hatası" });
+    res.status(500).send({ message: "Sunucu Hatası", error });
   }
 };
 exports.deleteStore = async (req, res) => {
@@ -127,7 +132,7 @@ exports.filterStores = async (req, res) => {
     } else if (magaza_tipi) {
       query += `magaza_tipi = ${magaza_tipi} `;
     } else if (sehir) {
-      query+=`sehir LIKE '%${sehir}%'`;
+      query += `sehir LIKE '%${sehir}%'`;
     } else {
       query = "SELECT * FROM magaza";
     }

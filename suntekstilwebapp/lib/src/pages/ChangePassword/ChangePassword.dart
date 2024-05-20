@@ -31,7 +31,7 @@ class _ChangePassword extends State<ChangePassword> {
       });
 
       if (response.statusCode == 200) {
-        String successMessage = "Bir hata oluştu!!";
+        String successMessage = "Şifre başarıyla değişti!!";
         if (response.body.isNotEmpty) {
           successMessage = response.body;
         }
@@ -39,9 +39,11 @@ class _ChangePassword extends State<ChangePassword> {
             context: context,
             builder: (BuildContext context) {
               return SuccessDialog(
-                successMessage: successMessage,
-                successIcon: Icons.check,
-              );
+                  successMessage: successMessage,
+                  successIcon: Icons.check,
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/home');
+                  });
             });
       } else if (response.statusCode == 401) {
         String errorMessage = "Bir hata oluştu!!";
@@ -54,6 +56,9 @@ class _ChangePassword extends State<ChangePassword> {
               return ErrorDialog(
                 errorMessage: errorMessage,
                 errorIcon: Icons.error,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               );
             });
       } else {
@@ -67,6 +72,9 @@ class _ChangePassword extends State<ChangePassword> {
               return ErrorDialog(
                 errorMessage: errorMessage,
                 errorIcon: Icons.error,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               );
             });
       }
