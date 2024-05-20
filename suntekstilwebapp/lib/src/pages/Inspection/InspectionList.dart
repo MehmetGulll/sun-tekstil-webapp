@@ -415,7 +415,8 @@ class _InspectionScreenState extends State<InspectionScreen> {
     }
   }
 
-  Future<void> uploadImage(Uint8List? bytes, String fileName, int soruId) async {
+  Future<void> uploadImage(
+      Uint8List? bytes, String fileName, int soruId) async {
     var request = http.MultipartRequest(
         'POST', Uri.parse('http://localhost:5000/upload'));
     request.files
@@ -425,12 +426,11 @@ class _InspectionScreenState extends State<InspectionScreen> {
       var responseData = await res.stream.bytesToString();
       var publicId = jsonDecode(responseData)['public_id'];
       print("Upload successful. Public ID: $publicId");
-      // set the publicId to the actionMap aksiyon_resim 
+      // set the publicId to the actionMap aksiyon_resim
       setState(() {
-         _actionMap[soruId] ??= {};
-         _actionMap[soruId]!['aksiyon_gorsel'] = publicId;
+        _actionMap[soruId] ??= {};
+        _actionMap[soruId]!['aksiyon_gorsel'] = publicId;
       });
-
     } else {
       print("Upload failed");
     }
@@ -475,6 +475,55 @@ class _InspectionScreenState extends State<InspectionScreen> {
     }
   }
 
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Denetimi Tamamla"),
+          content: Text("Denetimi tamamlamak istediğinizden emin misiniz?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("İptal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Onayla"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _answerInspection(widget.inspection);
+                // send denetim_id to mail function
+                _sendMail(widget.inspection['denetim_id']);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+// sendmail send denetim_id 
+  Future<void> _sendMail(int denetim_id ) async {
+    String? token = await TokenHelper.getToken();
+    final response = await http.post(
+      Uri.parse(ApiUrls.sendEmail),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, dynamic>{
+        'denetim_id': denetim_id,
+      }),
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print("Mail Başarılı Bir Şekilde Gönderildi");
+    } else {
+      throw Exception('Failed to load inspection questions');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -488,17 +537,17 @@ class _InspectionScreenState extends State<InspectionScreen> {
           children: [
             Text(
               'Denetim Tipi: ${widget.inspection['denetim_tipi']}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.0),
             Text(
               'Mağaza Adı: ${widget.inspection['magaza_adi']}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.0),
             Text(
               'Sorular:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.0),
             Expanded(
@@ -511,11 +560,11 @@ class _InspectionScreenState extends State<InspectionScreen> {
               ),
             ),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                _answerInspection(widget.inspection);
-              },
-              child: Text('Denetimi Tamamla'),
+            Center(
+              child: ElevatedButton(
+                onPressed: _showConfirmationDialog,
+                child: Text('Denetimi Tamamla'),
+              ),
             ),
           ],
         ),

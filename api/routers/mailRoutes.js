@@ -887,26 +887,26 @@ router.post("/sendEmail", async (req, res) => {
       subject: `${getDenetim.magaza.magaza_adi} Mağazası ${getDenetim.denetim_tipi.denetim_tipi}'i Dökümanı`,
       // text: textContent,
       html: htmlContent,
-      attachments: [
-        {
-          filename: "denetim_dokumani.pdf",
-          path: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        },
-        {
-          filename: "logo.png",
-          path: "routers/logo.png",
-        },
-        {
-          filename: "test.pdf",
-          path: "routers/test.pdf",
-        },
-      ],
+      // attachments: [
+      //   {
+      //     filename: "denetim_dokumani.pdf",
+      //     path: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      //   },
+      //   {
+      //     filename: "logo.png",
+      //     path: "routers/logo.png",
+      //   },
+      //   {
+      //     filename: "test.pdf",
+      //     path: "routers/test.pdf",
+      //   },
+      // ],
     };
 
     return res.status(200).send(await sendMail(mailOptions));
   } catch (error) {
     console.error("Mail gönderme hatası:", error);
-    return res.status(500).send("Mail gönderme hatası!");
+    return res.status(500).send("Mail gönderme hatası!", error.message);
   }
 });
 

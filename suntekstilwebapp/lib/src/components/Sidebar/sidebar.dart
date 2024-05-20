@@ -181,6 +181,22 @@ class _SidebarState extends State<Sidebar> {
       },
     );
 
+
+      final ActionTile = ListTile(
+      leading: Icon(Icons.all_inbox_rounded),
+      title: Text(
+        'Aksiyonlarım',
+        style: TextStyle(color: Themes.whiteColor),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        if (ModalRoute.of(context)?.settings.name != '/actions') {
+          Navigator.pushReplacementNamed(context, '/actions');
+        }
+      },
+    );
+
+
     final LogOutTile = ListTile(
       leading: Icon(Icons.logout),
       title: Text(
@@ -208,6 +224,7 @@ class _SidebarState extends State<Sidebar> {
                   ReportsTile,
                   MailTile,
                   InspectionTile,
+                  ActionTile,
                   LogOutTile,
                 ]
               : [
@@ -217,6 +234,7 @@ class _SidebarState extends State<Sidebar> {
                   RegionsTile,
                   UserManagementTile,
                   InspectionTile,
+                  ActionTile,
                   LogOutTile,
                 ],
         ),
