@@ -42,5 +42,8 @@ class ApiUrls {
   static const String getAllRegion = "http://localhost:5000/getAllRegion";
   static const String updateRegion = "http://localhost:5000/updateRegion";
   static const String addRegion = "http://localhost:5000/addRegion";
+  static const String getMyAction = "http://localhost:5000/getMyAction";
+  static const String closeAction = "http://localhost:5000/closeAction";
+  static const String sendEmail = "http://localhost:5000/sendEmail";
 
 }

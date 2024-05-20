@@ -496,11 +496,23 @@ router.post(
           }
         }
       }
-      // Denetim statusunu güncelle
+      
+      // Denetim puanını hesaplar
+      const totalSorular = sorular.length;
+      const dogruCevaplar = denetimSorular.filter(
+        (soru) => soru.dataValues.cevap === soru.dataValues.dogru_cevap
+      ).length;
+      const alinanPuan = (dogruCevaplar / totalSorular) * 100;      
+        console.log ("totalSorular: ", totalSorular);
+        console.log ("dogruCevaplar: ", dogruCevaplar);
+        console.log ("alinanPuan: ", alinanPuan);
+
+      // Denetim statusunu günceller
       await denetimModel.update(
         {
           status: 0,
           denetim_tamamlanma_tarihi: new Date().toISOString().split("T")[0],
+          alinan_puan: alinanPuan,
         },
         {
           where: {

@@ -414,6 +414,10 @@ const aksiyon = {
       key: "ds_id",
     },
   },
+  aksiyon_kapama_konu: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 };
 
 const unvan = {
