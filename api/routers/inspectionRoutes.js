@@ -191,7 +191,7 @@ router.post("/addInspection", authenticateToken, async (req, res) => {
       status: 1,
     });
 
-    return res.status(201).send(`Denetim Başarıyla Oluşturuldu!`);
+    return res.status(201).send(newInspection);
   } catch (error) {
     console.error("Add Inspection Error:", error);
     return res.status(500).send(error);
@@ -211,7 +211,7 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
 
     if (error) return res.status(400).send(error);
 
-    const { page = 1, perPage = 2, searchTerm, startDate, endDate } = value;
+    const { page = 1, perPage = 10, searchTerm, startDate, endDate } = value;
 
     const sequelize = await initializeSequelize();
 

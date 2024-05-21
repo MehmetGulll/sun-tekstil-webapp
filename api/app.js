@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.use(authRoutes);
 app.use(regionRoutes);
-// app.use(storeRoutes);
+app.use(storeRoutes);
 app.use(homeRoutes);
 app.use(titleRoutes);
 app.use(mailRoutes);

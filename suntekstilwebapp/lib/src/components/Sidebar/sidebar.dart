@@ -12,6 +12,7 @@ class Sidebar extends StatefulWidget {
 
 class _SidebarState extends State<Sidebar> {
   late int currentUserId;
+  late int userRolId;
 
   @override
   void initState() {
@@ -22,9 +23,13 @@ class _SidebarState extends State<Sidebar> {
   Future<void> getCurrentUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? userId = prefs.getInt('currentUserId');
+    int? userRoleID = await userRolIdHelper.getUserRolId();
     setState(() {
       currentUserId = userId ?? 6;
+      userRolId = userRoleID ?? 7;
     });
+    print("xdcurrentUserId: $currentUserId");
+    print("xduserRolId: $userRolId");
   }
 
   Future<void> logout(BuildContext context) async {
@@ -124,19 +129,21 @@ class _SidebarState extends State<Sidebar> {
             }
           },
         ),
-        ListTile(
-          leading: Icon(Icons.verified_user_rounded),
-          title: Text(
-            'Yetkili Kullanıcılar',
-            style: TextStyle(color: Themes.whiteColor),
+        if (userRolId == 1 || userRolId == 2) ...{
+          ListTile(
+            leading: Icon(Icons.verified_user_rounded),
+            title: Text(
+              'Yetkili Kullanıcılar',
+              style: TextStyle(color: Themes.whiteColor),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              if (ModalRoute.of(context)?.settings.name != '/officalUsers') {
+                Navigator.pushReplacementNamed(context, '/officalUsers');
+              }
+            },
           ),
-          onTap: () {
-            Navigator.pop(context);
-            if (ModalRoute.of(context)?.settings.name != '/officalUsers') {
-              Navigator.pushReplacementNamed(context, '/officalUsers');
-            }
-          },
-        ),
+        }
       ],
     );
     final ReportsTile = ListTile(
@@ -181,21 +188,57 @@ class _SidebarState extends State<Sidebar> {
       },
     );
 
-
-      final ActionTile = ListTile(
-      leading: Icon(Icons.all_inbox_rounded),
+    final ActionTile = ExpansionTile(
+      leading: Icon(Icons.date_range_outlined),
       title: Text(
-        'Aksiyonlarım',
+        'Aksiyonlar',
         style: TextStyle(color: Themes.whiteColor),
       ),
-      onTap: () {
-        Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/actions') {
-          Navigator.pushReplacementNamed(context, '/actions');
-        }
-      },
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.store_mall_directory_outlined),
+          title: Text(
+            'Mağaza Müdürü Aksiyonları',
+            style: TextStyle(color: Themes.whiteColor),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            if (ModalRoute.of(context)?.settings.name !=
+                '/storeManagerActions') {
+              Navigator.pushReplacementNamed(context, '/storeManagerActions');
+            }
+          },
+        ),
+        if (currentUserId == 1 || currentUserId == 2) ...{
+          ListTile(
+            leading: Icon(Icons.manage_search_rounded),
+            title: Text(
+              'Aksiyonları Görüntüle',
+              style: TextStyle(color: Themes.whiteColor),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              if (ModalRoute.of(context)?.settings.name != '/viewActions') {
+                Navigator.pushReplacementNamed(context, '/viewActions');
+              }
+            },
+          ),
+        },
+        ListTile(
+          leading: Icon(Icons.content_paste_search_rounded),
+          title: Text(
+            'Denetmen Aksiyonları',
+            style: TextStyle(color: Themes.whiteColor),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            if (ModalRoute.of(context)?.settings.name != '/managerActions') {
+              Navigator.pushReplacementNamed(context, '/managerActions');
+            }
+          },
+        ),
+      ],
     );
-
 
     final LogOutTile = ListTile(
       leading: Icon(Icons.logout),
@@ -213,7 +256,7 @@ class _SidebarState extends State<Sidebar> {
         color: Themes.blackColor,
         child: ListView(
           padding: EdgeInsets.zero,
-          children: currentUserId == 1
+          children: (userRolId == 1 || userRolId == 2)
               ? [
                   drawerHeader,
                   homeTile,
@@ -230,8 +273,6 @@ class _SidebarState extends State<Sidebar> {
               : [
                   drawerHeader,
                   homeTile,
-                  QuestionsExpansionTile,
-                  RegionsTile,
                   UserManagementTile,
                   InspectionTile,
                   ActionTile,

@@ -23,3 +23,11 @@ class currentUserIdHelper {
     return currentUserId;
   }
 }
+
+class userRolIdHelper {
+  static Future<int?> getUserRolId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? userRolId = prefs.getInt('rol');
+    return userRolId;
+  }
+}

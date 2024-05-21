@@ -42,8 +42,13 @@ class ApiUrls {
   static const String getAllRegion = "http://localhost:5000/getAllRegion";
   static const String updateRegion = "http://localhost:5000/updateRegion";
   static const String addRegion = "http://localhost:5000/addRegion";
-  static const String getMyAction = "http://localhost:5000/getMyAction";
+  static const String viewAllAction = "http://localhost:5000/viewAllAction";
   static const String closeAction = "http://localhost:5000/closeAction";
   static const String sendEmail = "http://localhost:5000/sendEmail";
+  static const String getMyCreatedAction = "http://localhost:5000/getMyCreatedAction";
+  static const String getAllActionStoreManager = "http://localhost:5000/getAllActionStoreManager";
+  static const String addInspection = "http://localhost:5000/addInspection";
+  static const String stores = "http://localhost:5000/stores";
+  static const String getAllInspectionType = "http://localhost:5000/getAllInspectionType";
 
 }

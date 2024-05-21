@@ -16,7 +16,11 @@ class CustomScaffold extends StatelessWidget {
           title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text("Jimmy Key Denetleme Sistemine Hoş Geldiniz..!"),
+          Text(
+            "Jimmy Key Denetim Yönetim Sistemi",
+            style: 
+            TextStyle(color: Colors.black),
+          ),
           Image.network(
             'https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png',
             fit: BoxFit.fill,
