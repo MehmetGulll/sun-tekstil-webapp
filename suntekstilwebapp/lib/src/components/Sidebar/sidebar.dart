@@ -61,7 +61,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/home') {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushNamed(context, '/home');
         }
       },
     );
@@ -75,7 +75,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/questions') {
-          Navigator.pushReplacementNamed(context, '/questions');
+          Navigator.pushNamed(context, '/questions');
         }
       },
     );
@@ -88,7 +88,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/stores') {
-          Navigator.pushReplacementNamed(context, '/stores');
+          Navigator.pushNamed(context, '/stores');
         }
       },
     );
@@ -101,7 +101,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/regions') {
-          Navigator.pushReplacementNamed(context, '/regions');
+          Navigator.pushNamed(context, '/regions');
         }
       },
     );
@@ -120,7 +120,7 @@ class _SidebarState extends State<Sidebar> {
           ),
           onTap: () {
             if (ModalRoute.of(context)?.settings.name != '/changePassword') {
-              Navigator.pushReplacementNamed(context, '/changePassword');
+              Navigator.pushNamed(context, '/changePassword');
             }
           },
         ),
@@ -133,7 +133,7 @@ class _SidebarState extends State<Sidebar> {
           onTap: () {
             Navigator.pop(context);
             if (ModalRoute.of(context)?.settings.name != '/officalUsers') {
-              Navigator.pushReplacementNamed(context, '/officalUsers');
+              Navigator.pushNamed(context, '/officalUsers');
             }
           },
         ),
@@ -148,7 +148,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/reports') {
-          Navigator.pushReplacementNamed(context, '/reports');
+          Navigator.pushNamed(context, '/reports');
         }
       },
     );
@@ -162,7 +162,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/mailManagement') {
-          Navigator.pushReplacementNamed(context, '/mailManagement');
+          Navigator.pushNamed(context, '/mailManagement');
         }
       },
     );
@@ -176,7 +176,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/inspectionList') {
-          Navigator.pushReplacementNamed(context, '/inspectionList');
+          Navigator.pushNamed(context, '/inspectionList');
         }
       },
     );
@@ -191,7 +191,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/actions') {
-          Navigator.pushReplacementNamed(context, '/actions');
+          Navigator.pushNamed(context, '/actions');
         }
       },
     );
