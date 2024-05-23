@@ -151,18 +151,31 @@ exports.getReportsByInspectionType = async (req, res) => {
     const result = await pool.request()
       .input('inspectionTypeId', sql.Int, inspectionTypeId)
       .query(`
-        SELECT b.bolge_adi AS regionName, ISNULL(SUM(ISNULL(d.alinan_puan, 0)), 0)/2 AS averagePoints
-        FROM denetim d 
-        INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id 
-        INNER JOIN magaza m ON d.magaza_id = m.magaza_id 
-        INNER JOIN bolge b ON m.bolge_id = b.bolge_id
-        WHERE dt.denetim_tip_id = @inspectionTypeId
-        GROUP BY b.bolge_adi`);
+        WITH AveragePoints AS (
+          SELECT 
+            b.bolge_adi AS regionName, 
+            ISNULL(SUM(ISNULL(d.alinan_puan, 0)), 0)/2 AS averagePoints
+          FROM denetim d 
+          INNER JOIN denetim_tipi dt ON d.denetim_tipi_id = dt.denetim_tip_id 
+          INNER JOIN magaza m ON d.magaza_id = m.magaza_id 
+          INNER JOIN bolge b ON m.bolge_id = b.bolge_id
+          WHERE dt.denetim_tip_id = @inspectionTypeId
+          GROUP BY b.bolge_adi
+        )
+        SELECT 
+          regionName, 
+          averagePoints,
+          CASE 
+            WHEN averagePoints > 100 THEN 100 
+            ELSE averagePoints 
+          END AS normalizedPoints
+        FROM AveragePoints
+      `);
     const reports = result.recordset.map(
       (row) =>
         new Report(
           row.regionName,
-          row.averagePoints
+          row.normalizedPoints
         )
     );
     res.status(200).send(reports);
@@ -171,6 +184,7 @@ exports.getReportsByInspectionType = async (req, res) => {
     res.status(500).send({ message: "Server Error", error });
   }
 };
+
 exports.getAverageScoresByInspectionType = async (req, res) => {
   try {
     const pool = await sql.connect(config);

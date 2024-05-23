@@ -78,7 +78,7 @@ class _SuccessRateState extends State<SuccessRate> {
                           decoration: BoxDecoration(
                             border:
                                 Border.all(color: Themes.greyColor, width: 1),
-                            color: Themes.prewinkleBlue,
+                            color: Themes.cardBackgroundColor,
                           ),
                           child: Column(
                             children: [
@@ -106,7 +106,7 @@ class _SuccessRateState extends State<SuccessRate> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Themes.greyColor, width: 1),
-                          color: Themes.prewinkleBlue,
+                          color: Themes.cardBackgroundColor,
                         ),
                         child: Column(
                           children: [

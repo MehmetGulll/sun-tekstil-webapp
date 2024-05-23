@@ -6,17 +6,39 @@ import 'package:suntekstilwebapp/src/API/url.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
 Future<List<Report>> fetchReports(int inspectionTypeId) async {
-  final response = await http.get(Uri.parse('${ApiUrls.getReportsByInspectionType}/$inspectionTypeId'));
+  final response = await http.get(
+      Uri.parse('${ApiUrls.getReportsByInspectionType}/$inspectionTypeId'));
 
   if (response.statusCode == 200) {
     List jsonResponse = json.decode(response.body);
-    print("Responsedata : ${response.body}");
-    return jsonResponse.map((item) => Report.fromJson(item)).toList();
+    print("Responsedata: ${response.body}");
+    List<Report> reports =
+        jsonResponse.map((item) => Report.fromJson(item)).toList();
+
+    reports = normalizeReports(reports);
+
+    return reports;
   } else {
     throw Exception('Failed to load reports from API');
   }
+}
+
+List<Report> normalizeReports(List<Report> reports) {
+  double maxPoints = reports.fold(
+      0.0,
+      (prev, report) =>
+          report.averagePoints! > prev ? report.averagePoints! : prev);
+
+  if (maxPoints > 100) {
+    reports = reports.map((report) {
+      double normalizedPoints = (report.averagePoints! / maxPoints) * 100;
+      return Report(
+          regionName: report.regionName, averagePoints: normalizedPoints);
+    }).toList();
+  }
+
+  return reports;
 }
 
 class Report {
@@ -28,16 +50,23 @@ class Report {
   factory Report.fromJson(Map<String, dynamic> json) {
     return Report(
       regionName: json['inspectionId'],
-      averagePoints: json['inspectionTypeId'].toDouble(),
+      averagePoints: (json['inspectionTypeId'] as num?)?.toDouble(),
     );
   }
 }
 
 class _BarChart extends StatelessWidget {
-   _BarChart({Key? key,required this.reports}) : super(key: key);
+  _BarChart({Key? key, required this.reports}) : super(key: key);
 
   final List<Report> reports;
-  final List<String> regions = ['Ege Bölgesi', 'İstanbul Asya Bölgesi', 'İstanbul Avrupa Bölgesi', 'Akdeniz Bölgesi', 'Karadeniz Bölgesi', 'İç Anadolu Bölgesi'];
+  final List<String> regions = [
+    'Ege Bölgesi',
+    'İstanbul Asya Bölgesi',
+    'İstanbul Avrupa Bölgesi',
+    'Akdeniz Bölgesi',
+    'Karadeniz Bölgesi',
+    'İç Anadolu Bölgesi'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -149,12 +178,17 @@ class _BarChart extends StatelessWidget {
 
   List<BarChartGroupData> get barGroups {
     return List.generate(6, (index) {
-      final report = reports.firstWhere((report) => report.regionName == regions[index], orElse: () => Report(regionName: regions[index], averagePoints: 0.0));
+      final report = reports.firstWhere(
+          (report) => report.regionName == regions[index],
+          orElse: () => Report(
+              regionName: regions[index],
+              averagePoints:
+                  0.0)); // // orElse içinde döndürülen Report nesnesinde averagePoints'i 0.0 olarak ayarladım
       return BarChartGroupData(
         x: index,
         barRods: [
           BarChartRodData(
-            toY: report?.averagePoints ?? 0,
+            toY: report.averagePoints ?? 0,
             gradient: _barsGradient,
           )
         ],
@@ -165,12 +199,12 @@ class _BarChart extends StatelessWidget {
 }
 
 class BarChartSample3 extends StatelessWidget {
- final String? inspectionTypeId;
+  final String? inspectionTypeId;
   BarChartSample3({this.inspectionTypeId});
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Report>>(
-      future: fetchReports(int.parse(inspectionTypeId ?? '4')),  
+      future: fetchReports(int.parse(inspectionTypeId ?? '4')),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return AspectRatio(
