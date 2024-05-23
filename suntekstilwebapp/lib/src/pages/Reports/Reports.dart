@@ -359,7 +359,7 @@ class _ReportsState extends State<Reports> {
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectionCompletionDate'],
+                      report['inspectionCompletionDate']?? 'BELİRSİZ',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
