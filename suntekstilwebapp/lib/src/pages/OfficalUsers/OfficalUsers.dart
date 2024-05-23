@@ -141,33 +141,9 @@ class _OfficalUsers extends State<OfficalUsers> {
     }
   }
 
-  Future<void> uploadImage(Uint8List? bytes, String fileName) async {
-    var request = http.MultipartRequest(
-        'POST', Uri.parse('http://localhost:5000/upload'));
-    request.files.add(http.MultipartFile.fromBytes('photo', bytes!, filename: fileName));
-    var res = await request.send();
-    if (res.statusCode == 200) {
-      print("Upload successful");
-    } else {
-      print("Upload failed");
-    }
-  }
+  
 
-String? _fileName;
 
-  void _openFilePicker() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      setState(() {
-        Uint8List? bytes = result.files.first.bytes;
-        _fileName = result.files.first.name!;
-        print("result is: $result");
-        print("result files first bytes : ${bytes}");
-        print("_fileName: $_fileName");
-      });
-    }
-  }
 
   void showModal(
       BuildContext context, Color backgroundColor, String text, Map user) {
@@ -278,6 +254,8 @@ String? _fileName;
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
+                      buttonColor: Themes.dividerColor,
+                      textColor: Themes.blackColor,
                       onPressed: () async {
                         print("Butona basıldı");
                         await updateUser(context, user['id'],
@@ -300,6 +278,7 @@ String? _fileName;
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Yetkili Kullanıcılar',
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 80),
@@ -314,22 +293,7 @@ String? _fileName;
                     fontSize: Tokens.fontSize[9],
                     fontWeight: Tokens.fontWeight[6]),
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  FilePickerResult? result =
-                      await FilePicker.platform.pickFiles();
-
-                  if (result != null) {
-                    Uint8List fileBytes = result.files.first.bytes!;
-                    String fileName = result.files.first.name;
-
-                    uploadImage(fileBytes, fileName);
-                  } else {
-                    print('No file selected');
-                  }
-                },
-                child: Text('Select a file'),
-              ),
+              
               SizedBox(
                 height: 50,
               ),
@@ -402,8 +366,8 @@ String? _fileName;
                             padding: EdgeInsets.all(8.0),
                             child: CustomButton(
                               buttonText: 'Düzenle',
-                              textColor: Themes.blueColor,
-                              buttonColor: Themes.whiteColor,
+                              textColor: Themes.blackColor,
+                              buttonColor: Themes.cardBackgroundColor,
                               onPressed: () {
                                 showModal(context, Themes.whiteColor, "", user);
                               },
@@ -424,7 +388,7 @@ String? _fileName;
                           TableRow(children: [
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "AD",
                                 style:
@@ -433,7 +397,7 @@ String? _fileName;
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "SOYAD",
                                 style:
@@ -442,7 +406,7 @@ String? _fileName;
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text("EMAİL",
                                   style: TextStyle(
                                     fontWeight: Tokens.fontWeight[2],
@@ -450,7 +414,7 @@ String? _fileName;
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "KULLANICI ADI ",
                                 style:
@@ -459,7 +423,7 @@ String? _fileName;
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "DURUM",
                                 style:
@@ -468,7 +432,7 @@ String? _fileName;
                             ),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "UNVAN",
                                   style: TextStyle(
@@ -476,7 +440,7 @@ String? _fileName;
                                 )),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "MARKA",
                                   style: TextStyle(
@@ -484,7 +448,7 @@ String? _fileName;
                                 )),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "DÜZENLE",
                                   style: TextStyle(
@@ -506,8 +470,11 @@ String? _fileName;
               ),
               CustomButton(
                   buttonText: "Yeni Kullanici Ekle",
+                  buttonColor: Themes.cardBackgroundColor,
+                  textColor: Themes.blackColor,
                   onPressed: () =>
-                      Navigator.pushReplacementNamed(context, '/register'))
+                      Navigator.pushReplacementNamed(context, '/register')),
+                      SizedBox(height: 20,)
             ],
           ),
         ),

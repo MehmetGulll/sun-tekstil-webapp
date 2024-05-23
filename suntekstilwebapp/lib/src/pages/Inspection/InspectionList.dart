@@ -295,6 +295,7 @@ class _InspectionPageState extends State<InspectionPage> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Denetim Listeleri',
       body: Column(
         children: [
           Padding(

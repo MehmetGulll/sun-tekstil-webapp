@@ -46,13 +46,10 @@ app.use(actionRoutes);
 app.use(questionRoutes);
 app.use(cloudRoutes);
 
-
-// Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-// Root endpoint
 app.get("/", (req, res) => {
   res.send("Welcome to the SUN TEKSTIL API!");
 });

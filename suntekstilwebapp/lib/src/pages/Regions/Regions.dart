@@ -232,6 +232,8 @@ class _RegionsState extends State<Regions> {
                           Expanded(
                             child: CustomButton(
                               buttonText: "Bölge Ekle",
+                              buttonColor: Themes.dividerColor,
+                              textColor: Themes.blackColor,
                               onPressed: () async {
                                 print("Onaya basıldı");
                                 addRegion(context);
@@ -314,6 +316,8 @@ class _RegionsState extends State<Regions> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Onay",
+                      buttonColor: Themes.dividerColor,
+                      textColor: Themes.blackColor,
                       onPressed: () async {
                         print("Onaya basıldı");
                         await updateRegion(context, region['bolge_id'],
@@ -336,6 +340,7 @@ class _RegionsState extends State<Regions> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Bölgeler',
       body: Container(
         child: Column(
           children: [
@@ -372,6 +377,8 @@ class _RegionsState extends State<Regions> {
                                 padding: EdgeInsets.symmetric(horizontal: 50),
                                 child: CustomButton(
                                     buttonText: "Yeni Bölge Ekle",
+                                    buttonColor: Themes.cardBackgroundColor,
+                                    textColor: Themes.blackColor,
                                     onPressed: () {
                                       showNewRegionModal(
                                         context,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
@@ -20,7 +21,22 @@ import 'dart:io';
 
 class ReportDetail extends StatefulWidget {
   final String reportId;
-  ReportDetail({Key? key, required this.reportId}) : super(key: key);
+  final String inspectorRole;
+  final String inspectorName;
+  final String storeName;
+  final String points;
+  final String inspectionType;
+  final String inspectionDate;
+  ReportDetail(
+      {Key? key,
+      required this.reportId,
+      required this.inspectorRole,
+      required this.inspectorName,
+      required this.storeName,
+      required this.points,
+      required this.inspectionType,
+      required this.inspectionDate})
+      : super(key: key);
   @override
   _ReportDetailState createState() => _ReportDetailState();
 }
@@ -36,7 +52,7 @@ class _ReportDetailState extends State<ReportDetail> {
     sheetObject.setColumnWidth(0, 50);
     sheetObject.setColumnWidth(1, 35);
     sheetObject.setColumnWidth(2, 35);
-    sheetObject.setColumnWidth(3,35);
+    sheetObject.setColumnWidth(3, 35);
 
     sheetObject.cell(CellIndex.indexByString("A1")).value =
         TextCellValue('SORU ADI');
@@ -145,6 +161,7 @@ class _ReportDetailState extends State<ReportDetail> {
       if (response.statusCode == 200) {
         _reportDetail =
             List<Map<String, dynamic>>.from(jsonDecode(response.body));
+        print("rapor detayları $_reportDetail");
         return _reportDetail;
       } else {
         throw Exception("Failed load report detail");
@@ -158,12 +175,14 @@ class _ReportDetailState extends State<ReportDetail> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Rapor Detayları',
       body: SingleChildScrollView(
         child: FutureBuilder<List>(
           future: getReportDetail(),
           builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
             if (snapshot.hasData && snapshot.data != null) {
               List<TableRow> rows = snapshot.data!.map((report) {
+                bool isCorrect = report['soruCevap'] == report['dogruCevap'];
                 return TableRow(children: [
                   Container(
                     padding: EdgeInsets.all(8.0),
@@ -181,6 +200,9 @@ class _ReportDetailState extends State<ReportDetail> {
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: isCorrect ? Themes.greenColor : Themes.secondaryColor,
+                    ),
                     child: Text(
                       report['soruPuan'].toString(),
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -195,94 +217,141 @@ class _ReportDetailState extends State<ReportDetail> {
                   ),
                 ]);
               }).toList();
-              return Column(children: [
-                Text(
-                  "Rapor Detayı",
-                  style: TextStyle(
-                      fontSize: Tokens.fontSize[9],
-                      fontWeight: Tokens.fontWeight[6]),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomButton(
-                        buttonText: 'Excel',
-                        buttonColor: Themes.greenColor,
-                        onPressed: () {
-                          print("Excel çıktısı alındı");
-                          List<Map<String, dynamic>> data =
-                              List<Map<String, dynamic>>.from(snapshot.data!);
-                          createExcelAndDownload(data);
-                        }),
-                    SizedBox(
-                      width: 20,
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Rapor Detayı",
+                        style: TextStyle(
+                            fontSize: Tokens.fontSize[9],
+                            fontWeight: Tokens.fontWeight[6]),
+                      ),
                     ),
-                    CustomButton(
-                        buttonText: 'PDF ',
-                        buttonColor: Themes.secondaryColor,
-                        onPressed: () {
-                          print("PDF çıktısı");
-                          List<Map<String, dynamic>> data =
-                              List<Map<String, dynamic>>.from(snapshot.data!);
-                          createPdfAndDownload(data);
-                        })
-                  ],
-                ),
-                SizedBox(height: 30),
-                Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Table(
-                    defaultColumnWidth: FlexColumnWidth(1),
-                    columnWidths: {
-                      0: FlexColumnWidth(2),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                      3: FlexColumnWidth(1),
-                    },
-                    border: TableBorder.all(color: Themes.blackColor),
-                    children: [
-                      TableRow(children: [
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "SORU ADI",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomButton(
+                            buttonText: 'Excel',
+                            textColor: Themes.blackColor,
+                            buttonColor: Themes.cardBackgroundColor,
+                            onPressed: () {
+                              print("Excel çıktısı alındı");
+                              List<Map<String, dynamic>> data =
+                                  List<Map<String, dynamic>>.from(
+                                      snapshot.data!);
+                              createExcelAndDownload(data);
+                            }),
+                        SizedBox(
+                          width: 20,
                         ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "VERİLEN CEVAP",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                        CustomButton(
+                            buttonText: 'PDF ',
+                            textColor: Themes.blackColor,
+                            buttonColor: Themes.cardBackgroundColor,
+                            onPressed: () {
+                              print("PDF çıktısı");
+                              List<Map<String, dynamic>> data =
+                                  List<Map<String, dynamic>>.from(
+                                      snapshot.data!);
+                              createPdfAndDownload(data);
+                            })
+                      ],
+                    ),
+                    SizedBox(height: 30),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Denetim Tipi: ${widget.inspectionType}",
+                            style: TextStyle(
+                                fontWeight: Tokens.fontWeight[7],
+                                fontSize: Tokens.fontSize[5]),
                           ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "SORU PUAN",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
-                          child: Text(
-                            "DOĞRU CEVAP",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
-                      ]),
-                      ...rows,
-                    ],
-                  ),
-                ),
-              ]);
+                          Text("Denetim Lokasyon: ${widget.storeName}",
+                              style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[7],
+                                  fontSize: Tokens.fontSize[5])),
+                          Text("Denetim Tarihi: ${widget.inspectionDate}",
+                              style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[7],
+                                  fontSize: Tokens.fontSize[5])),
+                          Text("Denetleyen: ${widget.inspectorName}",
+                              style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[7],
+                                  fontSize: Tokens.fontSize[5])),
+                          Text("Denetim Id: ${widget.reportId}",
+                              style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[7],
+                                  fontSize: Tokens.fontSize[5])),
+                          Text("Alınan Puan: ${widget.points}",
+                              style: TextStyle(
+                                  fontWeight: Tokens.fontWeight[7],
+                                  fontSize: Tokens.fontSize[5])),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Table(
+                        defaultColumnWidth: FlexColumnWidth(1),
+                        columnWidths: {
+                          0: FlexColumnWidth(2),
+                          1: FlexColumnWidth(1),
+                          2: FlexColumnWidth(1),
+                          3: FlexColumnWidth(1),
+                        },
+                        border: TableBorder.all(color: Themes.blackColor),
+                        children: [
+                          TableRow(children: [
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.cardBackgroundColor,
+                              child: Text(
+                                "SORU ADI",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.cardBackgroundColor,
+                              child: Text(
+                                "VERİLEN CEVAP",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.cardBackgroundColor,
+                              child: Text(
+                                "SORU PUAN",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(8.0),
+                              color: Themes.cardBackgroundColor,
+                              child: Text(
+                                "DOĞRU CEVAP",
+                                style:
+                                    TextStyle(fontWeight: Tokens.fontWeight[2]),
+                              ),
+                            ),
+                          ]),
+                          ...rows,
+                        ],
+                      ),
+                    ),
+                  ]);
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");
             }
