@@ -373,6 +373,8 @@ class _RegionsState extends State<Regions> {
                                 padding: EdgeInsets.symmetric(horizontal: 50),
                                 child: CustomButton(
                                     buttonText: "Yeni Bölge Ekle",
+                                    buttonColor: Themes.cardBackgroundColor,
+                                    textColor: Themes.blackColor,
                                     onPressed: () {
                                       showNewRegionModal(
                                         context,

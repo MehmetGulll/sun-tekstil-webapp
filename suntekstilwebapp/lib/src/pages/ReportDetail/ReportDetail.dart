@@ -237,7 +237,8 @@ class _ReportDetailState extends State<ReportDetail> {
                       children: [
                         CustomButton(
                             buttonText: 'Excel',
-                            buttonColor: Themes.greenColor,
+                            textColor: Themes.blackColor,
+                            buttonColor: Themes.cardBackgroundColor,
                             onPressed: () {
                               print("Excel çıktısı alındı");
                               List<Map<String, dynamic>> data =
@@ -250,7 +251,8 @@ class _ReportDetailState extends State<ReportDetail> {
                         ),
                         CustomButton(
                             buttonText: 'PDF ',
-                            buttonColor: Themes.secondaryColor,
+                            textColor: Themes.blackColor,
+                            buttonColor: Themes.cardBackgroundColor,
                             onPressed: () {
                               print("PDF çıktısı");
                               List<Map<String, dynamic>> data =
