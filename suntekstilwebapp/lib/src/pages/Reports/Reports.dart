@@ -20,28 +20,21 @@ class Reports extends StatefulWidget {
   _ReportsState createState() => _ReportsState();
 }
 
-Widget buildRow(
-    String label, List<String> items, ValueChanged<String?> onChanged) {
+Widget buildRow(List<String> items, ValueChanged<String?> onChanged) {
   return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-            child: Text(label),
-            flex: 1,
+    margin: EdgeInsets.symmetric(horizontal: 20),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Expanded(
+          child: CustomDropdown(
+            items: items,
+            onChanged: onChanged,
           ),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-              child: CustomDropdown(
-                items: items,
-                onChanged: onChanged,
-              ),
-              flex: 2)
-        ],
-      ));
+        ),
+      ],
+    ),
+  );
 }
 
 class _ReportsState extends State<Reports> {
@@ -246,6 +239,8 @@ class _ReportsState extends State<Reports> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
+                      textColor: Themes.blackColor,
+                      buttonColor: Themes.dividerColor,
                       onPressed: () async {
                         await updateReport(context, report['inspectionId'],
                             Map<String, dynamic>.from(report));
@@ -359,7 +354,7 @@ class _ReportsState extends State<Reports> {
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectionCompletionDate']?? 'BELİRSİZ',
+                      report['inspectionCompletionDate'] ?? 'BELİRSİZ',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
@@ -378,15 +373,25 @@ class _ReportsState extends State<Reports> {
                     padding: EdgeInsets.all(8.0),
                     child: CustomButton(
                       buttonText: 'Detay',
-                      textColor: Themes.secondaryColor,
+                      textColor: Themes.blueColor,
                       buttonColor: Themes.whiteColor,
                       onPressed: () {
                         print("Detay");
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                ReportDetail(reportId: report['inspectionId'].toString()),
+                            builder: (context) => ReportDetail(
+                                reportId: report['inspectionId'].toString(),
+                                inspectorRole:
+                                    report['inspectorRole'].toString(),
+                                inspectorName:
+                                    report['inspectorName'].toString(),
+                                storeName: report['storeId'].toString(),
+                                points: report['pointsReceived'].toString(),
+                                inspectionType:
+                                    report['inspectionTypeId'].toString(),
+                                inspectionDate:
+                                    report['inspectionDate'].toString()),
                           ),
                         );
                       },
@@ -402,83 +407,95 @@ class _ReportsState extends State<Reports> {
                       fontWeight: Tokens.fontWeight[6]),
                 ),
                 SizedBox(height: 30),
-                Column(children: [
-                  Text('DENETİM TARİHİ:'),
-                  SizedBox(width: 8),
-                  Text("${_startDate.toLocal()}".split(' ')[0]),
-                  SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context, true),
-                    child: Text('Seç'),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: buildRow(
+                          _inspectorType,
+                          (value) =>
+                              setState(() => _chosenInspectorType = value),
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _selectDate(context, true),
+                            child: Text('Denetim Başlangıç Tarihi'),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 20),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _selectDate(context, false),
+                            child: Text('Denetim Tamamlanma Tarihi'),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ]),
-                SizedBox(height: 16),
-                Column(children: [
-                  Text('DENETİM TAMAMLANMA TARİHİ:'),
-                  SizedBox(width: 8),
-                  Text("${_endDate.toLocal()}".split(' ')[0]),
-                  SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () => _selectDate(context, false),
-                    child: Text('Seç'),
-                  ),
-                ]),
+                ),
                 SizedBox(height: 20),
-                buildRow("DENETİM TİPİ", _inspectorType,
-                    (value) => setState(() => _chosenInspectorType = value)),
-                SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CustomButton(
-                        buttonText: "Filtreleme",
-                        onPressed: () async {
-                          if (_startDate != null && _endDate != null) {
-                            print("Filtrelendi");
-                            isFiltered = true;
-                            await filteredReports();
-                          } else if (_startDate == null) {
-                            String errorMessage = "Başlangıç tarihi seçiniz!";
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return ErrorDialog(
-                                    errorMessage: errorMessage,
-                                    errorIcon: Icons.person_off,
-                                    onPressed: (){
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                });
-                          } else if (_endDate == null) {
-                            String errorMessage = "Bitiş tarihi seçiniz!";
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return ErrorDialog(
-                                    errorMessage: errorMessage,
-                                    errorIcon: Icons.person_off,
-                                    onPressed: (){
-                                      Navigator.of(context).pop();
-                                    },
-                                  );
-                                });
-                          } else {
-                            print("Tarihleri seçiniz lütfem");
-                          }
-                        }),
-                    SizedBox(
-                      width: 20,
+                      buttonText: "Filtrele",
+                      textColor:Themes.blackColor,
+                      buttonColor: Themes.cardBackgroundColor,
+                      onPressed: () async {
+                        if (_startDate != null && _endDate != null) {
+                          print("Filtrelendi");
+                          isFiltered = true;
+                          await filteredReports();
+                        } else if (_startDate == null) {
+                          String errorMessage = "Başlangıç tarihi seçiniz!";
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ErrorDialog(
+                                errorMessage: errorMessage,
+                                errorIcon: Icons.person_off,
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
+                        } else if (_endDate == null) {
+                          String errorMessage = "Bitiş tarihi seçiniz!";
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ErrorDialog(
+                                errorMessage: errorMessage,
+                                errorIcon: Icons.person_off,
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
+                        } else {
+                          print("Tarihleri seçiniz lütfen");
+                        }
+                      },
                     ),
+                    SizedBox(width: 20),
                     CustomButton(
-                        buttonText: 'Filtreleri Sil',
-                        buttonColor: Themes.secondaryColor,
-                        onPressed: () async {
-                          print("Filtreler kaldırıldı");
-                          isFiltered = false;
-                          await _getReports();
-                          setState(() {});
-                        })
+                      buttonText: 'Filtreleri Sil',
+                      buttonColor: Themes.secondaryColor,
+                      onPressed: () async {
+                        print("Filtreler kaldırıldı");
+                        isFiltered = false;
+                        await _getReports();
+                        setState(() {});
+                      },
+                    ),
                   ],
                 ),
                 Padding(
@@ -500,7 +517,7 @@ class _ReportsState extends State<Reports> {
                       TableRow(children: [
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "DENETİM TİPİ",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -508,7 +525,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "MAĞAZA ADI",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -516,7 +533,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "DENETİMCİ ROLÜ",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -524,7 +541,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "DENETÇİ",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -532,7 +549,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "PUAN",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -540,7 +557,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "DENETİM TARİHİ",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -548,7 +565,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "DENETİM TAMAMLANMA GÜNÜ",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -556,7 +573,7 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
                             "DÜZENLE",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
@@ -564,9 +581,9 @@ class _ReportsState extends State<Reports> {
                         ),
                         Container(
                           padding: EdgeInsets.all(8.0),
-                          color: Themes.yellowColor,
+                          color: Themes.cardBackgroundColor,
                           child: Text(
-                            "Detay Gör",
+                            "DETAY GÖR",
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
                         ),
