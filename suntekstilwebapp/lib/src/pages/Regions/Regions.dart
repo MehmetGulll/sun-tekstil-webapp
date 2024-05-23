@@ -232,6 +232,8 @@ class _RegionsState extends State<Regions> {
                           Expanded(
                             child: CustomButton(
                               buttonText: "Bölge Ekle",
+                              buttonColor: Themes.dividerColor,
+                              textColor: Themes.blackColor,
                               onPressed: () async {
                                 print("Onaya basıldı");
                                 addRegion(context);
@@ -314,6 +316,8 @@ class _RegionsState extends State<Regions> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Onay",
+                      buttonColor: Themes.dividerColor,
+                      textColor: Themes.blackColor,
                       onPressed: () async {
                         print("Onaya basıldı");
                         await updateRegion(context, region['bolge_id'],
