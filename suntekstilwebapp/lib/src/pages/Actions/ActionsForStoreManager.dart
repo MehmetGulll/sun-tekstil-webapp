@@ -6,12 +6,12 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'dart:convert';
 
-class ActionPage extends StatefulWidget {
+class AllActionStoreManager extends StatefulWidget {
   @override
-  _ActionPageState createState() => _ActionPageState();
+  _AllActionStoreManagerState createState() => _AllActionStoreManagerState();
 }
 
-class _ActionPageState extends State<ActionPage> {
+class _AllActionStoreManagerState extends State<AllActionStoreManager> {
   List<dynamic> _allActions = [];
   int _currentPage = 1;
   int _totalPages = 1;
@@ -44,7 +44,7 @@ class _ActionPageState extends State<ActionPage> {
     }
 
     final response = await http.post(
-      Uri.parse(ApiUrls.viewAllAction),
+      Uri.parse(ApiUrls.getAllActionStoreManager),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': '$token'

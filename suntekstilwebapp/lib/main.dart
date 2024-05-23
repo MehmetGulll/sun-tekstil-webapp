@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:suntekstilwebapp/src/Context/GlobalStates.dart'; //
+import 'package:suntekstilwebapp/src/Context/GlobalStates.dart'; 
 import 'package:suntekstilwebapp/src/pages/Actions/Actions.dart';
+import 'package:suntekstilwebapp/src/pages/Actions/ManagerActions.dart';
+import 'package:suntekstilwebapp/src/pages/Actions/ActionsForStoreManager.dart';
 import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
 import 'package:suntekstilwebapp/src/pages/AddQuestion/AddQuestion.dart';
 import 'package:suntekstilwebapp/src/pages/ChangePassword/ChangePassword.dart';
@@ -52,7 +54,9 @@ class MyApp extends StatelessWidget {
         '/mailManagement': (context) => MailPage(),
         '/addQuestion': (context) => AddQuestion(),
         '/inspectionList': (context) => InspectionPage(),
-        '/actions': (context) => ActionPage()
+        '/viewActions': (context) => ActionPage(),
+        '/managerActions': (context) => ManagerActionPage(),
+        '/storeManagerActions': (context) => AllActionStoreManager()
       },
     );
   }

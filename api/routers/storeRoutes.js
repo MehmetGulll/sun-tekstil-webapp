@@ -4,54 +4,115 @@ const Joi = require("joi");
 const { Op } = require("sequelize");
 const authenticateToken = require("../middlewares/authentication");
 const { initializeSequelize } = require("../helpers/sequelize");
-const { magaza } = require("../helpers/sequelizemodels");
+const { magaza,kullanici,bolge,magaza_tipi } = require("../helpers/sequelizemodels");
 
 // TÜM MAĞAZALARI LİSTELER
-router.post("/getAllStore", authenticateToken, async (req, res) => {
+router.post("/stores", authenticateToken, async (req, res) => {
   try {
-    const paginationSchema = Joi.object({
-      page: Joi.number().integer().min(1).default(1),
-      perPage: Joi.number().integer().min(1).default(10),
-    });
-
-    const { error, value } = paginationSchema.validate(req.body);
+    const { error, value } = Joi.object({
+      searchTerm: Joi.string().allow(""),
+      page: Joi.number().optional(),
+      perPage: Joi.number().optional(),
+    }).validate(req.body);
 
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
 
-    let { page, perPage } = value;
-
-    const offset = (page - 1) * perPage;
-
+    const { searchTerm, page = 1, perPage = 10 } = value;
     const sequelize = await initializeSequelize();
+
     const magazaModel = sequelize.define("magaza", magaza, {
       timestamps: false,
       freezeTableName: true,
     });
-    console.log("page", page);
-    console.log("perPage", perPage);
 
-    const { rows: allStore, count } = await magazaModel.findAndCountAll({
-      where: {
-        status: 1,
-      },
-      offset: offset,
-      limit: perPage,
+    const magazaTipiModel = sequelize.define("magaza_tipi", magaza_tipi, {
+      timestamps: false,
+      freezeTableName: true,
     });
 
-    if (!allStore || allStore.length === 0) {
-      return res.status(404).send("Magaza Bulunamadi!");
+    const bolgeModel = sequelize.define("bolge", bolge, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    magazaModel.belongsTo(magazaTipiModel, {
+      foreignKey: "magaza_tipi",
+      targetKey: "magaza_tip_id",
+      as: "magazaTip",
+    });
+
+    magazaModel.belongsTo(bolgeModel, {
+      foreignKey: "bolge_id",
+      as: "bolge",
+    });
+
+    magazaModel.belongsTo(kullaniciModel, {
+      foreignKey: "magaza_muduru",
+      as: "mudur",
+    });
+
+    const whereObj = { status: 1 };
+
+    if (searchTerm) {
+      whereObj[Op.or] = [
+        { magaza_adi: { [Op.like]: `%${searchTerm}%` } },
+        { magaza_kodu: { [Op.like]: `%${searchTerm}%` } },
+        { magaza_telefon: { [Op.like]: `%${searchTerm}%` } },
+        { sehir: { [Op.like]: `%${searchTerm}%` } },
+      ];
     }
 
-    return res
-      .status(200)
-      .send({ stores: allStore, total: count, page: page, perPage: perPage });
+    const stores = await magazaModel.findAndCountAll({
+      where: whereObj,
+      include: [
+        {
+          model: magazaTipiModel,
+          as: "magazaTip",
+        },
+        {
+          model: bolgeModel,
+          as: "bolge",
+        },
+        {
+          model: kullaniciModel,
+          as: "mudur",
+        },
+      ],
+      limit: perPage,
+      offset: (page - 1) * perPage,
+    });
+
+    const modifiedStores = stores.rows.map((store) => {
+      return {
+        magaza_id: store.magaza_id,
+        magaza_adi: store.magaza_adi,
+        magaza_kodu: store.magaza_kodu,
+        magaza_tipi: store.magazaTip.magaza_tip_adi,
+        bolge: store.bolge.bolge_adi,
+        sehir: store.sehir,
+        magaza_telefon: store.magaza_telefon,
+        magaza_metre: store.magaza_metre,
+        magaza_muduru: store.mudur.kullanici_adi + " " + store.mudur.kullanici_soyadi,
+        acilis_tarihi: store.acilis_tarihi,
+        magaza_eposta: store.magaza_eposta,
+        status: store.status,
+      };
+    });
+
+    return res.status(200).send({ data: modifiedStores, total: stores.count });
   } catch (error) {
-    console.error("Get All Store Error:", error);
+    console.error("Stores Error:", error);
     return res.status(500).send(error);
   }
 });
+
 
 // YENİ MAĞAZA EKLER
 router.post("/addStore", authenticateToken, async (req, res) => {
@@ -171,35 +232,55 @@ router.post("/updateStore", authenticateToken, async (req, res) => {
       return res.status(404).send("Mağaza Bulunamadı!");
     }
 
-    if (store.magaza_kodu === value.magaza_kodu) 
-      return res.status(400).send("Mağaza Kodu Aynı Girildiği İçin Güncelleme Yapılmadı!");
-    
-    if (store.magaza_adi === value.magaza_adi)
-      return res.status(400).send("Mağaza Adı Aynı Girildiği İçin Güncelleme Yapılmadı!");  
-    
-    if (store.magaza_tipi === value.magaza_tipi)
-      return res.status(400).send("Mağaza Tipi Aynı Girildiği İçin Güncelleme Yapılmadı!");
-    
-    if (store.bolge_id === value.bolge_id)
-      return res.status(400).send("Bölge Aynı Girildiği İçin Güncelleme Yapılmadı!");
-    
-    if (store.sehir === value.sehir)
-      return res.status(400).send("Şehir Aynı Girildiği İçin Güncelleme Yapılmadı!");
+    if (store.magaza_kodu === value.magaza_kodu)
+      return res
+        .status(400)
+        .send("Mağaza Kodu Aynı Girildiği İçin Güncelleme Yapılmadı!");
 
-    if (store.magaza_telefon === value.magaza_telefon) 
-      return res.status(400).send("Mağaza Telefonu Aynı Girildiği İçin Güncelleme Yapılmadı!");
+    if (store.magaza_adi === value.magaza_adi)
+      return res
+        .status(400)
+        .send("Mağaza Adı Aynı Girildiği İçin Güncelleme Yapılmadı!");
+
+    if (store.magaza_tipi === value.magaza_tipi)
+      return res
+        .status(400)
+        .send("Mağaza Tipi Aynı Girildiği İçin Güncelleme Yapılmadı!");
+
+    if (store.bolge_id === value.bolge_id)
+      return res
+        .status(400)
+        .send("Bölge Aynı Girildiği İçin Güncelleme Yapılmadı!");
+
+    if (store.sehir === value.sehir)
+      return res
+        .status(400)
+        .send("Şehir Aynı Girildiği İçin Güncelleme Yapılmadı!");
+
+    if (store.magaza_telefon === value.magaza_telefon)
+      return res
+        .status(400)
+        .send("Mağaza Telefonu Aynı Girildiği İçin Güncelleme Yapılmadı!");
     if (store.magaza_metre === value.magaza_metre)
-      return res.status(400).send("Mağaza Metre Aynı Girildiği İçin Güncelleme Yapılmadı!");
+      return res
+        .status(400)
+        .send("Mağaza Metre Aynı Girildiği İçin Güncelleme Yapılmadı!");
 
     if (store.magaza_muduru === value.magaza_muduru)
-      return res.status(400).send("Mağaza Müdürü Aynı Girildiği İçin Güncelleme Yapılmadı!");
+      return res
+        .status(400)
+        .send("Mağaza Müdürü Aynı Girildiği İçin Güncelleme Yapılmadı!");
 
     if (store.acilis_tarihi === value.acilis_tarihi)
-      return res.status(400).send("Açılış Tarihi Aynı Girildiği İçin Güncelleme Yapılmadı!");  
+      return res
+        .status(400)
+        .send("Açılış Tarihi Aynı Girildiği İçin Güncelleme Yapılmadı!");
     if (store.status === value.status)
-      return res.status(400).send("Mağaza Durumu Aynı Girildiği İçin Güncelleme Yapılmadı!");
-    
-      await magazaModel.update(
+      return res
+        .status(400)
+        .send("Mağaza Durumu Aynı Girildiği İçin Güncelleme Yapılmadı!");
+
+    await magazaModel.update(
       {
         ...value,
         ekleyen_id: req.user.id,

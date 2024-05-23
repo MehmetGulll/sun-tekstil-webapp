@@ -22,11 +22,19 @@ class _InspectionPageState extends State<InspectionPage> {
   TextEditingController _searchController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
+  List<dynamic> _denetimTipiList = [];
+  List<dynamic> _magazalarList = [];
+
+  int _selectedDenetimTipi = 0;
+  int _selectedMagaza = 0;
+  TextEditingController _denetimTarihiController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchInspections();
+    _fetchStores();
+    _fetchDenetimTipi();
   }
 
   Future<void> _fetchInspections() async {
@@ -64,6 +72,72 @@ class _InspectionPageState extends State<InspectionPage> {
       });
     } else {
       throw Exception('Failed to load inspections');
+    }
+  }
+
+  Future<void> addInspection(
+      int denetim_tipi_id, int magaza_id, String denetim_tarihi) async {
+    String? token = await TokenHelper.getToken();
+    int? userId = await currentUserIdHelper.getCurrentUserId();
+    final response = await http.post(
+      Uri.parse(ApiUrls.addInspection),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': '$token'
+      },
+      body: jsonEncode(<String, dynamic>{
+        'denetim_tipi_id': denetim_tipi_id,
+        'magaza_id': magaza_id,
+        'denetim_tarihi': denetim_tarihi,
+        'denetci_id': userId
+      }),
+    );
+    if (response.statusCode == 201) {
+      final responseData = json.decode(response.body);
+      print("Denetim Başarılı Bir Şekilde Eklendi");
+      _fetchInspections();
+    } else {
+      throw Exception('Failed to load inspections');
+    }
+  }
+
+  Future<void> _fetchStores() async {
+    String? token = await TokenHelper.getToken();
+    final response = await http.post(
+      Uri.parse(ApiUrls.stores),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': '$token'
+      },
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _magazalarList = responseData['data'];
+      });
+      print("Magazalar Listesi: $_magazalarList");
+    } else {
+      throw Exception('Failed to load stores');
+    }
+  }
+
+  Future<void> _fetchDenetimTipi() async {
+    String? token = await TokenHelper.getToken();
+    final response = await http.get(
+      Uri.parse(ApiUrls.getAllInspectionType),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': '$token'
+      },
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _denetimTipiList = responseData['data'];
+      });
+      print("Denetim Tipi Listesi: $_denetimTipiList");
+    } else {
+      throw Exception('Failed to load denetim tipi');
     }
   }
 
@@ -114,13 +188,107 @@ class _InspectionPageState extends State<InspectionPage> {
     );
   }
 
+  void _showAddInspectionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Denetim Ekle"),
+          content: SizedBox(
+            width: 400,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Denetim Tipi',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  DropdownButtonFormField<int>(
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDenetimTipi = value!;
+                      });
+                    },
+                    items: _denetimTipiList.map((denetimTipi) {
+                      return DropdownMenuItem<int>(
+                        value: denetimTipi['denetim_tip_id'],
+                        child: Text(denetimTipi['denetim_tipi']),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Mağaza',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  DropdownButtonFormField<int>(
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedMagaza = value!;
+                      });
+                    },
+                    items: _magazalarList.map((magaza) {
+                      return DropdownMenuItem<int>(
+                        value: magaza['magaza_id'],
+                        child: Text(magaza['magaza_adi']),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (selectedDate != null) {
+                        setState(() {
+                          _denetimTarihiController.text =
+                              DateFormat('yyyy-MM-dd').format(selectedDate);
+                        });
+                      }
+                    },
+                    child: Text('Tarih Seç'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("İptal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                addInspection(
+                  _selectedDenetimTipi,
+                  _selectedMagaza,
+                  _denetimTarihiController.text,
+                );
+              },
+              child: Text("Ekle"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(40.0),
             child: Row(
               children: [
                 Expanded(
@@ -184,6 +352,32 @@ class _InspectionPageState extends State<InspectionPage> {
                 IconButton(
                   icon: Icon(Icons.delete_forever_sharp),
                   onPressed: _clearFilters,
+                ),
+                SizedBox(width: 8.0),
+                Tooltip(
+                  message: "Yeni Denetim Oluştur",
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      _showAddInspectionDialog();
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF7F2F9), // Arka plan rengi
+                        borderRadius:
+                            BorderRadius.circular(8), // Hafif border radius
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                            8), // İçerik ile kenarlar arasında boşluk
+                        child: Icon(
+                          Icons.add,
+                          color: Color(0xFF745FAB), // İkon rengi
+                          size: 24, // İkon boyutu
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
               mainAxisAlignment: MainAxisAlignment.center,
@@ -503,8 +697,9 @@ class _InspectionScreenState extends State<InspectionScreen> {
       },
     );
   }
-// sendmail send denetim_id 
-  Future<void> _sendMail(int denetim_id ) async {
+
+// sendmail send denetim_id
+  Future<void> _sendMail(int denetim_id) async {
     String? token = await TokenHelper.getToken();
     final response = await http.post(
       Uri.parse(ApiUrls.sendEmail),

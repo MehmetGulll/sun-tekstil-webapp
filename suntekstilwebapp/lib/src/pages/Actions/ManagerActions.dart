@@ -6,12 +6,12 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'dart:convert';
 
-class ActionPage extends StatefulWidget {
+class ManagerActionPage extends StatefulWidget {
   @override
-  _ActionPageState createState() => _ActionPageState();
+  _ManagerActionPageState createState() => _ManagerActionPageState();
 }
 
-class _ActionPageState extends State<ActionPage> {
+class _ManagerActionPageState extends State<ManagerActionPage> {
   List<dynamic> _allActions = [];
   int _currentPage = 1;
   int _totalPages = 1;
@@ -44,7 +44,7 @@ class _ActionPageState extends State<ActionPage> {
     }
 
     final response = await http.post(
-      Uri.parse(ApiUrls.viewAllAction),
+      Uri.parse(ApiUrls.getMyCreatedAction),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': '$token'
@@ -62,6 +62,37 @@ class _ActionPageState extends State<ActionPage> {
       });
     } else {
       throw Exception('Failed to load actions');
+    }
+  }
+
+  Future<void> _closeAction(int? id, String closingSubject) async {
+    if (id == null) {
+      throw ArgumentError('id must not be null.');
+    }
+
+    String? token = await TokenHelper.getToken();
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiUrls.closeAction),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': '$token'
+        },
+        body: jsonEncode(
+            {'aksiyon_id': id, 'aksiyon_kapama_konu': closingSubject}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print("responseData: $responseData");
+        _fetchActions();
+      } else {
+        throw Exception('Aksiyon kapatma işlemi başarısız oldu.');
+      }
+    } catch (e) {
+      print('Error closing action: $e');
+      throw Exception('Aksiyon kapatma işlemi sırasında bir hata oluştu.');
     }
   }
 
@@ -222,7 +253,7 @@ class _ActionPageState extends State<ActionPage> {
                                 fontWeight: FontWeight.bold, fontSize: 14)),
                       ),
                       DataColumn(
-                        label: Text('Aksiyon Durumu',
+                        label: Text('İşlemler',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 14)),
                       ),
@@ -286,7 +317,7 @@ class _ActionPageState extends State<ActionPage> {
                               DataCell(
                                 Container(
                                   // width:
-                                  // 200, // Set the desired maximum width here
+                                      // 200, // Set the desired maximum width here
                                   child: Text(
                                     action['aksiyon_sorusu'] ?? 'N/A',
                                     maxLines: null, // Allow unlimited lines
@@ -409,19 +440,83 @@ class _ActionPageState extends State<ActionPage> {
                                 Text(action['aksiyon_kapama_konu'] ?? 'N/A'),
                               ),
                               DataCell(
-                                Switch(
-                                  value: action['status'] == 1,
-                                  onChanged: (value) {
-                                    
-                                  },
-                                  activeColor: action['status'] == 1
-                                      ? Colors.green
-                                      : Colors.grey,
-                                  inactiveThumbColor: action['status'] == 1
-                                      ? Colors.green
-                                      : Colors.grey,
+                                ButtonBar(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.mode_edit_outlined),
+                                      tooltip: action["status"] == 0 ? "Aksiyon Kapatılmış!" :
+                                      action['aksiyon_konu'] +
+                                          " Denetimini Düzenle",
+                                      onPressed: action['status'] == 0
+                                          ? null
+                                          : () {
+                                              String actionSubject =
+                                                  action['aksiyon_konu'] ??
+                                                      'N/A';
+                                              String closingSubject = '';
+
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    title: Text(
+                                                        'Seçilen Aksiyon Konusu: $actionSubject'),
+                                                    content: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        TextField(
+                                                          decoration:
+                                                              InputDecoration(
+                                                            hintText:
+                                                                'Kapatma Açıklaması',
+                                                            border:
+                                                                OutlineInputBorder(),
+                                                          ),
+                                                          onChanged: (value) {
+                                                            closingSubject =
+                                                                value;
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: Text('İptal'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed:
+                                                            action['status'] ==
+                                                                    0
+                                                                ? null
+                                                                : () async {
+                                                                    await _closeAction(
+                                                                        action[
+                                                                            'aksiyon_id'],
+                                                                        closingSubject);
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .pop();
+                                                                  },
+                                                        child: Text(
+                                                            'Aksiyonu Tamamla'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                      color: action['status'] == 0
+                                          ? Colors.grey
+                                          : null,
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              )
                             ],
                           ),
                         )
