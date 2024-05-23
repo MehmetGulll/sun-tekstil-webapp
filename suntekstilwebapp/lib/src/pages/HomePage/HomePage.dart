@@ -345,13 +345,26 @@ class Home extends StatelessWidget {
                                                                           mainAxisAlignment:
                                                                               MainAxisAlignment.center,
                                                                           children: [
-                                                                            Text(
-                                                                              '${ziyaretData['completedCount']}/${ziyaretData['totalCount']}',
-                                                                              style: TextStyle(
-                                                                                color: Themes.cardTextColor,
-                                                                                fontSize: Tokens.fontSize[6],
-                                                                                fontWeight: Tokens.fontWeight[5],
-                                                                              ),
+                                                                            Row(
+                                                                              children: [
+                                                                                Text(
+                                                                                  '${ziyaretData['completedCount']}/${ziyaretData['totalCount']}',
+                                                                                  style: TextStyle(
+                                                                                    color: Themes.cardTextColor,
+                                                                                    fontSize: Tokens.fontSize[6],
+                                                                                    fontWeight: Tokens.fontWeight[5],
+                                                                                  ),
+                                                                                ),
+                                                                                Icon(Icons.arrow_right, size: 35,),
+                                                                                Text(
+                                                                                  '${ziyaretData['completionPercentage'] != null ? ziyaretData['completionPercentage'].toStringAsFixed(2) : '0.00'}%',
+                                                                                  style: TextStyle(
+                                                                                    color: Themes.cardTextColor,
+                                                                                    fontSize: Tokens.fontSize[6],
+                                                                                    fontWeight: Tokens.fontWeight[5],
+                                                                                  ),
+                                                                                ),
+                                                                              ],
                                                                             ),
                                                                             Text(
                                                                               'Ziyaret Tamamlama Durumu',
@@ -377,27 +390,13 @@ class Home extends StatelessWidget {
                                                                           mainAxisAlignment:
                                                                               MainAxisAlignment.center,
                                                                           children: [
-                                                                            Text(
-                                                                              '${ziyaretData['completionPercentage'] != null ? ziyaretData['completionPercentage'].toStringAsFixed(2) : '0.00'}%',
-                                                                              style: TextStyle(
-                                                                                color: Themes.cardTextColor,
-                                                                                fontSize: Tokens.fontSize[6],
-                                                                                fontWeight: Tokens.fontWeight[5],
-                                                                              ),
-                                                                            ),
-                                                                            Text(
-                                                                              'Ziyaret Tamamlama Yüzdesi',
-                                                                              style: TextStyle(
-                                                                                color: Themes.cardTextColor,
-                                                                                fontSize: Tokens.fontSize[1],
-                                                                                fontWeight: Tokens.fontWeight[4],
-                                                                              ),
-                                                                            ),
                                                                             SizedBox(
                                                                               height: 20,
                                                                             ),
                                                                             CustomButton(
                                                                                 buttonText: "Başarı oranlarını gör",
+                                                                                buttonColor: Themes.dividerColor,
+                                                                                textColor: Themes.blackColor,
                                                                                 onPressed: () {
                                                                                   Navigator.pushReplacement(
                                                                                     context,
@@ -405,6 +404,38 @@ class Home extends StatelessWidget {
                                                                                       builder: (context) => SuccessRate(),
                                                                                     ),
                                                                                   );
+                                                                                }),
+                                                                            FutureBuilder(
+                                                                                future: _getStoresCount(),
+                                                                                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                                                                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                                                                    return CircularProgressIndicator();
+                                                                                  } else if (snapshot.hasError) {
+                                                                                    return Text('Hata:${snapshot.error}');
+                                                                                  } else {
+                                                                                    String message = '';
+                                                                                    if (snapshot.data != null) {
+                                                                                      if (snapshot.data == 0) {
+                                                                                        message = 'Aktif Lokasyon Bulunamadı';
+                                                                                      } else {
+                                                                                        message = 'Aktif Lokasyon Sayısı: ${snapshot.data}';
+                                                                                      }
+                                                                                    }
+                                                                             
+                                                                                    return Column(
+                                                                                      children: [
+                                                                                        SizedBox(
+                                                                                          height: 20,
+                                                                                        ),
+                                                                                        Text(
+                                                                                          message,
+                                                                                          maxLines: 2,
+                                                                                          textAlign: TextAlign.center,
+                                                                                          style: TextStyle(color: Themes.cardTextColor, fontSize: Tokens.fontSize[3], fontWeight: Tokens.fontWeight[7]),
+                                                                                        )
+                                                                                      ],
+                                                                                    );
+                                                                                  }
                                                                                 })
                                                                           ],
                                                                         ),
@@ -517,77 +548,21 @@ class Home extends StatelessWidget {
                                                                   .cardTextColor,
                                                             ),
                                                             SizedBox(width: 8),
-                                                            FutureBuilder(
-                                                                future:
-                                                                    _getStoresCount(),
-                                                                builder: (BuildContext
-                                                                        context,
-                                                                    AsyncSnapshot<
-                                                                            int>
-                                                                        snapshot) {
-                                                                  if (snapshot
-                                                                          .connectionState ==
-                                                                      ConnectionState
-                                                                          .waiting) {
-                                                                    return CircularProgressIndicator();
-                                                                  } else if (snapshot
-                                                                      .hasError) {
-                                                                    return Text(
-                                                                        'Hata:${snapshot.error}');
-                                                                  } else {
-                                                                    String
-                                                                        message =
-                                                                        '';
-                                                                    if (snapshot
-                                                                            .data !=
-                                                                        null) {
-                                                                      if (snapshot
-                                                                          .data==0
-                                                                          ) {
-                                                                        message =
-                                                                            'Aktif Lokasyon Bulunamadı';
-                                                                      } else {
-                                                                        message =
-                                                                            'Aktif Lokasyon Sayısı: ${snapshot.data}';
-                                                                      }
-                                                                    }
-                                                                    return Column(
-                                                                      children: [
-                                                                        Text(
-                                                                          "Aktif Lokasyon Sayısı",
-                                                                          maxLines:
-                                                                              2,
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style:
-                                                                              TextStyle(
-                                                                            color:
-                                                                                Themes.cardTextColor,
-                                                                            fontSize:
-                                                                                Tokens.fontSize[3],
-                                                                            fontWeight:
-                                                                                Tokens.fontWeight[7],
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          height:
-                                                                              100,
-                                                                        ),
-                                                                        Text(
-                                                                          message,
-                                                                          maxLines:
-                                                                              2,
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style: TextStyle(
-                                                                              color: Themes.cardTextColor,
-                                                                              fontSize: Tokens.fontSize[2],
-                                                                              fontWeight: Tokens.fontWeight[5]),
-                                                                        )
-                                                                      ],
-                                                                    );
-                                                                  }
-                                                                })
+                                                            Text(
+                                                              "Aktif Lokasyon Sayısı",
+                                                              maxLines: 2,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: TextStyle(
+                                                                color: Themes
+                                                                    .cardTextColor,
+                                                                fontSize: Tokens
+                                                                    .fontSize[3],
+                                                                fontWeight: Tokens
+                                                                    .fontWeight[7],
+                                                              ),
+                                                            ),
                                                           ],
                                                         ),
                                                       ],
