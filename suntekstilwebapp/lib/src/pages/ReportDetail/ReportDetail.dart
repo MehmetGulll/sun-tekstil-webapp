@@ -175,6 +175,7 @@ class _ReportDetailState extends State<ReportDetail> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Rapor Detayları',
       body: SingleChildScrollView(
         child: FutureBuilder<List>(
           future: getReportDetail(),

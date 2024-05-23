@@ -60,6 +60,7 @@ class _SuccessRateState extends State<SuccessRate> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Başarı Oranları',
         body: SingleChildScrollView(
       child: Column(
         children: [

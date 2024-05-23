@@ -3,10 +3,12 @@ import 'package:suntekstilwebapp/src/components/Sidebar/sidebar.dart';
 
 class CustomScaffold extends StatelessWidget {
   final Widget body;
+  final String? pageTitle;
 
   const CustomScaffold({
     Key? key,
     required this.body,
+    this.pageTitle
   }) : super(key: key);
 
   @override
@@ -21,7 +23,7 @@ class CustomScaffold extends StatelessWidget {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text("Jimmy Key Denetim Sistemi"),
+              Text(pageTitle ?? 'Jimmy Key Denetleme Sistemi'),
               Image.network(
                 'https://static.jimmykey.com/Images/JMK/jimmy_logo_black_1.png',
                 fit: BoxFit.fill,

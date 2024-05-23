@@ -348,6 +348,7 @@ class _StoresState extends State<Stores> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Mağazalar',
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

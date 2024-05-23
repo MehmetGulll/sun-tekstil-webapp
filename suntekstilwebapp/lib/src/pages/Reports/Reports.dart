@@ -14,6 +14,7 @@ import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/pages/ReportDetail/ReportDetail.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+import 'package:toastification/toastification.dart';
 
 class Reports extends StatefulWidget {
   @override
@@ -156,6 +157,19 @@ class _ReportsState extends State<Reports> {
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
+        toastification.show(
+          context: context,
+          title: Text('Başarılı'),
+          description: Text('Filtreleme Başarılı.'),
+          icon: const Icon(Icons.check),
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          autoCloseDuration: const Duration(seconds: 5),
+          showProgressBar: true,
+          pauseOnHover: true,
+          dragToClose: true,
+          applyBlurEffect: true,
+        );
         var jsonData = json.decode(response.body) as List;
         setState(() {
           _reports.clear();
@@ -302,6 +316,7 @@ class _ReportsState extends State<Reports> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Raporlar',
       body: SingleChildScrollView(
         child: FutureBuilder<List>(
           future: _getReports(),
@@ -445,7 +460,7 @@ class _ReportsState extends State<Reports> {
                   children: [
                     CustomButton(
                       buttonText: "Filtrele",
-                      textColor:Themes.blackColor,
+                      textColor: Themes.blackColor,
                       buttonColor: Themes.cardBackgroundColor,
                       onPressed: () async {
                         if (_startDate != null && _endDate != null) {
@@ -491,6 +506,19 @@ class _ReportsState extends State<Reports> {
                       buttonColor: Themes.secondaryColor,
                       onPressed: () async {
                         print("Filtreler kaldırıldı");
+                        toastification.show(
+                          context: context,
+                          title: Text('Başarılı'),
+                          description: Text('Filtreler Temizlendi!.'),
+                          icon: const Icon(Icons.error),
+                          type: ToastificationType.error,
+                          style: ToastificationStyle.flatColored,
+                          autoCloseDuration: const Duration(seconds: 5),
+                          showProgressBar: true,
+                          pauseOnHover: true,
+                          dragToClose: true,
+                          applyBlurEffect: true,
+                        );
                         isFiltered = false;
                         await _getReports();
                         setState(() {});

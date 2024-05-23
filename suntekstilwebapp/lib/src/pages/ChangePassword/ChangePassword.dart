@@ -86,6 +86,7 @@ class _ChangePassword extends State<ChangePassword> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Şifre Değiştir',
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 80),
         child: Column(
@@ -128,6 +129,8 @@ class _ChangePassword extends State<ChangePassword> {
             ),
             CustomButton(
                 buttonText: "Onayla",
+                buttonColor: Themes.cardBackgroundColor,
+                textColor: Themes.blackColor,
                 onPressed: () {
                   changePassword();
                 })

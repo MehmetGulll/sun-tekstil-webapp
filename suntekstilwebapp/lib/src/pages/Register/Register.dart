@@ -95,6 +95,7 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Kayıt Et',
       body: SingleChildScrollView(
           child: Container(
         margin: EdgeInsets.symmetric(horizontal: 500, vertical: 50),
