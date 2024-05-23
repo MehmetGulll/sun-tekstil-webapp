@@ -4,6 +4,7 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
+import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:provider/provider.dart';
@@ -53,8 +54,8 @@ class _AddLocationState extends State<AddLocation> {
   final TextEditingController storePhoneNumberController =
       TextEditingController();
   final TextEditingController storeWidthController = TextEditingController();
-   TextEditingController storeTypeController = TextEditingController();
-   final TextEditingController storeEmailController = TextEditingController();
+  TextEditingController storeTypeController = TextEditingController();
+  final TextEditingController storeEmailController = TextEditingController();
   @override
   void dispose() {
     // burası dropdown değişince input içi değişmesin diye konuldu
@@ -104,11 +105,11 @@ class _AddLocationState extends State<AddLocation> {
       'storePhone': storePhoneNumberController.text,
       'storeWidth': storeWidthController.text,
       'addId': currentUserId.toString(),
-      'storeEmail':storeEmailController.text
+      'storeEmail': storeEmailController.text
     });
     if (response.statusCode == 200) {
       print("Mağaza eklendi");
-       String successMessage = "Mağaza Başarıyla Eklendi!!";
+      String successMessage = "Mağaza Başarıyla Eklendi!!";
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -122,7 +123,7 @@ class _AddLocationState extends State<AddLocation> {
           });
     } else {
       print("Bir hata oluştu");
-       String errorMessage = "Bir hata oluştu!!";
+      String errorMessage = "Bir hata oluştu!!";
       print("Hata");
       showDialog(
           context: context,
@@ -226,11 +227,15 @@ class _AddLocationState extends State<AddLocation> {
                       keyboardType: TextInputType.text)
                 ],
               ),
-              SizedBox(height:20 ,),
+              SizedBox(
+                height: 20,
+              ),
               Container(
                   margin: EdgeInsets.symmetric(vertical: 20),
                   child: CustomButton(
                       buttonText: 'Ekle',
+                      textColor: Themes.blackColor,
+                      buttonColor: Themes.cardBackgroundColor,
                       onPressed: () {
                         addStore(context);
                       }))

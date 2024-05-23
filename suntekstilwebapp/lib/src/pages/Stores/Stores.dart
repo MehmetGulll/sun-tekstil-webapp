@@ -15,25 +15,19 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+import 'package:toastification/toastification.dart';
 
 class Stores extends StatefulWidget {
   @override
   _StoresState createState() => _StoresState();
 }
 
-Widget buildColumn(BuildContext context, String label, List<String> items,
-    ValueChanged<String?> onChanged) {
+Widget buildColumn(
+    BuildContext context, List<String> items, ValueChanged<String?> onChanged) {
   return Container(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: Tokens.fontSize[4]),
-        ),
-        SizedBox(
-          height: 10,
-        ),
         Container(
           width: MediaQuery.of(context).size.width,
           child: CustomDropdown(
@@ -137,12 +131,12 @@ class _StoresState extends State<Stores> {
                 },
               );
             });
-      //   setState(() {
-      //     var updatedStores =
-      //         _stores.firstWhere((q) => q['storesId'] == store['storesId']);
-      //     updatedStores['status'] = _storeStateList;
-      //   });
-      // } else {
+        //   setState(() {
+        //     var updatedStores =
+        //         _stores.firstWhere((q) => q['storesId'] == store['storesId']);
+        //     updatedStores['status'] = _storeStateList;
+        //   });
+        // } else {
         print("Bir hata oluştu");
         String errorMessage = "Bir hata oluştu!!";
         print("Hata");
@@ -172,6 +166,18 @@ class _StoresState extends State<Stores> {
       final response = await http.get(Uri.parse(
           '${ApiUrls.filteredStore}?magaza_adi=${queryName ?? ''}&magaza_tipi=${queryType ?? ''}&sehir=${queryCity ?? ''}'));
       if (response.statusCode == 200) {
+        toastification.show(
+            context: context,
+            title: Text('Başarılı'),
+            description: Text('Filtreleme Başarılı.'),
+            type: ToastificationType.success,
+            icon: const Icon(Icons.check),
+            style: ToastificationStyle.flatColored,
+            autoCloseDuration: const Duration(seconds: 5),
+            showProgressBar: true,
+            pauseOnHover: true,
+            dragToClose: true,
+            applyBlurEffect: true);
         var jsonData = json.decode(response.body) as List;
         setState(() {
           _stores.clear();
@@ -326,6 +332,8 @@ class _StoresState extends State<Stores> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
+                      buttonColor: Themes.dividerColor,
+                      textColor: Themes.blackColor,
                       onPressed: () async {
                         await updateStore(context, store['storeId'],
                             Map<String, dynamic>.from(store));
@@ -351,88 +359,90 @@ class _StoresState extends State<Stores> {
       pageTitle: 'Mağazalar',
       body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
               margin: EdgeInsets.symmetric(horizontal: 80),
               child: Column(
                 children: [
-                  SizedBox(height: 20),
-                  Column(
-                    children: [
-                      Text(
-                        "MAĞAZA ADI",
-                        style: TextStyle(fontSize: Tokens.fontSize[4]),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      CustomInput(
-                        controller: filteredStoreNameController,
-                        hintText: 'MAĞAZA ADI',
-                        keyboardType: TextInputType.name,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  buildColumn(
-                      context,
-                      "MAĞAZA TİPİ",
-                      _storeTypeList.keys.toList(),
-                      (value) => setState(() => _chosenStoreType = value)),
-                  SizedBox(height: 20),
-                  Column(
-                    children: [
-                      Text(
-                        "ŞEHİR",
-                        style: TextStyle(fontSize: Tokens.fontSize[4]),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      CustomInput(
-                        controller: filteredStoreCityController,
-                        hintText: 'ŞEHİR',
-                        keyboardType: TextInputType.name,
-                      ),
-                    ],
-                  ),
                   SizedBox(
                     height: 20,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CustomButton(
-                        buttonText: "Filtreleme",
-                        onPressed: () {
-                          String? queryValue = _storeTypeList[_chosenStoreType];
-                          isFiltered = true;
-                          filteredStore(filteredStoreNameController.text,
-                              queryValue, filteredStoreCityController.text);
-                        },
+                      Expanded(
+                        child: CustomInput(
+                          controller: filteredStoreNameController,
+                          hintText: 'MAĞAZA ADI',
+                          keyboardType: TextInputType.name,
+                        ),
                       ),
-                      SizedBox(
-                        width: 20,
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: buildColumn(
+                          context,
+                          _storeTypeList.keys.toList(),
+                          (value) => setState(() => _chosenStoreType = value),
+                        ),
                       ),
-                      CustomButton(
-                        buttonText: "Mağaza Ekle",
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/addLocation');
-                        },
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: CustomInput(
+                          controller: filteredStoreCityController,
+                          hintText: 'ŞEHİR',
+                          keyboardType: TextInputType.name,
+                        ),
                       ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      CustomButton(
-                        buttonText: "Filtreleri Sil",
-                        buttonColor: Themes.secondaryColor,
-                        onPressed: () async {
-                          print("Filtreler kaldırıldı");
-                          isFiltered = false;
-                          await _getStores();
-                          setState(() {});
-                        },
+                      SizedBox(width: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CustomButton(
+                            buttonText: "Filtrele",
+                            buttonColor: Themes.cardBackgroundColor,
+                            textColor: Themes.blackColor,
+                            onPressed: () {
+                              String? queryValue =
+                                  _storeTypeList[_chosenStoreType];
+                              isFiltered = true;
+                              filteredStore(filteredStoreNameController.text,
+                                  queryValue, filteredStoreCityController.text);
+                            },
+                          ),
+                          SizedBox(width: 20),
+                          CustomButton(
+                            buttonText: "Mağaza Ekle",
+                            buttonColor: Themes.cardBackgroundColor,
+                            textColor: Themes.blackColor,
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/addLocation');
+                            },
+                          ),
+                          SizedBox(width: 20),
+                          CustomButton(
+                            buttonText: "Filtreleri Sil",
+                            buttonColor: Themes.secondaryColor,
+                            onPressed: () async {
+                              toastification.show(
+                                  context: context,
+                                  title: Text('Başarılı'),
+                                  description: Text('Filtreler Temizlendi!.'),
+                                  type: ToastificationType.error,
+                                  icon: const Icon(Icons.error),
+                                  style: ToastificationStyle.flatColored,
+                                  autoCloseDuration: const Duration(seconds: 5),
+                                  showProgressBar: true,
+                                  pauseOnHover: true,
+                                  dragToClose: true,
+                                  applyBlurEffect: true);
+                              print("Filtreler kaldırıldı");
+                              isFiltered = false;
+                              await _getStores();
+                              setState(() {});
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -542,7 +552,7 @@ class _StoresState extends State<Stores> {
                                   TableRow(children: [
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "MAĞAZA KODU",
                                         style: TextStyle(
@@ -551,7 +561,7 @@ class _StoresState extends State<Stores> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "MAĞAZA ADI",
                                         style: TextStyle(
@@ -560,7 +570,7 @@ class _StoresState extends State<Stores> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "MAĞAZA TİPİ",
                                         style: TextStyle(
@@ -569,7 +579,7 @@ class _StoresState extends State<Stores> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "ŞEHİR",
                                         style: TextStyle(
@@ -578,7 +588,7 @@ class _StoresState extends State<Stores> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "MAĞAZA TELEFON",
                                         style: TextStyle(
@@ -587,7 +597,7 @@ class _StoresState extends State<Stores> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "DURUMU",
                                         style: TextStyle(
@@ -596,7 +606,7 @@ class _StoresState extends State<Stores> {
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(8.0),
-                                      color: Themes.yellowColor,
+                                      color: Themes.cardBackgroundColor,
                                       child: Text(
                                         "DÜZENLE",
                                         style: TextStyle(

@@ -46,7 +46,6 @@ Widget buildColumn(
 }
 
 class _QuestionsState extends State<Questions> {
-  
   final TextEditingController questionIdController = TextEditingController();
   final TextEditingController questionNameController = TextEditingController();
   final TextEditingController questionPointController = TextEditingController();
