@@ -11,8 +11,13 @@ class CustomScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
           title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -26,13 +31,15 @@ class CustomScaffold extends StatelessWidget {
             fit: BoxFit.fill,
             width: 250,
             height: 50,
+
           ),
-        ],
-      )),
-      drawer: Drawer(
-        child: Sidebar(),
+        ),
+        drawer: Drawer(
+          child: Sidebar(),
+        ),
+        body: body,
       ),
-      body: body,
     );
   }
 }
+

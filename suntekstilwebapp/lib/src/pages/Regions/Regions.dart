@@ -40,11 +40,27 @@ class _RegionsState extends State<Regions> {
         },
       );
       var data = jsonDecode(response.body);
+      var rows = data['allRegion']['rows'];
+      var valueCount = rows.length;
+      print("Toplam bu kadar değerimiz var :$valueCount");
       return data['allRegion']['rows'];
     } catch (e) {
       print("Hata: $e");
       return [];
     }
+  }
+
+  List<Map<String, dynamic>> _region = [];
+  Future<int> _getRegionCount() async {
+    var url = Uri.parse(ApiUrls.storesUrl);
+    var data = await http.get(url);
+    var jsonData = json.decode(data.body) as List;
+    print(jsonData);
+
+    _region = jsonData.map((item) => item as Map<String, dynamic>).toList();
+    int storesCount = _region.length;
+
+    return storesCount;
   }
 
   Future<void> updateRegion(
@@ -143,8 +159,8 @@ class _RegionsState extends State<Regions> {
                 },
               );
             });
-      }else{
-         String errorMessage = "Bir hata oluştu!!";
+      } else {
+        String errorMessage = "Bir hata oluştu!!";
         print("Hata");
         showDialog(
             context: context,
@@ -177,7 +193,7 @@ class _RegionsState extends State<Regions> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Yeni Mağaza Ekle",
+                        "Yeni Bölge Ekle",
                         style: TextStyle(
                             fontSize: Tokens.fontSize[9],
                             fontWeight: Tokens.fontWeight[6]),
@@ -317,7 +333,7 @@ class _RegionsState extends State<Regions> {
     );
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return CustomScaffold(
       body: Container(
@@ -350,6 +366,7 @@ class _RegionsState extends State<Regions> {
                     child: Column(
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 50),
@@ -362,23 +379,57 @@ class _RegionsState extends State<Regions> {
                                         "",
                                       );
                                     })),
+                            FutureBuilder(
+                                future: _getRegionCount(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<int> snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Hata:${snapshot.error}');
+                                  } else {
+                                    String message = '';
+                                    if (snapshot.data != null) {
+                                      if (snapshot.data == 0) {
+                                        message =
+                                            'Herhangi bir bölge bulunamadı';
+                                      } else {
+                                        message =
+                                            'Toplam Bölge Sayısı: ${snapshot.data}';
+                                      }
+                                    }
+                                    return Column(
+                                      children: [
+                                        Text(
+                                          message,
+                                          maxLines: 2,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              color: Themes.cardTextColor,
+                                              fontSize: Tokens.fontSize[2],
+                                              fontWeight: Tokens.fontWeight[8]),
+                                        )
+                                      ],
+                                    );
+                                  }
+                                })
                           ],
                         ),
                         SizedBox(
                           height: 20,
                         ),
-                        Expanded( // Bu satırı ekledik
+                        Expanded(
                           child: FutureBuilder<List<dynamic>>(
                             future: getRegions(),
                             builder: (BuildContext context,
                                 AsyncSnapshot<List<dynamic>> snapshot) {
                               if (snapshot.hasData) {
                                 return ListView.builder(
-                            
-                            
                                   shrinkWrap: true,
                                   itemCount: snapshot.data!.length,
-                                  itemBuilder: (BuildContext context, int index) {
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
                                     var region = snapshot.data![index];
                                     return Card(
                                       child: ListTile(
@@ -426,8 +477,11 @@ class _RegionsState extends State<Regions> {
                                             textColor: Themes.blueColor,
                                             buttonColor: Themes.whiteColor,
                                             onPressed: () {
-                                              showModal(context,
-                                                  Themes.whiteColor, "", region);
+                                              showModal(
+                                                  context,
+                                                  Themes.whiteColor,
+                                                  "",
+                                                  region);
                                             },
                                           ),
                                         ),
@@ -455,4 +509,3 @@ class _RegionsState extends State<Regions> {
     );
   }
 }
-

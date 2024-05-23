@@ -38,7 +38,7 @@ class _SidebarState extends State<Sidebar> {
       print("Çıkış başarılı");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.clear();
-      Navigator.pushReplacementNamed(context, '/');
+      Navigator.pushNamed(context, '/');
     } else {
       print("Çıkış işlemi başarısız.. ");
     }
@@ -66,7 +66,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/home') {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushNamed(context, '/home');
         }
       },
     );
@@ -80,7 +80,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/questions') {
-          Navigator.pushReplacementNamed(context, '/questions');
+          Navigator.pushNamed(context, '/questions');
         }
       },
     );
@@ -93,7 +93,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/stores') {
-          Navigator.pushReplacementNamed(context, '/stores');
+          Navigator.pushNamed(context, '/stores');
         }
       },
     );
@@ -106,7 +106,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/regions') {
-          Navigator.pushReplacementNamed(context, '/regions');
+          Navigator.pushNamed(context, '/regions');
         }
       },
     );
@@ -125,7 +125,7 @@ class _SidebarState extends State<Sidebar> {
           ),
           onTap: () {
             if (ModalRoute.of(context)?.settings.name != '/changePassword') {
-              Navigator.pushReplacementNamed(context, '/changePassword');
+              Navigator.pushNamed(context, '/changePassword');
             }
           },
         ),
@@ -139,7 +139,7 @@ class _SidebarState extends State<Sidebar> {
             onTap: () {
               Navigator.pop(context);
               if (ModalRoute.of(context)?.settings.name != '/officalUsers') {
-                Navigator.pushReplacementNamed(context, '/officalUsers');
+                Navigator.pushNamed(context, '/officalUsers');
               }
             },
           ),
@@ -155,7 +155,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/reports') {
-          Navigator.pushReplacementNamed(context, '/reports');
+          Navigator.pushNamed(context, '/reports');
         }
       },
     );
@@ -169,7 +169,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/mailManagement') {
-          Navigator.pushReplacementNamed(context, '/mailManagement');
+          Navigator.pushNamed(context, '/mailManagement');
         }
       },
     );
@@ -183,7 +183,7 @@ class _SidebarState extends State<Sidebar> {
       onTap: () {
         Navigator.pop(context);
         if (ModalRoute.of(context)?.settings.name != '/inspectionList') {
-          Navigator.pushReplacementNamed(context, '/inspectionList');
+          Navigator.pushNamed(context, '/inspectionList');
         }
       },
     );
@@ -205,7 +205,7 @@ class _SidebarState extends State<Sidebar> {
             Navigator.pop(context);
             if (ModalRoute.of(context)?.settings.name !=
                 '/storeManagerActions') {
-              Navigator.pushReplacementNamed(context, '/storeManagerActions');
+              Navigator.pushNamed(context, '/storeManagerActions');
             }
           },
         ),
@@ -219,7 +219,7 @@ class _SidebarState extends State<Sidebar> {
             onTap: () {
               Navigator.pop(context);
               if (ModalRoute.of(context)?.settings.name != '/viewActions') {
-                Navigator.pushReplacementNamed(context, '/viewActions');
+                Navigator.pushNamed(context, '/viewActions');
               }
             },
           ),
@@ -233,7 +233,7 @@ class _SidebarState extends State<Sidebar> {
           onTap: () {
             Navigator.pop(context);
             if (ModalRoute.of(context)?.settings.name != '/managerActions') {
-              Navigator.pushReplacementNamed(context, '/managerActions');
+              Navigator.pushNamed(context, '/managerActions');
             }
           },
         ),
