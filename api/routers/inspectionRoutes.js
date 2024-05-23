@@ -69,14 +69,12 @@ router.post("/getAllInspectionType", authenticateToken, async (req, res) => {
       return res.status(404).send("Hiç Denetim Tipi Bulunamadı!");
     }
 
-    return res
-      .status(200)
-      .send({
-        data: allInspectionType.rows,
-        count: allInspectionType.count,
-        page,
-        perPage,
-      });
+    return res.status(200).send({
+      data: allInspectionType.rows,
+      count: allInspectionType.count,
+      page,
+      perPage,
+    });
   } catch (error) {
     console.error("Get All Inspection Type Error:", error);
     return res.status(500).send(error);
@@ -158,25 +156,39 @@ router.post("/updateInspectionType", authenticateToken, async (req, res) => {
 
     // Prepare the fields to be updated
     let fieldsToUpdate = {};
-    if (value.denetim_tipi && value.denetim_tipi !== existingInspectionType.denetim_tipi) {
+    if (
+      value.denetim_tipi &&
+      value.denetim_tipi !== existingInspectionType.denetim_tipi
+    ) {
       fieldsToUpdate.denetim_tipi = value.denetim_tipi;
     }
-    if (value.denetim_tipi_kodu && value.denetim_tipi_kodu !== existingInspectionType.denetim_tipi_kodu) {
+    if (
+      value.denetim_tipi_kodu &&
+      value.denetim_tipi_kodu !== existingInspectionType.denetim_tipi_kodu
+    ) {
       fieldsToUpdate.denetim_tipi_kodu = value.denetim_tipi_kodu;
     }
-    if (typeof value.status !== 'undefined' && value.status !== existingInspectionType.status) {
+    if (
+      typeof value.status !== "undefined" &&
+      value.status !== existingInspectionType.status
+    ) {
       fieldsToUpdate.status = value.status;
     }
 
     if (Object.keys(fieldsToUpdate).length === 0) {
-      return res.status(400).send("Güncelleme yapılacak değişiklik bulunamadı!");
+      return res
+        .status(400)
+        .send("Güncelleme yapılacak değişiklik bulunamadı!");
     }
 
-    const updatedInspectionType = await denetimTipiModel.update(fieldsToUpdate, {
-      where: {
-        denetim_tip_id: value.denetim_tipi_id,
-      },
-    });
+    const updatedInspectionType = await denetimTipiModel.update(
+      fieldsToUpdate,
+      {
+        where: {
+          denetim_tip_id: value.denetim_tipi_id,
+        },
+      }
+    );
 
     if (updatedInspectionType[0] === 0) {
       return res.status(404).send("Denetim Tipi Bulunamadı!");
@@ -219,6 +231,7 @@ router.post("/addInspection", authenticateToken, async (req, res) => {
       magaza_id,
       denetci_id,
       denetim_tarihi: formattedDate,
+      denetim_tamamlanma_tarihi: null,
       status: 1,
     });
 
@@ -296,6 +309,7 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
         { "$kullanici.soyad$": { [Op.like]: `%${searchTerm}%` } },
         { "$denetim_tipi.denetim_tipi$": { [Op.like]: `%${searchTerm}%` } },
         { "$magaza.magaza_adi$": { [Op.like]: `%${searchTerm}%` } },
+        { "$magaza.sehir$": { [Op.like]: `%${searchTerm}%` } },
       ];
     }
 
@@ -356,9 +370,9 @@ router.post("/getInspections", authenticateToken, async (req, res) => {
         denetim_tarihi: new Date(
           inspection.denetim_tarihi
         ).toLocaleDateString(),
-        denetim_tamamlanma_tarihi: new Date(
+        denetim_tamamlanma_tarihi: inspection.denetim_tamamlanma_tarihi ? new Date(
           inspection.denetim_tamamlanma_tarihi
-        ).toLocaleDateString(),
+        ).toLocaleDateString() : "Denetim Tamamlanmamış",
         status: inspection.status,
         denetim_tipi: inspection.denetim_tipi.denetim_tipi,
         denetim_tip_id: inspection.denetim_tipi_id,
@@ -477,6 +491,9 @@ router.post(
 
       // Tüm cevaplanan soruları bir kerede denetim_sorulari tablosuna ekler
       const denetimSorular = [];
+      let toplamPuan = 0;
+      let maxPuan = 0;
+
       for (let i = 0; i < cevaplar.length; i++) {
         const cevap = cevaplar[i];
         const soru = sorular.find(
@@ -493,7 +510,15 @@ router.post(
           dogru_cevap: soru.dataValues.soru_cevap,
         });
         denetimSorular.push(createDenetimSorular);
+        // Puan hesaplama
+        if (cevap.cevap === soru.dataValues.soru_cevap) {
+          toplamPuan += soru.dataValues.soru_puan;
+        }
+        maxPuan += soru.dataValues.soru_puan;
       }
+
+      const alinanPuan = (toplamPuan / maxPuan) * 100;
+
       for (let i = 0; i < denetimSorular.length; i++) {
         const ds_id = denetimSorular[i].dataValues.ds_id;
         const cevap = cevaplar[i];
@@ -530,14 +555,10 @@ router.post(
       }
 
       // Denetim puanını hesaplar
-      const totalSorular = sorular.length;
-      const dogruCevaplar = denetimSorular.filter(
-        (soru) => soru.dataValues.cevap === soru.dataValues.dogru_cevap
-      ).length;
-      const alinanPuan = (dogruCevaplar / totalSorular) * 100;
-      console.log("totalSorular: ", totalSorular);
-      console.log("dogruCevaplar: ", dogruCevaplar);
-      console.log("alinanPuan: ", alinanPuan);
+      // Eğer tüm sorular doğru ise max puanı alır fakat max puan 100 olmayabilir.
+      // Soru cevap ve doğru cevapları karşılaştırarak eğer birbirine denk ise soru_puan eklensin.
+      // Max puan tüm soruları doğru yaparsa oluşur fakat soru_puanları farklı olabilir.
+      // Yani max puan 20 ise ve alınan puan 10 ise 10/20*100 = 50 olur şeklinde yap.
 
       // Denetim statusunu günceller
       await denetimModel.update(
@@ -610,6 +631,91 @@ router.post("/updateInspectionStatus", authenticateToken, async (req, res) => {
     return res.status(200).send(`Denetim Başarıyla Güncellendi!`);
   } catch (error) {
     console.error("Update Inspection Status Error:", error);
+    return res.status(500).send(error);
+  }
+});
+
+// get inspection question from denetim_sorulari table by denetim_id
+router.post("/getInspectionQuestions", authenticateToken, async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      denetim_id: Joi.number().required(),
+    }).validate(req.body);
+
+    if (error) return res.status(400).send(error);
+
+    const { denetim_id } = value;
+
+    const sequelize = await initializeSequelize();
+    const denetimSorulariModel = sequelize.define(
+      "denetim_sorulari",
+      denetim_sorulari,
+      {
+        timestamps: false,
+        freezeTableName: true,
+      }
+    );
+
+    const soruModel = sequelize.define("soru", soru, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const denetimModel = sequelize.define("denetim", denetim, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    denetimSorulariModel.belongsTo(soruModel, {
+      foreignKey: "soru_id",
+      targetKey: "soru_id",
+      as: "soru",
+    });
+
+    const findDenetim = await denetimModel.findOne({
+      where: {
+        denetim_id,
+      },
+    });
+
+    if (!findDenetim) return res.status(404).send("Denetim Bulunamadı!");
+
+    const inspectionQuestions = await denetimSorulariModel.findAndCountAll({
+      where: {
+        denetim_id,
+      },
+      include: [
+        {
+          model: soruModel,
+          as: "soru",
+        },
+      ],
+    });
+
+    if (!inspectionQuestions || inspectionQuestions.length === 0) {
+      return res.status(404).send("Denetim Soruları Bulunamadı!");
+    }
+
+    const modifiedData = inspectionQuestions.rows.map((question) => {
+      return {
+        ds_id: question.ds_id,
+        denetim_id: question.denetim_id,
+        soru_id: question.soru_id,
+        soru: question.soru.soru_adi,
+        verilen_cevap: question.cevap,
+        dogru_cevap: question.soru.soru_cevap,
+        soru_puan: question.soru.soru_puan,
+      };
+    });
+
+    return res.status(200).send(modifiedData);
+  } catch (error) {
+    console.error("Get Inspection Questions Error:", error);
     return res.status(500).send(error);
   }
 });

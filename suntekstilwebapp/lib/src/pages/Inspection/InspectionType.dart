@@ -71,37 +71,11 @@ class _InspectionTypePageState extends State<InspectionTypePage> {
     );
 
     if (response.statusCode == 200) {
-      toastification.show(
-        context: context,
-        title: Text('Başarılı'),
-        description: Text('Denetim tipi başarıyla güncellendi.'),
-        icon: const Icon(Icons.check),
-        type: ToastificationType.success,
-        style: ToastificationStyle.flatColored,
-        autoCloseDuration: const Duration(seconds: 5),
-        showProgressBar: true,
-        pauseOnHover: true,
-        dragToClose: true,
-        applyBlurEffect: true,
-      );
 
       final responseData = json.decode(response.body);
       print("responseData: $responseData");
       _fetchInspectionTypes();
     } else {
-      toastification.show(
-          context: context,
-          title: Text('Hata'),
-          description: Text('Denetim tipi güncellenirken bir hata oluştu.'),
-          type: ToastificationType.error,
-          icon: const Icon(Icons.error),
-          style: ToastificationStyle.flatColored,
-          autoCloseDuration: const Duration(seconds: 5),
-          showProgressBar: true,
-          pauseOnHover: true,
-          dragToClose: true,
-          applyBlurEffect: true);
-
       throw Exception('Failed to update inspection type.');
     }
   }
@@ -196,37 +170,10 @@ class _InspectionTypePageState extends State<InspectionTypePage> {
     );
 
     if (response.statusCode == 201) {
-      toastification.show(
-        context: context,
-        title: Text('Başarılı'),
-        description: Text('Denetim tipi başarıyla eklendi.'),
-        icon: const Icon(Icons.check),
-        type: ToastificationType.success,
-        style: ToastificationStyle.flatColored,
-        autoCloseDuration: const Duration(seconds: 5),
-        showProgressBar: true,
-        pauseOnHover: true,
-        dragToClose: true,
-        applyBlurEffect: true,
-      );
-
       final responseData = json.decode(response.body);
       print("responseData: $responseData");
       _fetchInspectionTypes();
     } else {
-      toastification.show(
-          context: context,
-          title: Text('Hata'),
-          description: Text('Denetim tipi eklenirken bir hata oluştu.'),
-          type: ToastificationType.error,
-          icon: const Icon(Icons.error),
-          style: ToastificationStyle.flatColored,
-          autoCloseDuration: const Duration(seconds: 5),
-          showProgressBar: true,
-          pauseOnHover: true,
-          dragToClose: true,
-          applyBlurEffect: true);
-
       throw Exception('Failed to add inspection type.');
     }
   }

@@ -327,49 +327,50 @@ class _ReportsState extends State<Reports> {
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectionTypeId'],
+                      report['inspectionTypeId'] ?? 'N/A',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['storeId'],
+                      report['storeId'] ?? 'N/A',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectorRole'],
+                      report['inspectorRole'] ?? 'N/A',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectorName'],
+                      report['inspectorName'] ?? 'N/A',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['pointsReceived'].toString(),
+                      report['pointsReceived'].toString() ?? 'N/A',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectionDate'],
+                      report['inspectionDate'] ?? 'N/A',
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      report['inspectionCompletionDate'] ?? 'BELİRSİZ',
+                      report['inspectionCompletionDate']?? 'N/A',
+
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
