@@ -17,22 +17,19 @@ import 'package:provider/provider.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+import 'package:toastification/toastification.dart';
 
 class Questions extends StatefulWidget {
   @override
   _QuestionsState createState() => _QuestionsState();
 }
 
-Widget buildColumn(BuildContext context, String label, List<String> items,
-    ValueChanged<String?> onChanged) {
+Widget buildColumn(
+    BuildContext context, List<String> items, ValueChanged<String?> onChanged) {
   return Container(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: Tokens.fontSize[4]),
-        ),
         SizedBox(
           height: 10,
         ),
@@ -166,7 +163,21 @@ class _QuestionsState extends State<Questions> {
     final response = await http
         .get(Uri.parse('${ApiUrls.filteredQuestion}?$queryType=$queryText'));
     if (response.statusCode == 200) {
+      toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Filtreleme Başarılı.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 5),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
       var jsonData = json.decode(response.body) as List;
+
       print("Filtreleme için");
       print(jsonData);
       setState(() {
@@ -176,6 +187,18 @@ class _QuestionsState extends State<Questions> {
             jsonData.map((item) => item as Map<String, dynamic>).toList();
       });
     } else {
+      toastification.show(
+          context: context,
+          title: Text('Hata'),
+          description: Text('Filtreleme Başarısız.'),
+          type: ToastificationType.error,
+          icon: const Icon(Icons.error),
+          style: ToastificationStyle.flatColored,
+          autoCloseDuration: const Duration(seconds: 5),
+          showProgressBar: true,
+          pauseOnHover: true,
+          dragToClose: true,
+          applyBlurEffect: true);
       print("Hata");
     }
   }
@@ -229,7 +252,6 @@ class _QuestionsState extends State<Questions> {
               SizedBox(
                 height: 20,
               ),
-             
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -279,6 +301,8 @@ class _QuestionsState extends State<Questions> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Onay",
+                      textColor: Themes.blackColor,
+                      buttonColor: Themes.dividerColor,
                       onPressed: () async {
                         print("Butona basıldı");
                         await updateQuestion(context, question['questionId'],
@@ -306,38 +330,41 @@ class _QuestionsState extends State<Questions> {
           margin: EdgeInsets.symmetric(horizontal: 80),
           child: Column(
             children: [
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                "SORU ADI",
-                style: TextStyle(
-                    color: Themes.blackColor, fontSize: Tokens.fontSize[3]),
-              ),
-              CustomInput(
-                  controller: questionFilteredNameController,
-                  hintText: "SORU ADI",
-                  keyboardType: TextInputType.text),
-              SizedBox(
-                height: 20,
-              ),
-              buildColumn(context, "SORU TİPİ", _questionTypeList.keys.toList(),
-                  (value) => setState(() => _chosenQuestionType = value)),
-              SizedBox(
-                height: 20,
-              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CustomButton(
+                  Expanded(
+                    flex: 2,
+                    child: CustomInput(
+                      controller: questionFilteredNameController,
+                      hintText: "SORU ADI",
+                      keyboardType: TextInputType.text,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: buildColumn(
+                      context,
+                      _questionTypeList.keys.toList(),
+                      (value) => setState(() => _chosenQuestionType = value),
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: CustomButton(
                       buttonText: 'Filtreleme',
-                      textColor: Themes.whiteColor,
-                      buttonColor: Themes.blueColor,
+                      textColor: Themes.blackColor,
+                      buttonColor: Themes.cardBackgroundColor,
                       onPressed: () {
                         print("Arama kısmı çalıştı");
                         if (questionFilteredNameController.text.isNotEmpty) {
                           filteredQuestion(
-                              'soru_adi', questionFilteredNameController.text);
+                            'soru_adi',
+                            questionFilteredNameController.text,
+                          );
                           isFiltered = true;
                         } else if (_chosenQuestionType != null) {
                           String? queryValue =
@@ -345,27 +372,45 @@ class _QuestionsState extends State<Questions> {
                           filteredQuestion('soru_cevap', queryValue!);
                           isFiltered = true;
                         }
-                      }),
-                  SizedBox(
-                    width: 20,
+                      },
+                    ),
                   ),
-                  CustomButton(
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: CustomButton(
                       buttonText: 'Soru Ekle',
+                      textColor: Themes.blackColor,
+                      buttonColor: Themes.cardBackgroundColor,
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/addQuestion');
-                      }),
-                  SizedBox(
-                    width: 20,
+                      },
+                    ),
                   ),
-                  CustomButton(
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: CustomButton(
                       buttonText: 'Filtreleri Sil',
                       buttonColor: Themes.secondaryColor,
                       onPressed: () async {
+                        toastification.show(
+                            context: context,
+                            title: Text('Hata'),
+                            description: Text('Filtreler Temizlendi.'),
+                            type: ToastificationType.success,
+                            icon: const Icon(Icons.error),
+                            style: ToastificationStyle.flatColored,
+                            autoCloseDuration: const Duration(seconds: 5),
+                            showProgressBar: true,
+                            pauseOnHover: true,
+                            dragToClose: true,
+                            applyBlurEffect: true);
                         print("Filterleri temizleme");
                         isFiltered = false;
                         await _getQuestions();
                         setState(() {});
-                      })
+                      },
+                    ),
+                  ),
                 ],
               ),
               Padding(
@@ -447,7 +492,7 @@ class _QuestionsState extends State<Questions> {
                           TableRow(children: [
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "SORU KODU",
                                 style:
@@ -456,7 +501,7 @@ class _QuestionsState extends State<Questions> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text("SORULAR",
                                   style: TextStyle(
                                     fontWeight: Tokens.fontWeight[2],
@@ -464,7 +509,7 @@ class _QuestionsState extends State<Questions> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "TİPİ",
                                 style:
@@ -473,7 +518,7 @@ class _QuestionsState extends State<Questions> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "PUAN",
                                 style:
@@ -482,7 +527,7 @@ class _QuestionsState extends State<Questions> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "DURUMU",
                                 style:
@@ -491,7 +536,7 @@ class _QuestionsState extends State<Questions> {
                             ),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "DÜZENLE",
                                   style: TextStyle(
