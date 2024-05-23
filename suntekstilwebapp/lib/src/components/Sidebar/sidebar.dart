@@ -57,6 +57,7 @@ class _SidebarState extends State<Sidebar> {
         ),
       ),
     );
+    
     final homeTile = ListTile(
       leading: Icon(Icons.home),
       title: Text(
@@ -84,6 +85,7 @@ class _SidebarState extends State<Sidebar> {
         }
       },
     );
+    
     final StoreTile = ListTile(
       leading: Icon(Icons.store),
       title: Text(
@@ -97,7 +99,8 @@ class _SidebarState extends State<Sidebar> {
         }
       },
     );
-    final RegionsTile = ListTile(
+   
+   final RegionsTile = ListTile(
       leading: Icon(Icons.map),
       title: Text(
         'Bölgeler',
@@ -110,6 +113,7 @@ class _SidebarState extends State<Sidebar> {
         }
       },
     );
+    
     final UserManagementTile = ExpansionTile(
       leading: Icon(Icons.supervised_user_circle),
       title: Text(
@@ -146,6 +150,7 @@ class _SidebarState extends State<Sidebar> {
         }
       ],
     );
+   
     final ReportsTile = ListTile(
       leading: Icon(Icons.report),
       title: Text(
@@ -174,18 +179,40 @@ class _SidebarState extends State<Sidebar> {
       },
     );
 
-    final InspectionTile = ListTile(
+    final InspectionTile = ExpansionTile(
       leading: Icon(Icons.content_paste_search_rounded),
       title: Text(
-        'Denetimlerim',
+        'Denetim Yönetimi',
         style: TextStyle(color: Themes.whiteColor),
       ),
-      onTap: () {
-        Navigator.pop(context);
-        if (ModalRoute.of(context)?.settings.name != '/inspectionList') {
-          Navigator.pushNamed(context, '/inspectionList');
-        }
-      },
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.insert_chart_outlined_outlined),
+          title: Text(
+            'Denetimlerim',
+            style: TextStyle(color: Themes.whiteColor),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            if (ModalRoute.of(context)?.settings.name != '/inspectionList') {
+              Navigator.pushNamed(context, '/inspectionList');
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.add_location_alt_sharp),
+          title: Text(
+            'Denetim Tipi Yönetimi',
+            style: TextStyle(color: Themes.whiteColor),
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            if (ModalRoute.of(context)?.settings.name != '/inspectionType') {
+              Navigator.pushNamed(context, '/inspectionType');
+            }
+          },
+        ),
+      ],
     );
 
     final ActionTile = ExpansionTile(

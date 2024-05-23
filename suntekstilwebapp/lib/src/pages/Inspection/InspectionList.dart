@@ -123,7 +123,7 @@ class _InspectionPageState extends State<InspectionPage> {
 
   Future<void> _fetchDenetimTipi() async {
     String? token = await TokenHelper.getToken();
-    final response = await http.get(
+    final response = await http.post(
       Uri.parse(ApiUrls.getAllInspectionType),
       headers: <String, String>{
         'Content-Type': 'application/json',

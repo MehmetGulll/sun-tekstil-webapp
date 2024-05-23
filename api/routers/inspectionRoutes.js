@@ -20,19 +20,49 @@ const { format } = require("path");
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 
-// TÜM DENETİM TİPLERİNİ LİSTELER
-router.get("/getAllInspectionType", authenticateToken, async (req, res) => {
+router.post("/getAllInspectionType", authenticateToken, async (req, res) => {
   try {
+    const { error, value } = Joi.object({
+      page: Joi.number().optional(),
+      perPage: Joi.number().optional(),
+      searchTerm: Joi.string().optional(),
+    }).validate(req.body);
+
+    if (error) return res.status(400).send(error);
+
+    const { page = 1, perPage = 10, searchTerm } = value;
+
     const sequelize = await initializeSequelize();
     const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
       timestamps: false,
       freezeTableName: true,
     });
+    whereObj = {
+      status: 1,
+    };
+
+    if (searchTerm) {
+      whereObj[Op.or] = [
+        { denetim_tipi: { [Op.like]: `%${searchTerm}%` } },
+        { denetim_tipi_kodu: { [Op.like]: `%${searchTerm}%` } },
+        { status: { [Op.like]: `%${searchTerm}%` } },
+      ];
+    }
+    if (req.user.rol_id === 1 || req.user.rol_id === 2) {
+      whereObj = {
+        [Op.or]: [{ status: 1 }, { status: 0 }],
+      };
+    } else {
+      whereObj = {
+        status: 1,
+      };
+    }
 
     const allInspectionType = await denetimTipiModel.findAndCountAll({
-      where: {
-        status: 1,
-      },
+      where: whereObj,
+      limit: perPage,
+      offset: (page - 1) * perPage,
+      // order: [["denetim_tipi", "ASC"]],
     });
 
     if (!allInspectionType || allInspectionType.length === 0) {
@@ -41,7 +71,12 @@ router.get("/getAllInspectionType", authenticateToken, async (req, res) => {
 
     return res
       .status(200)
-      .send({ data: allInspectionType.rows, count: allInspectionType.count });
+      .send({
+        data: allInspectionType.rows,
+        count: allInspectionType.count,
+        page,
+        perPage,
+      });
   } catch (error) {
     console.error("Get All Inspection Type Error:", error);
     return res.status(500).send(error);
@@ -84,7 +119,7 @@ router.post("/addInspectionType", authenticateToken, async (req, res) => {
       status: value.status,
     });
 
-    return res.status(201).send(`Denetim Tipi Başarıyla Eklendi!`);
+    return res.status(201).send(newInspectionType);
   } catch (error) {
     console.error("Get All Inspection Type Error:", error);
     return res.status(500).send(error);
@@ -94,24 +129,21 @@ router.post("/addInspectionType", authenticateToken, async (req, res) => {
 // DENETİM TİPİNİ GÜNCELLER
 router.post("/updateInspectionType", authenticateToken, async (req, res) => {
   try {
-    const { error, value } = Joi.object({
+    const schema = Joi.object({
       denetim_tipi_id: Joi.number().required(),
-      denetim_tipi: Joi.string(),
-      denetim_tipi_kodu: Joi.string(),
-      status: Joi.number(),
-    }).validate(req.body);
+      denetim_tipi: Joi.string().optional(),
+      denetim_tipi_kodu: Joi.string().optional(),
+      status: Joi.number().optional(),
+    });
 
-    if (error) return res.status(400).send(error);
+    const { error, value } = schema.validate(req.body);
+
+    if (error) return res.status(400).send(error.details[0].message);
 
     const sequelize = await initializeSequelize();
     const denetimTipiModel = sequelize.define("denetim_tipi", denetim_tipi, {
       timestamps: false,
       freezeTableName: true,
-    });
-    const inspectionType = await denetimTipiModel.findOne({
-      where: {
-        denetim_tipi: value.denetim_tipi,
-      },
     });
 
     const existingInspectionType = await denetimTipiModel.findOne({
@@ -120,41 +152,40 @@ router.post("/updateInspectionType", authenticateToken, async (req, res) => {
       },
     });
 
-    if (!existingInspectionType)
+    if (!existingInspectionType) {
       return res.status(404).send("Denetim Tipi Bulunamadı!");
+    }
 
-    if (existingInspectionType.status === value.status)
-      return res
-        .status(400)
-        .send("Denetim Tipi Zaten Bu Durumda! Güncelleme Yapılmadı!");
+    // Prepare the fields to be updated
+    let fieldsToUpdate = {};
+    if (value.denetim_tipi && value.denetim_tipi !== existingInspectionType.denetim_tipi) {
+      fieldsToUpdate.denetim_tipi = value.denetim_tipi;
+    }
+    if (value.denetim_tipi_kodu && value.denetim_tipi_kodu !== existingInspectionType.denetim_tipi_kodu) {
+      fieldsToUpdate.denetim_tipi_kodu = value.denetim_tipi_kodu;
+    }
+    if (typeof value.status !== 'undefined' && value.status !== existingInspectionType.status) {
+      fieldsToUpdate.status = value.status;
+    }
 
-    if (existingInspectionType.denetim_tipi === value.denetim_tipi)
-      return res
-        .status(400)
-        .send("Denetim Tipi Zaten Bu İsimde! Güncelleme Yapılmadı!");
+    if (Object.keys(fieldsToUpdate).length === 0) {
+      return res.status(400).send("Güncelleme yapılacak değişiklik bulunamadı!");
+    }
 
-    if (existingInspectionType.denetim_tipi_kodu === value.denetim_tipi_kodu)
-      return res
-        .status(400)
-        .send("Denetim Tipi Zaten Bu Kodda! Güncelleme Yapılmadı!");
-
-    const updatedInspectionType = await denetimTipiModel.update(
-      { ...value },
-      {
-        where: {
-          denetim_tip_id: value.denetim_tipi_id,
-        },
-      }
-    );
+    const updatedInspectionType = await denetimTipiModel.update(fieldsToUpdate, {
+      where: {
+        denetim_tip_id: value.denetim_tipi_id,
+      },
+    });
 
     if (updatedInspectionType[0] === 0) {
       return res.status(404).send("Denetim Tipi Bulunamadı!");
     }
 
-    return res.status(200).send(`Denetim Tipi Başarıyla Güncellendi!`);
+    return res.status(200).send(updatedInspectionType);
   } catch (error) {
     console.error("Update Inspection Type Error:", error);
-    return res.status(500).send(error);
+    return res.status(500).send(error.message);
   }
 });
 
@@ -413,7 +444,7 @@ router.post(
       soruModel.belongsTo(denetimTipiModel, {
         foreignKey: "denetim_tip_id",
       });
-      
+
       const imageModel = sequelize.define("image", image, {
         timestamps: false,
         freezeTableName: true,
@@ -469,14 +500,16 @@ router.post(
         if (cevap.aksiyon && cevap.aksiyon.length > 0) {
           for (let j = 0; j < cevap.aksiyon.length; j++) {
             const aksiyon = cevap.aksiyon[j];
-            await imageModel.update({
-              aksiyon_id: aksiyon.aksiyon_id,
-            },
-            {
-              where: {
-                public_id: aksiyon.aksiyon_gorsel,
+            await imageModel.update(
+              {
+                aksiyon_id: aksiyon.aksiyon_id,
               },
-            });
+              {
+                where: {
+                  public_id: aksiyon.aksiyon_gorsel,
+                },
+              }
+            );
             const findImage = await imageModel.findOne({
               where: {
                 public_id: aksiyon.aksiyon_gorsel,
@@ -492,20 +525,19 @@ router.post(
               aksiyon_olusturan_id: req.user.id,
               status: 1,
             });
-            
           }
         }
       }
-      
+
       // Denetim puanını hesaplar
       const totalSorular = sorular.length;
       const dogruCevaplar = denetimSorular.filter(
         (soru) => soru.dataValues.cevap === soru.dataValues.dogru_cevap
       ).length;
-      const alinanPuan = (dogruCevaplar / totalSorular) * 100;      
-        console.log ("totalSorular: ", totalSorular);
-        console.log ("dogruCevaplar: ", dogruCevaplar);
-        console.log ("alinanPuan: ", alinanPuan);
+      const alinanPuan = (dogruCevaplar / totalSorular) * 100;
+      console.log("totalSorular: ", totalSorular);
+      console.log("dogruCevaplar: ", dogruCevaplar);
+      console.log("alinanPuan: ", alinanPuan);
 
       // Denetim statusunu günceller
       await denetimModel.update(
@@ -521,16 +553,19 @@ router.post(
         }
       );
 
-      return res.status(201).send(`Denetim Soruları Başarıyla Cevaplandıasdasdaasdasdasdadsd!`);
+      return res
+        .status(201)
+        .send(`Denetim Soruları Başarıyla Cevaplandıasdasdaasdasdasdadsd!`);
     } catch (error) {
       console.error("Answer Inspection Error:", error);
-      return res.status(500).send("Error occurred while answering inspection: " + error.message);
-      
+      return res
+        .status(500)
+        .send("Error occurred while answering inspection: " + error.message);
     }
   }
 );
 
-// update inspection status 
+// update inspection status
 router.post("/updateInspectionStatus", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -552,8 +587,7 @@ router.post("/updateInspectionStatus", authenticateToken, async (req, res) => {
       where: { denetim_id },
     });
 
-    if (!existingInspection)
-      return res.status(404).send("Denetim Bulunamadı!");
+    if (!existingInspection) return res.status(404).send("Denetim Bulunamadı!");
 
     if (existingInspection.status === status)
       return res
@@ -578,6 +612,6 @@ router.post("/updateInspectionStatus", authenticateToken, async (req, res) => {
     console.error("Update Inspection Status Error:", error);
     return res.status(500).send(error);
   }
-}); 
+});
 
 module.exports = router;

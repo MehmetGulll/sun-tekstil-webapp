@@ -17,6 +17,8 @@ import 'package:suntekstilwebapp/src/pages/Register/Register.dart';
 import 'package:suntekstilwebapp/src/pages/Stores/Stores.dart';
 import 'package:suntekstilwebapp/src/pages/Reports/Reports.dart';
 import 'package:suntekstilwebapp/src/pages/Inspection/InspectionList.dart';
+import 'package:suntekstilwebapp/src/pages/Inspection/InspectionType.dart';
+
 
 void main() {
   runApp(
@@ -55,7 +57,8 @@ class MyApp extends StatelessWidget {
         '/inspectionList': (context) => InspectionPage(),
         '/viewActions': (context) => ActionPage(),
         '/managerActions': (context) => ManagerActionPage(),
-        '/storeManagerActions': (context) => AllActionStoreManager()
+        '/storeManagerActions': (context) => AllActionStoreManager(),
+        '/inspectionType': (context) => InspectionTypePage(),
       },
     );
   }
