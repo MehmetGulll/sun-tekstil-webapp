@@ -4,7 +4,10 @@ import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
+import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
+import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:http/http.dart' as http;
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
@@ -31,8 +34,7 @@ Widget buildColumn(BuildContext context, String label,
         Container(
           width: MediaQuery.of(context).size.width,
           child: CustomDropdown(
-            items: items.keys
-                .toList(), // Anahtarları bir liste olarak kullanıyoruz.
+            items: items.keys.toList(),
             onChanged: onChanged,
           ),
         ),
@@ -105,12 +107,36 @@ class _AddQuestionState extends State<AddQuestion> {
                     inspectionTypes[_chosenInspectionType] != null
                 ? int.parse(inspectionTypes[_chosenInspectionType]!)
                 : null,
-           
           }));
 
       if (response.statusCode == 201) {
         print("Soru Eklendi");
+        String successMessage = "Soru Eklendi!!";
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return SuccessDialog(
+                successMessage: successMessage,
+                successIcon: Icons.check,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/questions');
+                },
+              );
+            });
       } else {
+        print("Soru Eklenemedi");
+        String errorMessage = "Soru Ekleme Sırasında Hata!!";
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ErrorDialog(
+                errorMessage: errorMessage,
+                errorIcon: Icons.error,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              );
+            });
         print("Bir hata oluştu");
       }
     } catch (e) {
@@ -171,6 +197,8 @@ class _AddQuestionState extends State<AddQuestion> {
                   margin: EdgeInsets.symmetric(vertical: 20),
                   child: CustomButton(
                       buttonText: 'Ekle',
+                      textColor: Themes.blackColor,
+                      buttonColor: Themes.cardBackgroundColor,
                       onPressed: () {
                         addQuestion(context);
                       }))
