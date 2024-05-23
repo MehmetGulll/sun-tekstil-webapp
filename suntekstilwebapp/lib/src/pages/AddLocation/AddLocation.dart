@@ -141,6 +141,7 @@ class _AddLocationState extends State<AddLocation> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Mağaza Ekle',
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 100),

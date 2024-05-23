@@ -336,6 +336,7 @@ class _RegionsState extends State<Regions> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Bölgeler',
       body: Container(
         child: Column(
           children: [

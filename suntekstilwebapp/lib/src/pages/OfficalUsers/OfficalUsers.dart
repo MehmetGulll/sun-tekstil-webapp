@@ -254,6 +254,8 @@ class _OfficalUsers extends State<OfficalUsers> {
                   Expanded(
                     child: CustomButton(
                       buttonText: "Düzenle",
+                      buttonColor: Themes.dividerColor,
+                      textColor: Themes.blackColor,
                       onPressed: () async {
                         print("Butona basıldı");
                         await updateUser(context, user['id'],
@@ -276,6 +278,7 @@ class _OfficalUsers extends State<OfficalUsers> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Yetkili Kullanıcılar',
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 80),
@@ -363,8 +366,8 @@ class _OfficalUsers extends State<OfficalUsers> {
                             padding: EdgeInsets.all(8.0),
                             child: CustomButton(
                               buttonText: 'Düzenle',
-                              textColor: Themes.blueColor,
-                              buttonColor: Themes.whiteColor,
+                              textColor: Themes.blackColor,
+                              buttonColor: Themes.cardBackgroundColor,
                               onPressed: () {
                                 showModal(context, Themes.whiteColor, "", user);
                               },
@@ -385,7 +388,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                           TableRow(children: [
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "AD",
                                 style:
@@ -394,7 +397,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "SOYAD",
                                 style:
@@ -403,7 +406,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text("EMAİL",
                                   style: TextStyle(
                                     fontWeight: Tokens.fontWeight[2],
@@ -411,7 +414,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "KULLANICI ADI ",
                                 style:
@@ -420,7 +423,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                             ),
                             Container(
                               padding: EdgeInsets.all(8.0),
-                              color: Themes.yellowColor,
+                              color: Themes.cardBackgroundColor,
                               child: Text(
                                 "DURUM",
                                 style:
@@ -429,7 +432,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                             ),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "UNVAN",
                                   style: TextStyle(
@@ -437,7 +440,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                                 )),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "MARKA",
                                   style: TextStyle(
@@ -445,7 +448,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                                 )),
                             Container(
                                 padding: EdgeInsets.all(8.0),
-                                color: Themes.yellowColor,
+                                color: Themes.cardBackgroundColor,
                                 child: Text(
                                   "DÜZENLE",
                                   style: TextStyle(
@@ -467,8 +470,11 @@ class _OfficalUsers extends State<OfficalUsers> {
               ),
               CustomButton(
                   buttonText: "Yeni Kullanici Ekle",
+                  buttonColor: Themes.cardBackgroundColor,
+                  textColor: Themes.blackColor,
                   onPressed: () =>
-                      Navigator.pushReplacementNamed(context, '/register'))
+                      Navigator.pushReplacementNamed(context, '/register')),
+                      SizedBox(height: 20,)
             ],
           ),
         ),

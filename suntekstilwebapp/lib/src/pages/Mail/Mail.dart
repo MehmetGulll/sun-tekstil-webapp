@@ -324,6 +324,7 @@ class _MailPageState extends State<MailPage> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Mail Yönetimi',
       body: DefaultTabController(
         length: _denetimTipleri.length,
         child: SingleChildScrollView(

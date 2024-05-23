@@ -147,6 +147,7 @@ class _AddQuestionState extends State<AddQuestion> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Soru Ekle',
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 100),
