@@ -52,5 +52,6 @@ class ApiUrls {
   static const String getAllInspectionType = "http://localhost:5000/getAllInspectionType";
   static const String addInspectionType = "http://localhost:5000/addInspectionType";
   static const String updateInspectionType = "http://localhost:5000/updateInspectionType";
+  static const String getInspectionQuestions = "http://localhost:5000/getInspectionQuestions";
 
 }
