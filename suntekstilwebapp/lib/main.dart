@@ -14,7 +14,6 @@ import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
 import 'package:suntekstilwebapp/src/pages/QuestionsPage/QuestionsPage.dart';
 import 'package:suntekstilwebapp/src/pages/Regions/Regions.dart';
 import 'package:suntekstilwebapp/src/pages/Register/Register.dart';
-import 'package:suntekstilwebapp/src/pages/ReportDetail/ReportDetail.dart';
 import 'package:suntekstilwebapp/src/pages/Stores/Stores.dart';
 import 'package:suntekstilwebapp/src/pages/Reports/Reports.dart';
 import 'package:suntekstilwebapp/src/pages/Inspection/InspectionList.dart';
