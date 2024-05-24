@@ -394,6 +394,19 @@ Widget build(BuildContext context) {
 }
 
   void _applyFilters() {
+        toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Filtreleme Başarılı!.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 5),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
     setState(() {
       _currentPage = 1;
     });
@@ -401,6 +414,19 @@ Widget build(BuildContext context) {
   }
 
   void _clearFilters() {
+        toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Filtreler Kaldırıldı!.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 5),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
     setState(() {
       _searchController.clear();
       _currentPage = 1;

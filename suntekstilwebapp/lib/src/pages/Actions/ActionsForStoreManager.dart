@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'dart:convert';
+import 'package:toastification/toastification.dart';
 
 class AllActionStoreManager extends StatefulWidget {
   @override
@@ -68,6 +69,7 @@ class _AllActionStoreManagerState extends State<AllActionStoreManager> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Aksiyonlar',
       body: Column(
         children: [
           Padding(
@@ -452,6 +454,19 @@ class _AllActionStoreManagerState extends State<AllActionStoreManager> {
   }
 
   void _applyFilters() {
+        toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Filtreleme Başarılı!.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 5),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
     setState(() {
       _currentPage = 1;
     });
@@ -459,6 +474,19 @@ class _AllActionStoreManagerState extends State<AllActionStoreManager> {
   }
 
   void _clearFilters() {
+        toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Filtreleme Başarılı!.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 5),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
     setState(() {
       _searchController.clear();
       _startDate = null;
