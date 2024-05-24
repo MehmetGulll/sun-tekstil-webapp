@@ -10,7 +10,6 @@ import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class Register extends StatefulWidget {
   @override

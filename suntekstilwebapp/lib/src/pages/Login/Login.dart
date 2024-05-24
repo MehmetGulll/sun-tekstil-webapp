@@ -6,7 +6,6 @@ import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
-import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:shared_preferences/shared_preferences.dart';
