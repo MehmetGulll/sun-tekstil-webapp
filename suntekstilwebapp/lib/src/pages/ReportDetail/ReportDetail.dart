@@ -17,6 +17,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:io';
+import 'dart:math';
 
 class ReportDetail extends StatefulWidget {
   final String reportId;
@@ -89,69 +90,78 @@ class _ReportDetailState extends State<ReportDetail> {
   }
 
   void createPdfAndDownload(List<Map<String, dynamic>> data) async {
-    final pdf = pw.Document();
+  final pdf = pw.Document();
 
-    final fontData =
-        await rootBundle.load('fonts/NotoSans_Condensed-Black.ttf');
+  final fontData =
+      await rootBundle.load('fonts/NotoSans_Condensed-Black.ttf');
 
-    final font = pw.Font.ttf(fontData);
+  final font = pw.Font.ttf(fontData);
+
+  int rowsPerPage = 6; // istediğiniz satır sayısını belirleyin
+
+  for (var i = 0; i < data.length; i += rowsPerPage) {
+    var pageData = data.sublist(i, min(i + rowsPerPage, data.length));
 
     pdf.addPage(pw.Page(build: (pw.Context context) {
-      return pw.Table(border: pw.TableBorder.all(width: 1.0), columnWidths: {
-        0: pw.FlexColumnWidth(2),
-        1: pw.FlexColumnWidth(1),
-        2: pw.FlexColumnWidth(1),
-        3: pw.FlexColumnWidth(1),
-      }, children: [
-        pw.TableRow(children: [
-          pw.Container(
-              child: pw.Text('SORU ADI', style: pw.TextStyle(font: font)),
-              alignment: pw.Alignment.center),
-          pw.Container(
-              child: pw.Text('VERİLEN CEVAP', style: pw.TextStyle(font: font)),
-              alignment: pw.Alignment.center),
-          pw.Container(
-              child: pw.Text('SORU PUAN', style: pw.TextStyle(font: font)),
-              alignment: pw.Alignment.center),
-          pw.Container(
-              child: pw.Text('DOĞRU CEVAP', style: pw.TextStyle(font: font)),
-              alignment: pw.Alignment.center),
-        ]),
-        ...data.map((item) => pw.TableRow(children: [
-              pw.Container(
-                  child:
-                      pw.Text(item['soruAdi'], style: pw.TextStyle(font: font)),
-                  alignment: pw.Alignment.center),
-              pw.Container(
-                  child: pw.Text(item['soruCevap'] == 0 ? 'Evet' : 'Hayır',
-                      style: pw.TextStyle(font: font)),
-                  alignment: pw.Alignment.center),
-              pw.Container(
-                  child: pw.Text(item['soruPuan'].toString(),
-                      style: pw.TextStyle(font: font)),
-                  alignment: pw.Alignment.center),
-              pw.Container(
-                  child: pw.Text(item['dogruCevap'] == 0 ? 'Evet' : 'Hayır',
-                      style: pw.TextStyle(font: font)),
-                  alignment: pw.Alignment.center),
-            ]))
-      ]);
+      return pw.Table(
+        border: pw.TableBorder.all(width: 1.0),
+        columnWidths: {
+          0: pw.FlexColumnWidth(2),
+          1: pw.FlexColumnWidth(1),
+          2: pw.FlexColumnWidth(1),
+          3: pw.FlexColumnWidth(1),
+        },
+        children: [
+          pw.TableRow(children: [
+            pw.Container(
+                child: pw.Text('SORU ADI', style: pw.TextStyle(font: font)),
+                alignment: pw.Alignment.center),
+            pw.Container(
+                child: pw.Text('VERİLEN CEVAP', style: pw.TextStyle(font: font)),
+                alignment: pw.Alignment.center),
+            pw.Container(
+                child: pw.Text('SORU PUAN', style: pw.TextStyle(font: font)),
+                alignment: pw.Alignment.center),
+            pw.Container(
+                child: pw.Text('DOĞRU CEVAP', style: pw.TextStyle(font: font)),
+                alignment: pw.Alignment.center),
+          ]),
+          ...pageData.map((item) => pw.TableRow(children: [
+                pw.Container(
+                    child: pw.Text(item['soruAdi'], style: pw.TextStyle(font: font)),
+                    alignment: pw.Alignment.center),
+                pw.Container(
+                    child: pw.Text(item['soruCevap'] == 0 ? 'Evet' : 'Hayır',
+                        style: pw.TextStyle(font: font)),
+                    alignment: pw.Alignment.center),
+                pw.Container(
+                    child: pw.Text(item['soruPuan'].toString(),
+                        style: pw.TextStyle(font: font)),
+                    alignment: pw.Alignment.center),
+                pw.Container(
+                    child: pw.Text(item['dogruCevap'] == 0 ? 'Evet' : 'Hayır',
+                        style: pw.TextStyle(font: font)),
+                    alignment: pw.Alignment.center),
+              ]))
+        ],
+      );
     }));
-
-    final Future<Uint8List> pdfDataFuture = pdf.save();
-
-    final Uint8List pdfData = await pdfDataFuture;
-
-    final blob = html.Blob([pdfData.buffer.asUint8List()], 'application/pdf');
-
-    final url = html.Url.createObjectUrlFromBlob(blob);
-
-    final anchor = html.AnchorElement(href: url)
-      ..target = 'blank'
-      ..download = 'RaporDetayi.pdf';
-
-    anchor.click();
   }
+
+  final Future<Uint8List> pdfDataFuture = pdf.save();
+
+  final Uint8List pdfData = await pdfDataFuture;
+
+  final blob = html.Blob([pdfData.buffer.asUint8List()], 'application/pdf');
+
+  final url = html.Url.createObjectUrlFromBlob(blob);
+
+  final anchor = html.AnchorElement(href: url)
+    ..target = 'blank'
+    ..download = 'RaporDetayi.pdf';
+
+  anchor.click();
+}
 
   Future<List<Map<String, dynamic>>> getReportDetail() async {
     try {
