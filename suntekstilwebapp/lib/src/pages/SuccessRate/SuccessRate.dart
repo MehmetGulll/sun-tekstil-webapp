@@ -130,6 +130,7 @@ class _SuccessRateState extends State<SuccessRate> {
                                     () => _chosenInspectorType = value), inspectionTypes
                               ),
                             ),
+                            SizedBox(height: 20,),
                             Consumer<InspectionTypeId>(
                               builder: (context, inspectionTypeId, child) {
                                 return BarChartSample3(
