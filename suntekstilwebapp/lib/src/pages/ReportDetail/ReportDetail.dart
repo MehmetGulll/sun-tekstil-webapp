@@ -18,7 +18,6 @@ import 'package:printing/printing.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:io';
 
-
 class ReportDetail extends StatefulWidget {
   final String reportId;
   final String inspectorRole;
@@ -200,12 +199,14 @@ class _ReportDetailState extends State<ReportDetail> {
                   ),
                   Container(
                     padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: isCorrect ? Themes.greenColor : Themes.secondaryColor,
-                    ),
                     child: Text(
                       report['soruPuan'].toString(),
-                      style: TextStyle(fontWeight: Tokens.fontWeight[2]),
+                      style: TextStyle(
+                        fontWeight: Tokens.fontWeight[2],
+                        color: isCorrect
+                            ? Themes.greenColor
+                            : Themes.secondaryColor,
+                      ),
                     ),
                   ),
                   Container(
