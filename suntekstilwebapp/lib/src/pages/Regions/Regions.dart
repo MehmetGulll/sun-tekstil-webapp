@@ -1,337 +1,298 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:suntekstilwebapp/src/components/Card/Card.dart';
-import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
-import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
-import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
-import 'package:suntekstilwebapp/src/components/Input/Input.dart';
-import 'package:suntekstilwebapp/src/components/Button/Button.dart';
-import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
-import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
-import 'package:suntekstilwebapp/src/constants/tokens.dart';
-import 'package:suntekstilwebapp/src/constants/theme.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:suntekstilwebapp/src/API/url.dart';
+import 'package:http/http.dart' as http;
+import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+import 'dart:convert';
+import 'package:toastification/toastification.dart';
 
 class Regions extends StatefulWidget {
   @override
-  _RegionsState createState() => _RegionsState();
+  _RegionsPageState createState() => _RegionsPageState();
 }
 
-class _RegionsState extends State<Regions> {
-  String? _chosenRegionState;
-  Map<String, String> _regionStateList = {'Aktif': '1', 'Pasif': '0'};
-  TextEditingController _searchTextController = TextEditingController();
-  List<Map<String, dynamic>> _regions = [];
-  final TextEditingController regionNameController = TextEditingController();
-  final TextEditingController regionManagerController = TextEditingController();
-  final TextEditingController addRegionCodeController = TextEditingController();
-  final TextEditingController addRegionNameController = TextEditingController();
-  Future<List<dynamic>> getRegions() async {
-    try {
-      String? token = await TokenHelper.getToken();
-      final response = await http.post(
-        Uri.parse(ApiUrls.getAllRegion),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': '$token'
-        },
-      );
-      var data = jsonDecode(response.body);
-      var rows = data['allRegion']['rows'];
-      var valueCount = rows.length;
-      print("Toplam bu kadar değerimiz var :$valueCount");
-      return data['allRegion']['rows'];
-    } catch (e) {
-      print("Hata: $e");
-      return [];
+class _RegionsPageState extends State<Regions> {
+  List<dynamic> _allRegions = [];
+  List<dynamic> _allUsers = [];
+  int _currentPage = 1;
+  int _totalPages = 1;
+  TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRegions();
+    _getUsers();
+  }
+
+  Future<void> _fetchRegions() async {
+    String? token = await TokenHelper.getToken();
+    Map<String, dynamic> requestBody = {
+      'page': _currentPage,
+    };
+    if (_searchController.text.isNotEmpty) {
+      requestBody['searchTerm'] = _searchController.text;
+    }
+
+    final response = await http.post(
+      Uri.parse(ApiUrls.getAllRegion),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _allRegions = responseData['allRegion']['rows'];
+        _totalPages = (responseData['total'] / responseData['perPage']).ceil();
+      });
+    } else {
+      throw Exception('Failed to load regions.');
     }
   }
 
-  List<Map<String, dynamic>> _region = [];
-  Future<int> _getRegionCount() async {
-    var url = Uri.parse(ApiUrls.storesUrl);
-    var data = await http.get(url);
-    var jsonData = json.decode(data.body) as List;
-    print(jsonData);
+  Future<void> _updateRegion(
+      int regionId, Map<String, dynamic> updatedFields) async {
+    String? token = await TokenHelper.getToken();
+    updatedFields['bolge_id'] = regionId;
 
-    _region = jsonData.map((item) => item as Map<String, dynamic>).toList();
-    int storesCount = _region.length;
+    final response = await http.post(
+      Uri.parse(ApiUrls.updateRegion),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(updatedFields),
+    );
 
-    return storesCount;
-  }
-
-  Future<void> updateRegion(
-      BuildContext context, int id, Map<String, dynamic> region) async {
-    try {
-      String regionName = regionNameController.text;
-      String regionManager = regionManagerController.text;
-      String chosenRegionState = _chosenRegionState ?? 'Aktif';
-      print("gelen id $id");
-      print("Bolge Adı: $regionName");
-      print("Bolge Müdürü: $regionManager");
-      print("Seçilen bolge durumu : $chosenRegionState");
-      String? token = await TokenHelper.getToken();
-      final response = await http.post(Uri.parse(ApiUrls.updateRegion),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': '$token'
-          },
-          body: jsonEncode(<String, String>{
-            "bolge_id": id.toString(),
-            "bolge_adi": regionName,
-            "status": _regionStateList[chosenRegionState] ?? 'Aktif'
-          }));
-      if (response.statusCode == 200) {
-        print("Başarıyla güncellendi");
-        String successMessage = "Güncelleme Başarılı!!";
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SuccessDialog(
-                successMessage: successMessage,
-                successIcon: Icons.check,
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/regions');
-                },
-              );
-            });
-      } else {
-        String errorMessage = "Bir hata oluştu!!";
-        print("Hata");
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ErrorDialog(
-                errorMessage: errorMessage,
-                errorIcon: Icons.error,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              );
-            });
-      }
-    } catch (e) {
-      print("Hata $e");
-    }
-  }
-
-  Future<void> addRegion(BuildContext context) async {
-    try {
-      String? token = await TokenHelper.getToken();
-      print(addRegionCodeController);
-      print(addRegionNameController);
-      final response = await http.post(Uri.parse(ApiUrls.addRegion),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': '$token'
-          },
-          body: jsonEncode(<String, String>{
-            "bolge_adi": addRegionNameController.text,
-            "bolge_kodu": addRegionCodeController.text
-          }));
-      if (response.statusCode == 201) {
-        print("Başarıyla eklendi");
-        String successMessage = "Bölge Ekleme Başarılı!!";
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SuccessDialog(
-                successMessage: successMessage,
-                successIcon: Icons.check,
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/regions');
-                },
-              );
-            });
-      } else if (response.statusCode == 400) {
-        String errorMessage = response.body;
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ErrorDialog(
-                errorMessage: errorMessage,
-                errorIcon: Icons.error,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              );
-            });
-      } else {
-        String errorMessage = "Bir hata oluştu!!";
-        print("Hata");
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ErrorDialog(
-                errorMessage: errorMessage,
-                errorIcon: Icons.error,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              );
-            });
-      }
-    } catch (e) {
-      print("Hata : $e");
-    }
-  }
-
-  void showNewRegionModal(
-      BuildContext context, Color backgroundColor, String text) {
-    showDialog(
+    if (response.statusCode == 200) {
+      toastification.show(
         context: context,
-        builder: (BuildContext context) {
-          return CustomModal(
-              backgroundColor: backgroundColor,
-              text: text,
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Yeni Bölge Ekle",
-                        style: TextStyle(
-                            fontSize: Tokens.fontSize[9],
-                            fontWeight: Tokens.fontWeight[6]),
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: Icon(Icons.close))
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  CustomInput(
-                    controller: addRegionCodeController,
-                    hintText: 'Bölge Kodu',
-                    keyboardType: TextInputType.name,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  CustomInput(
-                    controller: addRegionNameController,
-                    hintText: 'Bölge Adı',
-                    keyboardType: TextInputType.name,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 600),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: CustomButton(
-                              buttonText: "Bölge Ekle",
-                              buttonColor: Themes.dividerColor,
-                              textColor: Themes.blackColor,
-                              onPressed: () async {
-                                print("Onaya basıldı");
-                                addRegion(context);
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                        ]),
-                  )
-                ],
-              ));
-        });
+        title: Text('Başarılı'),
+        description: Text(' Bölge başarıyla güncellendi.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 3),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
+      _fetchRegions();
+    } else {
+      throw Exception('Failed to update region.');
+    }
   }
 
-  void showModal(
-      BuildContext context, Color backgroundColor, String text, Map region) {
-    regionManagerController.text = region['bolge_muduru'].toString();
-    regionNameController.text = region['bolge_adi'].toString();
+  Future<void> _getUsers() async {
+    String? token = await TokenHelper.getToken();
+    final response = await http.get(
+      Uri.parse(ApiUrls.getAllUsers),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _allUsers = responseData;
+      });
+    } else {
+      throw Exception('Failed to load users.');
+    }
+  }
+
+  Future<void> _addRegion(Map<String, dynamic> newRegion) async {
+    String? token = await TokenHelper.getToken();
+
+    final response = await http.post(
+      Uri.parse(ApiUrls.addRegion),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(newRegion),
+    );
+
+    if (response.statusCode == 201) {
+      toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Yeni Bölge başarıyla eklendi.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 3),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
+      _fetchRegions();
+    } else {
+      throw Exception('Failed to add region.');
+    }
+  }
+
+  void _showAddRegionDialog() {
+    TextEditingController bolgeAdiController = TextEditingController();
+    TextEditingController bolgeKoduController = TextEditingController();
+    int bolgeMuduruId = _allUsers.isNotEmpty ? _allUsers[0]['id'] : 0;
+    int status = 1;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CustomModal(
-          backgroundColor: backgroundColor,
-          text: text,
-          child: Column(
+        return AlertDialog(
+          title: Text("Yeni Bölge Oluştur"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Bölge Düzenle",
-                    style: TextStyle(
-                        fontSize: Tokens.fontSize[9],
-                        fontWeight: Tokens.fontWeight[6]),
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(Icons.close))
+              TextField(
+                controller: bolgeAdiController,
+                decoration: InputDecoration(labelText: 'Bölge Adı'),
+              ),
+              TextField(
+                controller: bolgeKoduController,
+                decoration: InputDecoration(labelText: 'Bölge Kodu'),
+              ),
+              DropdownButtonFormField<int>(
+                value: bolgeMuduruId,
+                items: _allUsers.map<DropdownMenuItem<int>>((user) {
+                  return DropdownMenuItem<int>(
+                    value: user['id'],
+                    child: Text('${user['ad']} ${user['soyad']}'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    bolgeMuduruId = value!;
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Bölge Müdürü ID'),
+              ),
+              DropdownButtonFormField<int>(
+                value: status,
+                items: [
+                  DropdownMenuItem(value: 1, child: Text("Aktif")),
+                  DropdownMenuItem(value: 0, child: Text("Pasif")),
                 ],
+                onChanged: (value) {
+                  setState(() {
+                    status = value!;
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Durum'),
+                disabledHint: Text("Aktif"),
               ),
-              SizedBox(
-                height: 20,
-              ),
-              CustomInput(
-                controller: regionNameController,
-                hintText: 'Bölge Adı',
-                keyboardType: TextInputType.name,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Durum",
-                      style: TextStyle(fontSize: Tokens.fontSize[2]),
-                    ),
-                    CustomDropdown(
-                      selectedItem: region['status'] == 1 ? 'Aktif' : 'Pasif',
-                      items: ['Aktif', 'Pasif'],
-                      onChanged: (String? value) {
-                        _chosenRegionState = value;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 600),
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Onay",
-                      buttonColor: Themes.dividerColor,
-                      textColor: Themes.blackColor,
-                      onPressed: () async {
-                        print("Onaya basıldı");
-                        await updateRegion(context, region['bolge_id'],
-                            Map<String, dynamic>.from(region));
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                ]),
-              )
             ],
           ),
+          actions: [
+            TextButton(
+              child: Text("İptal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text("Kaydet"),
+              onPressed: () {
+                Map<String, dynamic> newRegion = {
+                  'bolge_adi': bolgeAdiController.text,
+                  'bolge_kodu': bolgeKoduController.text,
+                  'bolge_muduru': bolgeMuduruId
+                };
+                _addRegion(newRegion);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(Map<String, dynamic> region) {
+    TextEditingController bolgeAdiController =
+        TextEditingController(text: region['bolge_adi']);
+    TextEditingController bolgeKoduController =
+        TextEditingController(text: region['bolge_kodu']);
+    int bolgeMuduruId = region['bolge_muduru'];
+    int status = region['status'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Bölge Düzenle"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: bolgeAdiController,
+                decoration: InputDecoration(labelText: 'Bölge Adı'),
+              ),
+              TextField(
+                controller: bolgeKoduController,
+                decoration: InputDecoration(labelText: 'Bölge Kodu'),
+              ),
+              DropdownButtonFormField<int>(
+                value: bolgeMuduruId,
+                items: _allUsers.map<DropdownMenuItem<int>>((user) {
+                  return DropdownMenuItem<int>(
+                    value: user['id'],
+                    child: Text('${user['ad']} ${user['soyad']}'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    bolgeMuduruId = value!;
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Bölge Müdürü ID'),
+              ),
+              DropdownButtonFormField<int>(
+                value: status,
+                items: [
+                  DropdownMenuItem(value: 1, child: Text("Aktif")),
+                  DropdownMenuItem(value: 0, child: Text("Pasif")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    status = value!;
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Durum'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text("İptal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text("Kaydet"),
+              onPressed: () {
+                Map<String, dynamic> updatedFields = {
+                  'bolge_adi': bolgeAdiController.text,
+                  'bolge_kodu': bolgeKoduController.text,
+                  'bolge_muduru': bolgeMuduruId,
+                  'status': status,
+                };
+                _updateRegion(region['bolge_id'], updatedFields);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
     );
@@ -341,178 +302,207 @@ class _RegionsState extends State<Regions> {
   Widget build(BuildContext context) {
     return CustomScaffold(
       pageTitle: 'Bölgeler',
-      body: Container(
-        child: Column(
-          children: [
-            SizedBox(height: 50),
-            Center(
-              child: Text(
-                "Bölgeler",
-                style: TextStyle(
-                  fontSize: Tokens.fontSize[9],
-                  fontWeight: Tokens.fontWeight[6],
-                ),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Themes.borderColor,
-                  width: 1,
-                ),
-              ),
-            ),
-            CustomCard(
-              color: Themes.cardBackgroundColor,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Row(
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 50),
-                                child: CustomButton(
-                                    buttonText: "Yeni Bölge Ekle",
-                                    buttonColor: Themes.cardBackgroundColor,
-                                    textColor: Themes.blackColor,
-                                    onPressed: () {
-                                      showNewRegionModal(
-                                        context,
-                                        Themes.whiteColor,
-                                        "",
-                                      );
-                                    })),
-                            FutureBuilder(
-                                future: _getRegionCount(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<int> snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return CircularProgressIndicator();
-                                  } else if (snapshot.hasError) {
-                                    return Text('Hata:${snapshot.error}');
-                                  } else {
-                                    String message = '';
-                                    if (snapshot.data != null) {
-                                      if (snapshot.data == 0) {
-                                        message =
-                                            'Herhangi bir bölge bulunamadı';
-                                      } else {
-                                        message =
-                                            'Toplam Bölge Sayısı: ${snapshot.data}';
-                                      }
-                                    }
-                                    return Column(
-                                      children: [
-                                        Text(
-                                          message,
-                                          maxLines: 2,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: Themes.cardTextColor,
-                                              fontSize: Tokens.fontSize[2],
-                                              fontWeight: Tokens.fontWeight[8]),
-                                        )
-                                      ],
-                                    );
-                                  }
-                                })
-                          ],
+                  child: SizedBox(
+                    width: 200,
+                    child: TextFormField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Arama yapın...',
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: _applyFilters,
                         ),
-                        SizedBox(
-                          height: 20,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.0),
+                Tooltip(
+                  message: "Filtrele",
+                  child: IconButton(
+                    icon: Icon(Icons.filter_alt),
+                    onPressed: _applyFilters,
+                  ),
+                ),
+                SizedBox(width: 8.0),
+                Tooltip(
+                  message: "Filtreleri Temizle",
+                  child: IconButton(
+                    icon: Icon(Icons.delete_forever_sharp),
+                    onPressed: _clearFilters,
+                  ),
+                ),
+                SizedBox(width: 8.0),
+                Tooltip(
+                  message: "Yeni Bölge Oluştur",
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      _showAddRegionDialog();
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF7F2F9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.add,
+                          color: Color(0xFF745FAB),
+                          size: 24,
                         ),
-                        Expanded(
-                          child: FutureBuilder<List<dynamic>>(
-                            future: getRegions(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<List<dynamic>> snapshot) {
-                              if (snapshot.hasData) {
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    var region = snapshot.data![index];
-                                    return Card(
-                                      child: ListTile(
-                                        title: Text(region['bolge_adi']),
-                                        subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Text("Bölge Müdürü:"),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Text(
-                                                  region['bolge_muduru'],
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          Tokens.fontWeight[6]),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                Text("Durum:"),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Text(
-                                                  region['status'] == 1
-                                                      ? 'Aktif'
-                                                      : 'Pasif',
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          Tokens.fontWeight[6]),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                        trailing: Container(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: CustomButton(
-                                            buttonText: 'Düzenle',
-                                            textColor: Themes.blueColor,
-                                            buttonColor: Themes.whiteColor,
-                                            onPressed: () {
-                                              showModal(
-                                                  context,
-                                                  Themes.whiteColor,
-                                                  "",
-                                                  region);
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              } else if (snapshot.hasError) {
-                                return Text('Bir hata oluştu');
-                              } else {
-                                return CircularProgressIndicator();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ],
+              mainAxisAlignment: MainAxisAlignment.center,
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 8.0),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: DataTable(
+                columns: [
+                  DataColumn(
+                      label: Text('Bölge Adı',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      tooltip: 'Bölge Adı'),
+                  DataColumn(
+                      label: Text('Bölge Kodu',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      tooltip: 'Bölge Kodu'),
+                  DataColumn(
+                      label: Text('Durum',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      tooltip: 'Durum'),
+                  DataColumn(
+                      label: Text('Bölge Müdürü ID',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      tooltip: 'Bölge Müdürü ID'),
+                  DataColumn(
+                      label: Text('Actions',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      tooltip: 'Actions'),
+                ],
+                rows: _allRegions.map((region) {
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(region['bolge_adi'])),
+                      DataCell(Text(region['bolge_kodu'])),
+                      DataCell(Text(
+                        region['status'] == 1 ? 'Aktif' : 'Pasif',
+                      )),
+                      DataCell(Text(
+                          '${region['bolgeMuduru']['ad']} ${region['bolgeMuduru']['soyad']}')),
+                      DataCell(Row(
+                        children: [
+                          Tooltip(
+                            message: "Düzenle",
+                            child: IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                _showEditDialog(region);
+                              },
+                            ),
+                          )
+                        ],
+                      )),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          PaginationControls(
+            currentPage: _currentPage,
+            totalPages: _totalPages,
+            onPageChanged: (int page) {
+              setState(() {
+                _currentPage = page;
+              });
+              _fetchRegions();
+            },
+          ),
+        ],
       ),
+    );
+  }
+
+  void _applyFilters() {
+    toastification.show(
+      context: context,
+      title: Text('Başarılı'),
+      description: Text(' Filtreler uygulandı.'),
+      icon: const Icon(Icons.check),
+      type: ToastificationType.success,
+      style: ToastificationStyle.flatColored,
+      autoCloseDuration: const Duration(seconds: 3),
+      showProgressBar: true,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
+    _fetchRegions();
+  }
+
+  void _clearFilters() {
+    toastification.show(
+      context: context,
+      title: Text('Başarılı'),
+      description: Text(' Filtreler temizlendi.'),
+      icon: const Icon(Icons.check),
+      type: ToastificationType.success,
+      style: ToastificationStyle.flatColored,
+      autoCloseDuration: const Duration(seconds: 3),
+      showProgressBar: true,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
+    _searchController.clear();
+    _fetchRegions();
+  }
+}
+
+class PaginationControls extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final ValueChanged<int> onPageChanged;
+
+  PaginationControls({
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed:
+              currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+        ),
+        Text('$currentPage / $totalPages'),
+        IconButton(
+          icon: Icon(Icons.arrow_forward),
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(currentPage + 1)
+              : null,
+        ),
+      ],
     );
   }
 }

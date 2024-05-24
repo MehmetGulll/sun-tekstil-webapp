@@ -106,13 +106,12 @@ router.post("/stores", authenticateToken, async (req, res) => {
       };
     });
 
-    return res.status(200).send({ data: modifiedStores, total: stores.count });
+    return res.status(200).send({ data: modifiedStores, total: stores.count ,page,perPage });
   } catch (error) {
     console.error("Stores Error:", error);
     return res.status(500).send(error);
   }
 });
-
 
 // YENİ MAĞAZA EKLER
 router.post("/addStore", authenticateToken, async (req, res) => {
@@ -128,7 +127,6 @@ router.post("/addStore", authenticateToken, async (req, res) => {
       magaza_muduru: Joi.number().required(),
       acilis_tarihi: Joi.string().required(),
       magaza_eposta: Joi.string().email().required(),
-      status: Joi.number().required(),
     }).validate(req.body);
 
     if (error) {
@@ -146,7 +144,6 @@ router.post("/addStore", authenticateToken, async (req, res) => {
       magaza_muduru,
       acilis_tarihi,
       magaza_eposta,
-      status,
     } = value;
 
     const sequelize = await initializeSequelize();
@@ -187,9 +184,9 @@ router.post("/addStore", authenticateToken, async (req, res) => {
       magaza_metre,
       magaza_muduru,
       acilis_tarihi,
-      status,
       ekleyen_id: req.user.id,
       magaza_eposta,
+      status: 1,
     });
 
     return res.status(201).send(newStore);
@@ -297,5 +294,6 @@ router.post("/updateStore", authenticateToken, async (req, res) => {
     return res.status(500).send(error);
   }
 });
+
 
 module.exports = router;
