@@ -51,7 +51,7 @@ router.post("/getAllRegion", authenticateToken, async (req, res) => {
         {
           model: kullaniciModel,
           as: "bolgeMuduru",
-          attributes: ["ad", "soyad"],
+          attributes: ["id","ad", "soyad"],
         },
       ],
       limit: perPage,
@@ -61,12 +61,6 @@ router.post("/getAllRegion", authenticateToken, async (req, res) => {
     if (!allRegion || allRegion.length === 0) {
       return res.status(404).send("No Region Found");
     }
-
-    allRegion.rows.forEach((region) => {
-      region.bolge_muduru = `${region.bolgeMuduru.ad} ${region.bolgeMuduru.soyad}`;
-      delete region.dataValues.bolgeMuduru;
-    });
-
     return res
       .status(200)
       .send({ allRegion, total: allRegion.count, page, perPage });
@@ -82,6 +76,7 @@ router.post("/addRegion", authenticateToken, async (req, res) => {
     const { error, value } = Joi.object({
       bolge_adi: Joi.string().required(),
       bolge_kodu: Joi.string().required(),
+      bolge_muduru: Joi.number().required(),
     }).validate(req.body);
 
     if (error) {
@@ -94,12 +89,28 @@ router.post("/addRegion", authenticateToken, async (req, res) => {
       freezeTableName: true,
     });
 
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const isUserExist = await kullaniciModel.findOne({
+      where: {
+        id: value.bolge_muduru,
+        status: 1,
+      },
+    });
+
+    if (!isUserExist) return res.status(404).send("Kullanıcı Bulunamadı!");
+
     const region = await bolgeModel.findOne({
       where: {
         bolge_kodu: value.bolge_kodu,
         status: 1,
       },
     });
+
+
 
     if (region) {
       return res
@@ -109,7 +120,7 @@ router.post("/addRegion", authenticateToken, async (req, res) => {
 
     const newRegion = await bolgeModel.create({
       bolge_adi: value.bolge_adi,
-      bolge_muduru: req.user.id,
+      bolge_muduru: value.bolge_muduru,
       bolge_kodu: value.bolge_kodu,
       status: 1,
     });
@@ -126,14 +137,17 @@ router.post("/updateRegion", authenticateToken, async (req, res) => {
   try {
     const { error, value } = Joi.object({
       bolge_id: Joi.number().required(),
-      bolge_adi: Joi.string().required(),
-      bolge_muduru: Joi.string(),
-      status: Joi.number().required(),
+      bolge_adi: Joi.string().optional(),
+      bolge_muduru: Joi.number().optional(),
+      bolge_kodu: Joi.string().optional(),
+      status: Joi.number().optional(),
     }).validate(req.body);
 
     if (error) {
       return res.status(400).send(error);
     }
+
+    const { bolge_id, bolge_adi, bolge_muduru, bolge_kodu, status } = value;
 
     const sequelize = await initializeSequelize();
     const bolgeModel = sequelize.define("bolge", bolge, {
@@ -143,7 +157,7 @@ router.post("/updateRegion", authenticateToken, async (req, res) => {
 
     const region = await bolgeModel.findOne({
       where: {
-        bolge_id: value.bolge_id,
+        bolge_id: bolge_id,
       },
     });
 
@@ -151,31 +165,26 @@ router.post("/updateRegion", authenticateToken, async (req, res) => {
       return res.status(404).send("Bölge Bulunamadı!");
     }
 
-
-    await bolgeModel.update(
+    const updatedRegion = await region.update(
       {
-        status: value.status,
-        bolge_adi:value.bolge_adi,
-        bolge_muduru: req.user.id,
+        bolge_adi: bolge_adi || region.bolge_adi,
+        bolge_muduru: bolge_muduru || region.bolge_muduru,
+        bolge_kodu: bolge_kodu || region.bolge_kodu,
+        status: status !== undefined ? status : region.status, 
       },
       {
         where: {
-          bolge_id: value.bolge_id,
+          bolge_id: bolge_id,
         },
       }
     );
 
-    return res
-      .status(200)
-      .send(
-        `${region.bolge_adi} Bölgesi ${
-          value.status === 1 ? "Aktif" : "Pasif"
-        }  Olarak Güncellendi.`
-      );
+    return res.status(200).send(updatedRegion);
   } catch (error) {
     console.error("Update Region Status Error:", error);
     return res.status(500).send(error);
   }
 });
+
 
 module.exports = router;
