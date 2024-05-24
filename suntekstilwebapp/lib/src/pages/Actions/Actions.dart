@@ -7,7 +7,6 @@ import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'dart:convert';
 import 'package:toastification/toastification.dart';
 
-
 class ActionPage extends StatefulWidget {
   @override
   _ActionPageState createState() => _ActionPageState();
@@ -70,6 +69,7 @@ class _ActionPageState extends State<ActionPage> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      pageTitle: 'Aksiyonlar',
       body: Column(
         children: [
           Padding(
@@ -413,9 +413,7 @@ class _ActionPageState extends State<ActionPage> {
                               DataCell(
                                 Switch(
                                   value: action['status'] == 1,
-                                  onChanged: (value) {
-                                    
-                                  },
+                                  onChanged: (value) {},
                                   activeColor: action['status'] == 1
                                       ? Colors.green
                                       : Colors.grey,
@@ -454,6 +452,19 @@ class _ActionPageState extends State<ActionPage> {
   }
 
   void _applyFilters() {
+    toastification.show(
+      context: context,
+      title: Text('Başarılı'),
+      description: Text('Filtreleme Başarılı!.'),
+      icon: const Icon(Icons.check),
+      type: ToastificationType.success,
+      style: ToastificationStyle.flatColored,
+      autoCloseDuration: const Duration(seconds: 5),
+      showProgressBar: true,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
     setState(() {
       _currentPage = 1;
     });
@@ -461,6 +472,19 @@ class _ActionPageState extends State<ActionPage> {
   }
 
   void _clearFilters() {
+        toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Filtreler Kaldırıldı!.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 5),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
     setState(() {
       _searchController.clear();
       _startDate = null;

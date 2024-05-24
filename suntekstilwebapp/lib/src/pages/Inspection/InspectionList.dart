@@ -101,11 +101,9 @@ class _InspectionPageState extends State<InspectionPage> {
       }),
     );
     if (response.statusCode == 201) {
-    
       final responseData = json.decode(response.body);
       _fetchInspections();
     } else {
-   
       throw Exception('Failed to load inspections');
     }
   }
@@ -168,10 +166,36 @@ class _InspectionPageState extends State<InspectionPage> {
   }
 
   void _applyFilters() {
+    toastification.show(
+      context: context,
+      title: Text('Başarılı'),
+      description: Text('Filtreleme Başarılı!.'),
+      icon: const Icon(Icons.check),
+      type: ToastificationType.success,
+      style: ToastificationStyle.flatColored,
+      autoCloseDuration: const Duration(seconds: 5),
+      showProgressBar: true,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
     _fetchInspections();
   }
 
   void _clearFilters() {
+    toastification.show(
+      context: context,
+      title: Text('Başarılı'),
+      description: Text('Filtreler Kaldırıldı!.'),
+      icon: const Icon(Icons.check),
+      type: ToastificationType.success,
+      style: ToastificationStyle.flatColored,
+      autoCloseDuration: const Duration(seconds: 5),
+      showProgressBar: true,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
     setState(() {
       _searchController.clear();
       _startDate = null;
@@ -386,16 +410,18 @@ class _InspectionPageState extends State<InspectionPage> {
                 Tooltip(
                   message: "Filtrele",
                   child: IconButton(
-                    icon: Icon(Icons.filter_alt),
-                    onPressed: _applyFilters,
-                  ),
+                      icon: Icon(Icons.filter_alt),
+                      onPressed: () {
+                        _applyFilters();
+                      }),
                 ),
                 Tooltip(
                   message: "Filtreleri Temizle",
                   child: IconButton(
-                    icon: Icon(Icons.delete_forever_sharp),
-                    onPressed: _clearFilters,
-                  ),
+                      icon: Icon(Icons.delete_forever_sharp),
+                      onPressed: () {
+                        _clearFilters();
+                      }),
                 ),
 
                 SizedBox(width: 8.0),
