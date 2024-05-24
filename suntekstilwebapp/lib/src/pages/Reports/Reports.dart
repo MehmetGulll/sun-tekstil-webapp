@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
-import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/pages/ReportDetail/ReportDetail.dart';
-import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
-import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
-import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'package:toastification/toastification.dart';
 
 class Reports extends StatefulWidget {
@@ -85,18 +78,6 @@ class _ReportsState extends State<Reports> {
     return _reports;
   }
 
-  Future<void> deleteReport(int id) async {
-    final response =
-        await http.delete(Uri.parse('${ApiUrls.deleteReport}/$id'));
-    if (response.statusCode == 200) {
-      print("Rapor başarıyla silindi");
-      setState(() {
-        _reports.removeWhere((report) => report['inspectionId'] == id);
-      });
-    } else {
-      print("Bir hata oluştu");
-    }
-  }
 
   
 
@@ -157,23 +138,13 @@ class _ReportsState extends State<Reports> {
 
   String? _chosenInspectorType;
   String? _chosenInspectorRole;
-  String? _chosenInspectorName;
-  String? _chosenLocationType;
-  String? _chosenAuditor;
-  String? _chosenVisitType;
-  String? _chosenCenterTeam;
+
 
   List<String> _inspectorType = [];
   List<String> _inspectorRole = [];
   List<String> _inspectorName = [];
-  List<String> _locationTypeList = [
-    'Location Type 1',
-    'Location Type 2',
-    'Location Type 3'
-  ];
-  List<String> _auditorList = ['Auditor 1', 'Auditor 2', 'Auditor 3'];
-  List<String> _visitTypeList = ['VisitType 1', 'VisitType 2', 'VisitType 3'];
-  List<String> _centerTeamList = ['Team 1', 'Team 2', 'Team 3'];
+
+
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
 

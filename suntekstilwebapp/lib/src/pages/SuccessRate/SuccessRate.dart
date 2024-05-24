@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Charts/PieCharts.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
-import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'package:suntekstilwebapp/src/components/Charts/PieCharts.dart';

@@ -4,7 +4,6 @@ import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
-import 'package:suntekstilwebapp/src/components/Checkbox/Checkbox.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
@@ -13,9 +12,6 @@ import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:typed_data';
-
 class OfficalUsers extends StatefulWidget {
   @override
   _OfficalUsers createState() => _OfficalUsers();
@@ -81,7 +77,6 @@ class _OfficalUsers extends State<OfficalUsers> {
       BuildContext context, int id, Map<String, dynamic> user) async {
     var currentStatus = user['status'] == 1 ? 'Pasif' : 'Aktif';
     var newStatus = currentStatus == 'Aktif' ? 0 : 1;
-    var currentUnvan = user['rol_adi'];
     print(user['id']);
     print(adController.text);
     print(soyadController.text);

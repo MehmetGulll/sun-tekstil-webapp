@@ -60,14 +60,10 @@ class _AddQuestionState extends State<AddQuestion> {
   // }
 
   final TextInputType keyboardType = TextInputType.text;
-  String? _chosenCountry;
-  String? _chosenCity;
-  String? _chosenRegion;
-  String? _chosenLocationManager;
+
   String? _chosenQuestionState;
   String? _chosenInspectionType;
   String? _chosenQuestionAnswer;
-  List<String> _countryList = ['Country 1', 'Country 2', 'Country 3'];
   Map<String, String> inspectionTypes = {
     'Bölge Müdürü Haftalık Kontrol': '1',
     'Bölge Müdürü Aylık Kontrol': '2',
@@ -76,12 +72,12 @@ class _AddQuestionState extends State<AddQuestion> {
   };
   Map<String, String> questionAnswer = {'Evet': '0', 'Hayır': '1'};
   Map<String, String> questionState = {'Aktif': '1', 'Pasif': '0'};
-  List<String> _regionList = ['Region 1', 'Region 2', 'Region 3'];
+
   List<String> _storeManagerType = [
     '1',
     '2',
   ];
-  List<String> _countyList = ['County 1', 'County 2', 'County 3'];
+
 
   Future<void> addQuestion(BuildContext context) async {
     String? token = await TokenHelper.getToken();

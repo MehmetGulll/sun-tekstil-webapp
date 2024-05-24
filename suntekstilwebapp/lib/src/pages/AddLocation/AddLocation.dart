@@ -13,7 +13,6 @@ import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class AddLocation extends StatefulWidget {
   @override
@@ -68,20 +67,13 @@ class _AddLocationState extends State<AddLocation> {
   }
 
   final TextInputType keyboardType = TextInputType.text;
-  String? _chosenCountry;
-  String? _chosenCity;
-  String? _chosenRegion;
-  String? _chosenLocationManager;
-  String? _chosenCounty;
-  String? _chosenStoreType;
-  String? _chosenManagerType;
-  List<String> _countryList = ['Country 1', 'Country 2', 'Country 3'];
-  List<String> _regionList = ['Region 1', 'Region 2', 'Region 3'];
+
+
+
   List<String> _storeManagerType = [
     '1',
     '2',
   ];
-  List<String> _countyList = ['County 1', 'County 2', 'County 3'];
   Future<void> addStore(BuildContext context) async {
     final auth = Provider.of<Auth>(context, listen: false);
     SharedPreferences prefs = await SharedPreferences.getInstance();
