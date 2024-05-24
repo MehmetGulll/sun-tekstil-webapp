@@ -97,7 +97,7 @@ class _ReportDetailState extends State<ReportDetail> {
 
   final font = pw.Font.ttf(fontData);
 
-  int rowsPerPage = 6; // istediğiniz satır sayısını belirleyin
+  int rowsPerPage = 6;
 
   for (var i = 0; i < data.length; i += rowsPerPage) {
     var pageData = data.sublist(i, min(i + rowsPerPage, data.length));
