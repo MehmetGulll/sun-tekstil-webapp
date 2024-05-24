@@ -149,6 +149,8 @@ class Login extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CustomButton(
+                    buttonColor: Themes.cardBackgroundColor,
+                    textColor: Themes.blackColor,
                       buttonText: "Giriş", onPressed: () => login(context)),
                   SizedBox(
                     width: 20,

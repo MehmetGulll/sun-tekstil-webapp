@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
-import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
 import 'package:suntekstilwebapp/src/pages/ReportDetail/ReportDetail.dart';
-import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'package:toastification/toastification.dart';
 
 class Reports extends StatefulWidget {
@@ -83,52 +78,8 @@ class _ReportsState extends State<Reports> {
     return _reports;
   }
 
-  Future<void> deleteReport(int id) async {
-    final response =
-        await http.delete(Uri.parse('${ApiUrls.deleteReport}/$id'));
-    if (response.statusCode == 200) {
-      print("Rapor başarıyla silindi");
-      setState(() {
-        _reports.removeWhere((report) => report['inspectionId'] == id);
-      });
-    } else {
-      print("Bir hata oluştu");
-    }
-  }
 
-  Future<void> updateReport(
-      BuildContext context, int id, Map<String, dynamic> report) async {
-    var currentStatus = report['status'];
-    var newStatus = currentStatus == 0 ? 1 : 0;
-    report['status'] = newStatus;
-    print("status değeeri");
-    print(report['status']);
-    print("id değeri");
-    print(report['inspectionId']);
-    String? token = await TokenHelper.getToken();
-
-    final response = await http.put(
-      Uri.parse(ApiUrls.updateReport),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': '$token'
-      },
-      body: jsonEncode(<String, String>{
-        'inspectionId': report['inspectionId'].toString(),
-        'status': newStatus.toString()
-      }),
-    );
-    if (response.statusCode == 200) {
-      print("Rapor başarıyla güncellendi");
-      setState(() {
-        var updatedReport =
-            _reports.firstWhere((r) => r['inspectionId'] == r['inspectionId']);
-        updatedReport['status'] = newStatus;
-      });
-    } else {
-      print("Bir hata oluştu");
-    }
-  }
+  
 
   Future<void> filteredReports() async {
     String startDate =
@@ -183,116 +134,17 @@ class _ReportsState extends State<Reports> {
   }
 
   List<Map<String, dynamic>> _reports = [];
-  void showModal(
-      BuildContext context, Color backgroundColor, String text, Map report) {
-    Map<String, int> items = {
-      'Bölge Müdürü Haftalık Kontrol': 1,
-      'Bölge Müdürü Aylık Kontrol': 2,
-      'Görsel Denetim': 3,
-      'Mağaza Denetim': 4,
-    };
-    inspectionTypeController.text = report['inspectionTypeId'].toString();
-    storeNameController.text = report['storeId'].toString();
-    inspectionRoleController.text = report['inspectorRole'].toString();
-    inspectionerNameController.text = report['inspectorName'].toString();
-    inspectionPointController.text = report['pointsReceived'].toString();
-    inspectionDateController.text = report['inspectionDate'].toString();
-    inspectionCompletionDateController.text =
-        report['inspectionCompletionDate'].toString();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CustomModal(
-          backgroundColor: backgroundColor,
-          text: text,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Rapor Düzenle",
-                    style: TextStyle(
-                        fontSize: Tokens.fontSize[9],
-                        fontWeight: Tokens.fontWeight[6]),
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(Icons.close))
-                ],
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Durum",
-                      style: TextStyle(fontSize: Tokens.fontSize[2]),
-                    ),
-                    CustomDropdown(
-                      selectedItem: report['status'] == 1 ? 'Aktif' : 'Pasif',
-                      items: ['Aktif', 'Pasif'],
-                      onChanged: (String? value) {},
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 600),
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Düzenle",
-                      textColor: Themes.blackColor,
-                      buttonColor: Themes.dividerColor,
-                      onPressed: () async {
-                        await updateReport(context, report['inspectionId'],
-                            Map<String, dynamic>.from(report));
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                ]),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
+ 
 
   String? _chosenInspectorType;
   String? _chosenInspectorRole;
-  String? _chosenInspectorName;
-  String? _chosenLocationType;
-  String? _chosenAuditor;
-  String? _chosenVisitType;
-  String? _chosenCenterTeam;
+
 
   List<String> _inspectorType = [];
   List<String> _inspectorRole = [];
   List<String> _inspectorName = [];
-  List<String> _locationTypeList = [
-    'Location Type 1',
-    'Location Type 2',
-    'Location Type 3'
-  ];
-  List<String> _auditorList = ['Auditor 1', 'Auditor 2', 'Auditor 3'];
-  List<String> _visitTypeList = ['VisitType 1', 'VisitType 2', 'VisitType 3'];
-  List<String> _centerTeamList = ['Team 1', 'Team 2', 'Team 3'];
+
+
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
 
@@ -374,17 +226,7 @@ class _ReportsState extends State<Reports> {
                       style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(8.0),
-                    child: CustomButton(
-                      buttonText: 'Düzenle',
-                      textColor: Themes.blueColor,
-                      buttonColor: Themes.whiteColor,
-                      onPressed: () {
-                        showModal(context, Themes.whiteColor, "", report);
-                      },
-                    ),
-                  ),
+                  
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: CustomButton(
@@ -600,14 +442,7 @@ class _ReportsState extends State<Reports> {
                             style: TextStyle(fontWeight: Tokens.fontWeight[2]),
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Themes.cardBackgroundColor,
-                          child: Text(
-                            "DÜZENLE",
-                            style: TextStyle(fontWeight: Tokens.fontWeight[2]),
-                          ),
-                        ),
+                      
                         Container(
                           padding: EdgeInsets.all(8.0),
                           color: Themes.cardBackgroundColor,

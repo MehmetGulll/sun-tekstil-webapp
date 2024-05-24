@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:suntekstilwebapp/src/API/url.dart';
-import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'dart:convert';
 import 'package:suntekstilwebapp/src/components/Modal/Modal.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
@@ -12,10 +11,6 @@ import 'package:suntekstilwebapp/src/components/Button/Button.dart';
 import 'package:suntekstilwebapp/src/components/Dropdown/Dropdown.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
-import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
-import 'package:provider/provider.dart';
-import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
-import 'package:suntekstilwebapp/src/components/Charts/BarCharts.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'package:toastification/toastification.dart';
 
@@ -77,19 +72,7 @@ class _QuestionsState extends State<Questions> {
   }
 
   List<Map<String, dynamic>> _questions = [];
-  Future<void> deleteQuestion(int id) async {
-    print(id);
-    final response =
-        await http.delete(Uri.parse('${ApiUrls.deleteQuestion}/$id'));
-    if (response.statusCode == 200) {
-      print("Mağaza başarıyla silindi");
-      setState(() {
-        _questions.removeWhere((question) => question['id'] == id);
-      });
-    } else {
-      print("Bir hata oluştu");
-    }
-  }
+  
 
   Future<void> updateQuestion(
       BuildContext context, int id, Map<String, dynamic> question) async {
