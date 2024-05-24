@@ -7,7 +7,7 @@ import 'package:suntekstilwebapp/src/pages/Actions/ActionsForStoreManager.dart';
 import 'package:suntekstilwebapp/src/pages/AddLocation/AddLocation.dart';
 import 'package:suntekstilwebapp/src/pages/AddQuestion/AddQuestion.dart';
 import 'package:suntekstilwebapp/src/pages/ChangePassword/ChangePassword.dart';
-import 'package:suntekstilwebapp/src/pages/HomePage/HomePage.dart';
+import 'package:suntekstilwebapp/src/pages/HomePage/Home.dart';
 import 'package:suntekstilwebapp/src/pages/Login/Login.dart';
 import 'package:suntekstilwebapp/src/pages/Mail/Mail.dart';
 import 'package:suntekstilwebapp/src/pages/OfficalUsers/OfficalUsers.dart';
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => Login(),
-        '/home': (context) => Home(),
+        '/home': (context) => HomePage(),
         '/register': (context) => Register(),
         '/questions': (context) => Questions(),
         '/stores': (context) => Stores(),

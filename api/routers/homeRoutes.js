@@ -39,7 +39,8 @@ router.get(
         },
       });
 
-      const completionPercentage = (completedCount / totalCount) * 100;
+      const completionPercentage = ((completedCount / totalCount) * 100).toFixed( 2 );
+
 
       return res
         .status(200)
@@ -108,7 +109,7 @@ router.get(
       if (lastFiveInspections.length === 0)
         return res
           .status(200)
-          .send("Kullanıcıya ait son 3 denetim bulunamadı.");
+          .send([]);
 
       const modifiedLastFiveInspections = lastFiveInspections.map(
         (inspection) => {

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
 import 'package:suntekstilwebapp/src/components/Input/Input.dart';
 import 'package:suntekstilwebapp/src/components/Button/Button.dart';
-import 'package:suntekstilwebapp/src/components/Dialogs/ErrorDialog.dart';
-import 'package:suntekstilwebapp/src/components/Dialogs/SucessDialog.dart';
 import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
 import 'package:http/http.dart' as http;
+import 'package:toastification/toastification.dart';
 
 class ChangePassword extends StatefulWidget {
   @override
@@ -31,52 +30,48 @@ class _ChangePassword extends State<ChangePassword> {
       });
 
       if (response.statusCode == 200) {
-        String successMessage = "Şifre başarıyla değişti!!";
-        if (response.body.isNotEmpty) {
-          successMessage = response.body;
-        }
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SuccessDialog(
-                  successMessage: successMessage,
-                  successIcon: Icons.check,
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/home');
-                  });
-            });
+        toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Şifreniz başarıyla değiştirildi.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 3),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
+      Navigator.pushNamed(context, '/');
       } else if (response.statusCode == 401) {
-        String errorMessage = "Bir hata oluştu!!";
-        if (response.body.isNotEmpty) {
-          errorMessage = response.body;
-        }
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ErrorDialog(
-                errorMessage: errorMessage,
-                errorIcon: Icons.error,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              );
-            });
+        toastification.show(
+        context: context,
+        title: Text('Başarısız'),
+        description: Text(' Lütfen eski şifrenizi doğru girdiğinizden emin olun.'),
+        icon: const Icon(Icons.error_outline),
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 3),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
       } else {
-        String errorMessage = "Oops bir şeyler ters gitti!";
-        if (response.body.isNotEmpty) {
-          errorMessage = response.body;
-        }
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ErrorDialog(
-                errorMessage: errorMessage,
-                errorIcon: Icons.error,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              );
-            });
+        toastification.show(
+        context: context,
+        title: Text('Başarısız'),
+        description: Text('Şifre değiştirme işlemi başarısız oldu.'),
+        icon: const Icon(Icons.error_outline),
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 3),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
       }
     } catch (e) {
       print("Hata: $e");

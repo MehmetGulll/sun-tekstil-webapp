@@ -901,4 +901,198 @@ router.post("/closeAction", authenticateToken, async (req, res) => {
   }
 });
 
+// en çok aksiyonu olan mağazalrı listeler
+router.get("/getMostActionStore", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const aksiyonModel = sequelize.define("aksiyon", aksiyon, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const denetimSorulariModel = sequelize.define(
+      "denetim_sorulari",
+      denetim_sorulari,
+      {
+        timestamps: false,
+        freezeTableName: true,
+      }
+    );
+
+    const denetimModel = sequelize.define("denetim", denetim, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const magazaModel = sequelize.define("magaza", magaza, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    aksiyonModel.belongsTo(denetimSorulariModel, {
+      foreignKey: "ds_id",
+      as: "denetim_sorulari",
+    });
+
+    denetimSorulariModel.belongsTo(denetimModel, {
+      foreignKey: "denetim_id",
+      as: "denetim",
+    });
+
+    denetimModel.belongsTo(magazaModel, {
+      foreignKey: "magaza_id",
+      as: "magaza",
+    });
+
+    magazaModel.belongsTo(kullaniciModel, {
+      foreignKey: "magaza_muduru",
+      as: "kullanici",
+    });
+    const findMostActionStore = await aksiyonModel.findAll({
+      include: [
+        {
+          model: denetimSorulariModel,
+          as: "denetim_sorulari",
+          include: [
+            {
+              model: denetimModel,
+              as: "denetim",
+              include: [
+                {
+                  model: magazaModel,
+                  as: "magaza",
+                  include: [
+                    {
+                      model: kullaniciModel,
+                      as: "kullanici",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const storeList = findMostActionStore.map((item) => {
+      return {
+        magaza_id: item.denetim_sorulari.denetim.magaza_id,
+        magaza_adi: item.denetim_sorulari.denetim.magaza.magaza_adi,
+        magaza_muduru:
+          item.denetim_sorulari.denetim.magaza.kullanici.ad +
+          " " +
+          item.denetim_sorulari.denetim.magaza.kullanici.soyad,
+        aksiyon_sayisi: findMostActionStore.filter(
+          (store) =>
+            store.denetim_sorulari.denetim.magaza_id ===
+            item.denetim_sorulari.denetim.magaza_id
+        ).length,
+      };
+    });
+
+    const mostActionStore = storeList.sort((a, b) =>
+      a.aksiyon_sayisi > b.aksiyon_sayisi ? -1 : 1
+    );
+
+    // discard the same magaza_id values and get the first 5
+
+    const uniqueStore = mostActionStore.filter(
+      (store, index, self) =>
+        index ===
+        self.findIndex((t) => t.magaza_id === store.magaza_id)
+    );
+    return res.status(200).send(uniqueStore.slice(0, 10));
+    
+
+  } catch (error) {
+
+    console.error("Get Most Action Store Error:", error);
+    return res.status(500).send(error);
+  }
+} );
+
+// en çok aksiyonu olan soruları listeler
+router.get("/getMostActionQuestion", authenticateToken, async (req, res) => {
+  try {
+    const sequelize = await initializeSequelize();
+    const aksiyonModel = sequelize.define("aksiyon", aksiyon, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const denetimSorulariModel = sequelize.define(
+      "denetim_sorulari",
+      denetim_sorulari,
+      {
+        timestamps: false,
+        freezeTableName: true,
+      }
+    );
+
+    const soruModel = sequelize.define("soru", soru, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    aksiyonModel.belongsTo(denetimSorulariModel, {
+      foreignKey: "ds_id",
+      as: "denetim_sorulari",
+    });
+
+    denetimSorulariModel.belongsTo(soruModel, {
+      foreignKey: "soru_id",
+      as: "soru",
+    });
+
+    const findMostActionQuestion = await aksiyonModel.findAll({
+      include: [
+        {
+          model: denetimSorulariModel,
+          as: "denetim_sorulari",
+          include: [
+            {
+              model: soruModel,
+              as: "soru",
+            },
+          ],
+        },
+      ],
+    });
+
+    const questionList = findMostActionQuestion.map((item) => {
+      return {
+        soru_id: item.denetim_sorulari.soru_id,
+        soru_adi: item.denetim_sorulari.soru.soru_adi,
+        aksiyon_sayisi: findMostActionQuestion.filter(
+          (question) =>
+            question.denetim_sorulari.soru_id ===
+            item.denetim_sorulari.soru_id
+        ).length,
+      };
+    });
+
+    const mostActionQuestion = questionList.sort((a, b) =>
+      a.aksiyon_sayisi > b.aksiyon_sayisi ? -1 : 1
+    );
+
+    // discard the same soru_id values and get the first 5
+
+    const uniqueQuestion = mostActionQuestion.filter(
+      (question, index, self) =>
+        index ===
+        self.findIndex((t) => t.soru_id === question.soru_id)
+    );
+    return res.status(200).send(uniqueQuestion.slice(0, 10));
+  } catch (error) {
+    console.error("Get Most Action Question Error:", error);
+    return res.status(500).send (error);
+  } 
+} );
+
 module.exports = router;
