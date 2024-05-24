@@ -19,12 +19,11 @@ class Home extends StatelessWidget {
   Future<Widget> fetchData(BuildContext context, String token) async {
     try {
       String? token = await TokenHelper.getToken();
-      print("tokenim $token");
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      int intId = prefs.getInt('rol') ?? 0;
-      print("Kullanici yetki id $intId");
+      int? userID = await currentUserIdHelper.getCurrentUserId();
+      print('userID: $userID');
 
-      final url = Uri.parse('${ApiUrls.getLastThreeInspections}/$intId');
+      final url = Uri.parse('${ApiUrls.getLastThreeInspections}/$userID');
       final response = await http.get(url, headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': '$token'
@@ -68,6 +67,7 @@ class Home extends StatelessWidget {
           color: Themes.cardBackgroundColor,
           children: announcements,
         );
+        print('Announcements: $announcements');
         return announcementCard;
       } else {
         print('Request failed with status: ${response.statusCode}');
@@ -116,6 +116,7 @@ class Home extends StatelessWidget {
     }
   }
 
+  List<Map<String, dynamic>> _kronikSorularData = [];
   Future<Map<String, dynamic>> kronikSorular() async {
     try {
       String? token = await TokenHelper.getToken();
@@ -128,7 +129,14 @@ class Home extends StatelessWidget {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('Data kronikSorular: $data');
-        return data;
+        _kronikSorularData = data as List<Map<String, dynamic>>;
+
+        Map<String, dynamic> kronikSorularData = {
+          'kronikSorular': _kronikSorularData,
+        };
+
+        print('kronikSorularData: $kronikSorularData');
+        return  kronikSorularData;
       } else {
         print('Request failed with status: ${response.statusCode}');
         return {};
@@ -182,9 +190,6 @@ class Home extends StatelessWidget {
                             return Text(
                                 'Error fetching data: ${kronikSnapshot.error}');
                           } else {
-                            Map<String, dynamic> kronikSorularData =
-                                kronikSnapshot.data as Map<String, dynamic>;
-
                             return CustomScaffold(
                               body: Padding(
                                 padding: const EdgeInsets.all(16.0),
@@ -355,7 +360,10 @@ class Home extends StatelessWidget {
                                                                                     fontWeight: Tokens.fontWeight[5],
                                                                                   ),
                                                                                 ),
-                                                                                Icon(Icons.arrow_right, size: 35,),
+                                                                                Icon(
+                                                                                  Icons.arrow_right,
+                                                                                  size: 35,
+                                                                                ),
                                                                                 Text(
                                                                                   '${ziyaretData['completionPercentage'] != null ? ziyaretData['completionPercentage'].toStringAsFixed(2) : '0.00'}%',
                                                                                   style: TextStyle(
@@ -421,7 +429,7 @@ class Home extends StatelessWidget {
                                                                                         message = 'Aktif Lokasyon Sayısı: ${snapshot.data}';
                                                                                       }
                                                                                     }
-                                                                             
+
                                                                                     return Column(
                                                                                       children: [
                                                                                         SizedBox(
@@ -497,7 +505,7 @@ class Home extends StatelessWidget {
                                                             ),
                                                             SizedBox(width: 8),
                                                             Text(
-                                                              "En Çok Aksiyonu Olan Lokasyonlar",
+                                                              "En Çok Aksiyonu Olan Mağazalar",
                                                               maxLines: 2,
                                                               textAlign:
                                                                   TextAlign
@@ -542,14 +550,14 @@ class Home extends StatelessWidget {
                                                           children: [
                                                             Icon(
                                                               Icons
-                                                                  .location_city,
+                                                                  .assignment_outlined,
                                                               size: 30,
                                                               color: Themes
                                                                   .cardTextColor,
                                                             ),
                                                             SizedBox(width: 8),
                                                             Text(
-                                                              "Aktif Lokasyon Sayısı",
+                                                              "En Çok Aksiyonu Olan Sorular",
                                                               maxLines: 2,
                                                               textAlign:
                                                                   TextAlign
@@ -594,137 +602,101 @@ class Home extends StatelessWidget {
                                                       color: Themes
                                                           .cardBackgroundColor,
                                                       children: [
-                                                        Row(
+                                                        Column(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
                                                                   .center,
                                                           children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .dashboard_outlined,
-                                                              size: 30,
-                                                              color: Themes
-                                                                  .cardTextColor,
-                                                            ),
-                                                            SizedBox(width: 8),
-                                                            FutureBuilder(
-                                                                future:
-                                                                    kronikSorular(),
-                                                                builder: (BuildContext
-                                                                        context,
-                                                                    AsyncSnapshot<
-                                                                            Map<String,
-                                                                                dynamic>>
-                                                                        snapshot) {
-                                                                  if (snapshot
-                                                                          .connectionState ==
-                                                                      ConnectionState
-                                                                          .waiting) {
-                                                                    return CircularProgressIndicator();
-                                                                  } else if (snapshot
-                                                                      .hasError) {
-                                                                    return Text(
-                                                                        'Hata:${snapshot.error}');
-                                                                  } else {
-                                                                    String
-                                                                        message =
-                                                                        '';
-                                                                    if (snapshot
-                                                                            .data !=
-                                                                        null) {
-                                                                      if (snapshot
-                                                                          .data!
-                                                                          .isEmpty) {
-                                                                        message =
-                                                                            'Kronik yanlış soru bulunamadı';
-                                                                      } else {
-                                                                        message =
-                                                                            'Kronik yanlış sorular: ${snapshot.data}';
-                                                                      }
-                                                                    }
-                                                                    return Column(
-                                                                      children: [
-                                                                        Text(
-                                                                          'Kronik Hale Gelen Sorular',
-                                                                          maxLines:
-                                                                              2,
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style: TextStyle(
-                                                                              color: Themes.cardTextColor,
-                                                                              fontSize: Tokens.fontSize[3],
-                                                                              fontWeight: Tokens.fontWeight[7]),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          height:
-                                                                              100,
-                                                                        ),
-                                                                        Text(
-                                                                          message,
-                                                                          maxLines:
-                                                                              2,
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style: TextStyle(
-                                                                              color: Themes.cardTextColor,
-                                                                              fontSize: Tokens.fontSize[2],
-                                                                              fontWeight: Tokens.fontWeight[5]),
-                                                                        )
-                                                                      ],
-                                                                    );
-                                                                  }
-                                                                })
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: Container(
-                                                    margin: EdgeInsets.only(
-                                                        left: 8),
-                                                    decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                        color:
-                                                            Themes.borderColor,
-                                                        width: 1,
-                                                      ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10),
-                                                    ),
-                                                    child: CustomCard(
-                                                      color: Themes
-                                                          .cardBackgroundColor,
-                                                      children: [
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .assignment_outlined,
-                                                              size: 30,
-                                                              color: Themes
-                                                                  .cardTextColor,
-                                                            ),
-                                                            SizedBox(width: 8),
-                                                            Text(
-                                                              "En Çok Aksiyon Başlatılan Sorular",
-                                                              maxLines: 2,
-                                                              textAlign:
-                                                                  TextAlign
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
                                                                       .center,
-                                                              style: TextStyle(
-                                                                color: Themes
-                                                                    .cardTextColor,
-                                                                fontSize: Tokens
-                                                                    .fontSize[3],
-                                                                fontWeight: Tokens
-                                                                    .fontWeight[7],
-                                                              ),
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.dashboard_outlined,
+                                                                  size: 30,
+                                                                  color: Themes
+                                                                      .cardTextColor,
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 10),
+                                                                Text(
+                                                                  'Kronik Hale Gelen Sorular',
+                                                                  maxLines: 2,
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    color: Themes
+                                                                        .cardTextColor,
+                                                                    fontSize:
+                                                                        Tokens.fontSize[
+                                                                            3],
+                                                                    fontWeight:
+                                                                        Tokens.fontWeight[
+                                                                            7],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 16),
+                                                            FutureBuilder<
+                                                                Map<String,
+                                                                    dynamic>>(
+                                                              future: kronikSorular(),
+                                                              builder: (BuildContext
+                                                                      context,
+                                                                  AsyncSnapshot<
+                                                                          Map<String,
+                                                                              dynamic>>
+                                                                      snapshot) {
+                                                                if (snapshot
+                                                                        .connectionState ==
+                                                                    ConnectionState
+                                                                        .waiting) {
+                                                                  return CircularProgressIndicator();
+                                                                } else if (snapshot
+                                                                    .hasError) {
+                                                                  return Text(
+                                                                      'Hata:${snapshot.error}');
+                                                                } else {
+                                                                  String
+                                                                      message =
+                                                                      '';
+                                                                  if (snapshot
+                                                                          .data !=
+                                                                      null) {
+                                                                    if (snapshot
+                                                                        .data!
+                                                                        .isEmpty) {
+                                                                      message =
+                                                                          'Kronik yanlış soru bulunamadı';
+                                                                    } else {
+                                                                      message =
+                                                                          'Kronik yanlış sorular: ${snapshot.data}';
+                                                                    }
+                                                                  }
+                                                                  return Text(
+                                                                    message,
+                                                                    maxLines: 2,
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Themes
+                                                                          .cardTextColor,
+                                                                      fontSize:
+                                                                          Tokens
+                                                                              .fontSize[2],
+                                                                      fontWeight:
+                                                                          Tokens
+                                                                              .fontWeight[5],
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
                                                             ),
                                                           ],
                                                         ),
