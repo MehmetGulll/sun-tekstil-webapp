@@ -236,6 +236,8 @@ class _RegisterState extends State<Register> {
             ),
             CustomButton(
                 buttonText: "Kullanıcı Ekle",
+                buttonColor: Themes.cardBackgroundColor,
+                textColor: Themes.blackColor,
                 onPressed: () => register(context)),
             isModalVisible
                 ? CustomModal(
