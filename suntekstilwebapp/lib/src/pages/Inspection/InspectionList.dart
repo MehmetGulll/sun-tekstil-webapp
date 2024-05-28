@@ -999,7 +999,7 @@ class _InspectionScreenState extends State<InspectionScreen> {
                     print('No file selected');
                   }
                 },
-                child: Text('Select a file'),
+                child: Text('Aksiyon Görseli Ekle'),
               ),
             ],
           ),
