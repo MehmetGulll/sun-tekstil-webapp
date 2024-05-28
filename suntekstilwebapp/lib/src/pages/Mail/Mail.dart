@@ -336,12 +336,33 @@ class _MailPageState extends State<MailPage> {
                   height: 50,
                 ),
                 Center(
-                  child: Text(
-                    "Mail Yönetimi",
-                    style: TextStyle(
-                      fontSize: Tokens.fontSize[9],
-                      fontWeight: Tokens.fontWeight[6],
-                    ),
+                  child: 
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.quick_contacts_mail_outlined,
+                        color: Themes.purpleColor,
+                        size: 45,
+                        shadows: [
+                          BoxShadow(
+                            color: Themes.purpleColor.withOpacity(0.5),
+                            spreadRadius: 1,
+                            blurRadius: 20,
+                            offset: Offset(0, 3),
+                          ),],
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "Mail Yönetimi",
+                        style: TextStyle(
+                          fontSize: Tokens.fontSize[9],
+                          fontWeight: Tokens.fontWeight[6],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(
@@ -359,9 +380,13 @@ class _MailPageState extends State<MailPage> {
                       setState(() {
                         _selectedDenetimTipi =
                             _denetimTipleri[index]['denetim_tip_id'];
+                        _fetchaAllSelectedKullanici(_selectedDenetimTipi);
                       });
-                      _fetchaAllSelectedKullanici(_selectedDenetimTipi);
+                      // _fetchaAllSelectedKullanici(_selectedDenetimTipi);
+                       _searchTextController.clear();
+                      _fetchAllUsers();
                       _getAllDataRight(_selectedDenetimTipi);
+                      denetimTip = _selectedDenetimTipi;
                     },
                   ),
                 ),

@@ -140,83 +140,102 @@ class _RegionsPageState extends State<Regions> {
     }
   }
 
-  void _showAddRegionDialog() {
-    TextEditingController bolgeAdiController = TextEditingController();
-    TextEditingController bolgeKoduController = TextEditingController();
-    int bolgeMuduruId = _allUsers.isNotEmpty ? _allUsers[0]['id'] : 0;
-    int status = 1;
+void _showAddRegionDialog() {
+  TextEditingController bolgeAdiController = TextEditingController();
+  TextEditingController bolgeKoduController = TextEditingController();
+  int bolgeMuduruId = _allUsers.isNotEmpty ? _allUsers[0]['id'] : 0;
+  
+  // Set status to Aktif (value: 1) and disable the dropdown
+  int status = 1;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Yeni Bölge Oluştur"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: bolgeAdiController,
-                decoration: InputDecoration(labelText: 'Bölge Adı'),
-              ),
-              TextField(
-                controller: bolgeKoduController,
-                decoration: InputDecoration(labelText: 'Bölge Kodu'),
-              ),
-              DropdownButtonFormField<int>(
-                value: bolgeMuduruId,
-                items: _allUsers.map<DropdownMenuItem<int>>((user) {
-                  return DropdownMenuItem<int>(
-                    value: user['id'],
-                    child: Text('${user['ad']} ${user['soyad']}'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    bolgeMuduruId = value!;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Bölge Müdürü ID'),
-              ),
-              DropdownButtonFormField<int>(
-                value: status,
-                items: [
-                  DropdownMenuItem(value: 1, child: Text("Aktif")),
-                  DropdownMenuItem(value: 0, child: Text("Pasif")),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    status = value!;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Durum'),
-                disabledHint: Text("Aktif"),
-              ),
-            ],
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: 600,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Yeni Bölge Oluştur",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: bolgeAdiController,
+                        decoration: InputDecoration(labelText: 'Bölge Adı'),
+                      ),
+                      TextField(
+                        controller: bolgeKoduController,
+                        decoration: InputDecoration(labelText: 'Bölge Kodu'),
+                      ),
+                      DropdownButtonFormField<int>(
+                        value: bolgeMuduruId,
+                        items: _allUsers.map<DropdownMenuItem<int>>((user) {
+                          return DropdownMenuItem<int>(
+                            value: user['id'],
+                            child: Text('${user['ad']} ${user['soyad']}'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            bolgeMuduruId = value!;
+                          });
+                        },
+                        decoration: InputDecoration(labelText: 'Bölge Müdürü ID'),
+                      ),
+                      // Dropdown with only one option "Aktif" and disabled
+                      DropdownButtonFormField<int>(
+                        value: status,
+                        items: [
+                          DropdownMenuItem(value: 1, child: Text("Aktif")),
+                        ],
+                        onChanged: null, // Disable dropdown
+                        decoration: InputDecoration(labelText: 'Durum'),
+                        disabledHint: Text("Aktif"),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              child: Text("İptal"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text("Kaydet"),
-              onPressed: () {
-                Map<String, dynamic> newRegion = {
-                  'bolge_adi': bolgeAdiController.text,
-                  'bolge_kodu': bolgeKoduController.text,
-                  'bolge_muduru': bolgeMuduruId
-                };
-                _addRegion(newRegion);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            child: Text("İptal"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            child: Text("Kaydet"),
+            onPressed: () {
+              Map<String, dynamic> newRegion = {
+                'bolge_adi': bolgeAdiController.text,
+                'bolge_kodu': bolgeKoduController.text,
+                'bolge_muduru': bolgeMuduruId
+              };
+              _addRegion(newRegion);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _showEditDialog(Map<String, dynamic> region) {
     TextEditingController bolgeAdiController =
@@ -230,47 +249,69 @@ class _RegionsPageState extends State<Regions> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Bölge Düzenle"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: bolgeAdiController,
-                decoration: InputDecoration(labelText: 'Bölge Adı'),
-              ),
-              TextField(
-                controller: bolgeKoduController,
-                decoration: InputDecoration(labelText: 'Bölge Kodu'),
-              ),
-              DropdownButtonFormField<int>(
-                value: bolgeMuduruId,
-                items: _allUsers.map<DropdownMenuItem<int>>((user) {
-                  return DropdownMenuItem<int>(
-                    value: user['id'],
-                    child: Text('${user['ad']} ${user['soyad']}'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    bolgeMuduruId = value!;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Bölge Müdürü ID'),
-              ),
-              DropdownButtonFormField<int>(
-                value: status,
-                items: [
-                  DropdownMenuItem(value: 1, child: Text("Aktif")),
-                  DropdownMenuItem(value: 0, child: Text("Pasif")),
+          contentPadding: EdgeInsets.zero,
+          content: Container(
+            width: 600,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Bölge Düzenle",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        TextField(
+                          controller: bolgeAdiController,
+                          decoration: InputDecoration(labelText: 'Bölge Adı'),
+                        ),
+                        TextField(
+                          controller: bolgeKoduController,
+                          decoration: InputDecoration(labelText: 'Bölge Kodu'),
+                        ),
+                        DropdownButtonFormField<int>(
+                          value: bolgeMuduruId,
+                          items: _allUsers.map<DropdownMenuItem<int>>((user) {
+                            return DropdownMenuItem<int>(
+                              value: user['id'],
+                              child: Text('${user['ad']} ${user['soyad']}'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              bolgeMuduruId = value!;
+                            });
+                          },
+                          decoration:
+                              InputDecoration(labelText: 'Bölge Müdürü ID'),
+                        ),
+                        DropdownButtonFormField<int>(
+                          value: status,
+                          items: [
+                            DropdownMenuItem(value: 1, child: Text("Aktif")),
+                            DropdownMenuItem(value: 0, child: Text("Pasif")),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              status = value!;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'Durum'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
-                onChanged: (value) {
-                  setState(() {
-                    status = value!;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Durum'),
               ),
-            ],
+            ),
           ),
           actions: [
             TextButton(

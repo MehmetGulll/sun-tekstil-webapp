@@ -197,67 +197,88 @@ class _InspectionTypePageState extends State<InspectionTypePage> {
     }
   }
 
-  void _showAddInspectionTypeDialog() {
-    TextEditingController denetimTipiController = TextEditingController();
-    TextEditingController denetimTipiKoduController = TextEditingController();
-    int status = 1;
+void _showAddInspectionTypeDialog() {
+  TextEditingController denetimTipiController = TextEditingController();
+  TextEditingController denetimTipiKoduController = TextEditingController();
+  int status = 1;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Yeni Denetim Tipi Oluştur"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: denetimTipiController,
-                decoration: InputDecoration(labelText: 'Denetim Tipi'),
-              ),
-              TextField(
-                controller: denetimTipiKoduController,
-                decoration: InputDecoration(labelText: 'Denetim Tipi Kodu'),
-              ),
-              DropdownButtonFormField<int>(
-                value: status,
-                items: [
-                  DropdownMenuItem(value: 1, child: Text("Aktif")),
-                  DropdownMenuItem(value: 0, child: Text("Pasif")),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    status = value!;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Status'),
-              ),
-            ],
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: 400,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Yeni Denetim Tipi Oluştur",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: denetimTipiController,
+                        decoration: InputDecoration(labelText: 'Denetim Tipi'),
+                      ),
+                      TextField(
+                        controller: denetimTipiKoduController,
+                        decoration: InputDecoration(labelText: 'Denetim Tipi Kodu'),
+                      ),
+                      DropdownButtonFormField<int>(
+                        value: status,
+                        items: [
+                          DropdownMenuItem(value: 1, child: Text("Aktif")),
+                          DropdownMenuItem(value: 0, child: Text("Pasif")),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            status = value!;
+                          });
+                        },
+                        decoration: InputDecoration(labelText: 'Status'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              child: Text("İptal"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text("Kaydet"),
-              onPressed: () {
-                Map<String, dynamic> newInspectionType = {
-                  'denetim_tipi': denetimTipiController.text,
-                  'denetim_tipi_kodu': denetimTipiKoduController.text,
-                  'status': status,
-                };
+        ),
+        actions: [
+          TextButton(
+            child: Text("İptal"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            child: Text("Kaydet"),
+            onPressed: () {
+              Map<String, dynamic> newInspectionType = {
+                'denetim_tipi': denetimTipiController.text,
+                'denetim_tipi_kodu': denetimTipiKoduController.text,
+                'status': status,
+              };
 
-                _addInspectionType(newInspectionType);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+              _addInspectionType(newInspectionType);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {

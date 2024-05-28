@@ -56,7 +56,7 @@ router.get("/kullanicilar", async (req, res) => {
 });
 
 // KULLANICI GİRİŞİ İÇİN
-router.post("/login", async (req, res) => {
+router.post("/panelLogin", async (req, res) => {
   try {
     const { error, value } = Joi.object({
       kullanici_adi: Joi.string().required(),
@@ -100,18 +100,22 @@ router.post("/login", async (req, res) => {
       ],
     });
 
+    if (!user) {
+      return res.status(404).send("Kullanici bulunamadi!");
+    }
+
     if (user.status === 0) {
       return res.status(400).send("Kullanici hesabi aktif degil!");
     }
-
-    if (!user) {
-      return res.status(404).send("Kullanici bulunamadi!");
+    
+    if (user.rol === 6) {
+      return res.status(401).send("Giriş İzniniz Yok!");
     }
 
     const isPasswordCorrect = await bcrypt.compare(sifre, user.sifre);
 
     if (!isPasswordCorrect) {
-      return res.status(401).send("Invalid username or password");
+      return res.status(401).send("Yanlış şifre! Lütfen kontrol ediniz.");
     }
 
     // Generate JWT token
@@ -125,7 +129,9 @@ router.post("/login", async (req, res) => {
       rol_adi: user.userRole ? user.userRole.rol_adi : "Default Kullanici",
     };
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET_KEY);
-
+    
+    console.log("Hoşgeldin ad soyad: ", user.ad, user.soyad);
+    
     return res.status(200).send({ token, user: tokenPayload });
   } catch (error) {
     console.error("Login Error:", error);
