@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:suntekstilwebapp/src/components/Sidebar/custom_scaffold.dart';
-import 'package:suntekstilwebapp/src/components/Input/Input.dart';
-import 'package:suntekstilwebapp/src/constants/theme.dart';
 import 'package:suntekstilwebapp/src/constants/tokens.dart';
 import 'package:suntekstilwebapp/src/API/url.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
@@ -85,7 +83,7 @@ class _ChangePassword extends State<ChangePassword> {
       body: Center(
         child: Container(
           padding: EdgeInsets.all(24.0),
-          constraints: BoxConstraints(maxWidth: 600), 
+          constraints: BoxConstraints(maxWidth: 600),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.0),
@@ -107,23 +105,32 @@ class _ChangePassword extends State<ChangePassword> {
                     fontWeight: Tokens.fontWeight[6]),
               ),
               SizedBox(height: 20),
-              CustomInput(
+              TextFormField(
                 controller: oldPasswordController,
-                hintText: "Eski Şifre",
+                decoration: InputDecoration(
+                  labelText: "Eski Şifre",
+                  hintText: "Eski Şifrenizi Girin",
+                ),
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true,
               ),
               SizedBox(height: 20),
-              CustomInput(
+              TextFormField(
                 controller: newPasswordController,
-                hintText: "Yeni Şifre",
+                decoration: InputDecoration(
+                  labelText: "Yeni Şifre",
+                  hintText: "Yeni Şifrenizi Girin",
+                ),
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true,
               ),
               SizedBox(height: 20),
-              CustomInput(
+              TextFormField(
                 controller: confirmPasswordController,
-                hintText: "Tekrar Yeni Şifre",
+                decoration: InputDecoration(
+                  labelText: "Tekrar Yeni Şifre",
+                  hintText: "Yeni Şifrenizi Tekrar Girin",
+                ),
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true,
               ),
@@ -131,9 +138,12 @@ class _ChangePassword extends State<ChangePassword> {
               Tooltip(
                 message: 'Şifreyi Değiştir',
                 child: ElevatedButton(
-                  child: Text("Şifre Değişikliğini Kaydet",
-                      style: TextStyle(
-                          fontSize: Tokens.fontSize[3])),
+                  child: Text(
+                    "Şifre Değişikliğini Kaydet",
+                    style: TextStyle(
+                      fontSize: Tokens.fontSize[3],
+                    ),
+                  ),
                   onPressed: () {
                     if (newPasswordController.text !=
                         confirmPasswordController.text) {
