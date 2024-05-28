@@ -147,9 +147,12 @@ class _OfficalUsers extends State<OfficalUsers> {
     emailController.text = user['eposta'];
     unvanController.text = user['rol_adi'];
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CustomModal(
+  context: context,
+  builder: (BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: 600, // Set the width of the dialog
+        child: CustomModal(
           backgroundColor: backgroundColor,
           text: text,
           child: Column(
@@ -160,14 +163,16 @@ class _OfficalUsers extends State<OfficalUsers> {
                   Text(
                     "Yetkili Düzenle",
                     style: TextStyle(
-                        fontSize: Tokens.fontSize[9],
-                        fontWeight: Tokens.fontWeight[6]),
+                      fontSize: Tokens.fontSize[9],
+                      fontWeight: Tokens.fontWeight[6],
+                    ),
                   ),
                   IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(Icons.close))
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: Icon(Icons.close),
+                  )
                 ],
               ),
               SizedBox(
@@ -210,7 +215,7 @@ class _OfficalUsers extends State<OfficalUsers> {
                       selectedItem: user['status'] == 1 ? 'Aktif' : 'Pasif',
                       items: ['Aktif', 'Pasif'],
                       onChanged: (String? value) {
-                        user['status'] = value == 'Aktif' ? 1:0;
+                        user['status'] = value == 'Aktif' ? 1 : 0;
                       },
                     ),
                   ],
@@ -243,32 +248,39 @@ class _OfficalUsers extends State<OfficalUsers> {
                 height: 20,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 600),
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Expanded(
-                    child: CustomButton(
-                      buttonText: "Düzenle",
-                      buttonColor: Themes.dividerColor,
-                      textColor: Themes.blackColor,
-                      onPressed: () async {
-                        print("Butona basıldı");
-                        await updateUser(context, user['id'],
-                            Map<String, dynamic>.from(user));
-                      },
+                padding: EdgeInsets.symmetric(horizontal: 20), // Adjusted padding
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: CustomButton(
+                        buttonText: "Düzenle",
+                        buttonColor: Themes.dividerColor,
+                        textColor: Themes.blackColor,
+                        onPressed: () async {
+                          print("Butona basıldı");
+                          await updateUser(
+                            context,
+                            user['id'],
+                            Map<String, dynamic>.from(user),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                ]),
+                    SizedBox(
+                      width: 20,
+                    ),
+                  ],
+                ),
               )
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
-  }
+  },
+);
+ }
 
   @override
   Widget build(BuildContext context) {

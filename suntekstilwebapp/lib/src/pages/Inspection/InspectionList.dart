@@ -173,7 +173,7 @@ class _InspectionPageState extends State<InspectionPage> {
       icon: const Icon(Icons.check),
       type: ToastificationType.success,
       style: ToastificationStyle.flatColored,
-      autoCloseDuration: const Duration(seconds: 5),
+      autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: true,
       pauseOnHover: true,
       dragToClose: true,
@@ -613,7 +613,7 @@ class _InspectionPageState extends State<InspectionPage> {
               ),
             ),
           ),
-          SizedBox(height: 16.0),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

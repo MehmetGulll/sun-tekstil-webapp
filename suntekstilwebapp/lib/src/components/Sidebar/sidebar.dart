@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../constants/theme.dart';
 import '../../API/url.dart';
 import 'package:suntekstilwebapp/src/utils/token_helper.dart';
+import 'package:toastification/toastification.dart';
 
 class Sidebar extends StatefulWidget {
   @override
@@ -39,6 +40,20 @@ class _SidebarState extends State<Sidebar> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       Navigator.pushNamed(context, '/');
+      toastification.show(
+        context: context,
+        title: Text('Başarılı'),
+        description: Text('Çıkış işlemi başarılı bir şekilde gerçekleşti.'),
+        icon: const Icon(Icons.check),
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 3),
+        showProgressBar: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: true,
+      );
+
     } else {
       print("Çıkış işlemi başarısız.. ");
     }
@@ -199,6 +214,7 @@ class _SidebarState extends State<Sidebar> {
             }
           },
         ),
+        if(currentUserId == 1 || currentUserId == 2) ...{
         ListTile(
           leading: Icon(Icons.add_location_alt_sharp),
           title: Text(
@@ -212,6 +228,7 @@ class _SidebarState extends State<Sidebar> {
             }
           },
         ),
+        }
       ],
     );
 

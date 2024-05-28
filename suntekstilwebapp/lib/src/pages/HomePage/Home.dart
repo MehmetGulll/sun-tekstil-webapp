@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (response.body == '[]') {
       setState(() {
-        lastThreeInspections = [ ];
+        lastThreeInspections = [];
       });
     }
     if (response.statusCode == 200) {
@@ -134,7 +134,7 @@ class _HomePageState extends State<HomePage> {
       print(response.body);
     }
   }
-  
+
   Future<void> _getMostActionStore() async {
     var token = await TokenHelper.getToken();
     var response = await http.get(
@@ -151,8 +151,7 @@ class _HomePageState extends State<HomePage> {
       print(response.body);
     }
   }
-  
-  
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -244,41 +243,88 @@ Widget _buildInspectionsBox() {
             ],
           ),
           SizedBox(height: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:  lastThreeInspections.map((inspection) {
-              String inspectionType = inspection['denetim_tipi'];
-              String inspectionDate = inspection['denetim_tarihi'];
-              inspectionDate = inspectionDate.split('-').reversed.join('.');
-              String store = inspection['magaza'];
-              String auditor = inspection['denetci'];
-              String status = inspection['status'] == 0 ? 'Tamamlandı' : 'Tamamlanmadı';
-              String score = inspection['alinan_puan'] == '' ? '' : inspection['alinan_puan'].toString();
-
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Column(
+          lastThreeInspections.isEmpty
+              ? Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    'Henüz bir denetim yapılmamıştır.',
+                    style: TextStyle(fontSize: 15),
+                  ),
+                )
+              : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('• Denetim Türü: $inspectionType , Mağaza: $store , Denetçi: $auditor , Denetim Tarihi: $inspectionDate , Durum: $status , Alınan Puan: $score', style: TextStyle(fontSize: 15)), 
-                  ],
+                  children: lastThreeInspections.map((inspection) {
+                    String inspectionType = inspection['denetim_tipi'];
+                    String inspectionDate = inspection['denetim_tarihi'];
+                    inspectionDate = inspectionDate.split('-').reversed.join('.');
+                    String store = inspection['magaza'];
+                    String auditor = inspection['denetci'];
+                    String status = inspection['status'] == 0 ? 'Tamamlandı' : 'Tamamlanmadı';
+                    String score = inspection['alinan_puan']?.toString() ?? '';
+
+                    Color statusColor = inspection['status'] == 0 ? Colors.green : Color.fromARGB(255, 255, 214, 78);
+                    Color scoreColor = Colors.black;
+
+                    if (score.isNotEmpty) {
+                      try {
+                        int scoreValue = int.parse(score);
+                        if (scoreValue >= 80) {
+                          scoreColor = Colors.green;
+                        } else if (scoreValue >= 60) {
+                          scoreColor = Colors.yellow;
+                        } else {
+                          scoreColor = Colors.red;
+                        }
+                      } catch (e) {
+                        // Handle parse error if score is not a valid integer
+                        score = '-';
+                        scoreColor = Colors.red;
+                      }
+                    }
+
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: TextStyle(fontSize: 15, color: Colors.black),
+                              children: [
+                                TextSpan(text: '• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: 'Denetim Türü: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: '$inspectionType , '),
+                                TextSpan(text: 'Mağaza: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: '$store , '),
+                                TextSpan(text: 'Denetçi: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: '$auditor , '),
+                                TextSpan(text: 'Denetim Tarihi: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: '$inspectionDate , '),
+                                TextSpan(text: 'Durum: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: status,
+                                  style: TextStyle(color: statusColor),
+                                ),
+                                TextSpan(text: ' , Alınan Puan: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: score,
+                                  style: TextStyle(color: scoreColor),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
-              );
-            }).toList() 
-          ),
         ],
       ),
     ),
   );
 }
 
-//  List<dynamic> getMostActionQuestion = [];
-//  {
-//         "soru_id": 15,
-//         "soru_adi": "Mağaza içerisinde veya depoda İş Güvenliğini tehlikeye atacak bir durum varmı?",
-//         "aksiyon_sayisi": 9
-//     },
-Widget _mostActionQuestion(){
+  Widget _mostActionQuestion() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -304,9 +350,9 @@ Widget _mostActionQuestion(){
                 itemBuilder: (context, index) {
                   var question = getMostActionQuestion[index];
                   return ListTile(
-                    title: Text("• "+question['soru_adi']),
+                    title: Text("• " + question['soru_adi']),
                     subtitle: Text(
-                        ' Soru ID: ${question['soru_id']}, Aksiyon Sayısı: ${question['aksiyon_sayisi']}'),
+                        ' Soru No: ${question['soru_id']}, Aksiyon Sayısı: ${question['aksiyon_sayisi']}'),
                   );
                 },
               ),
@@ -315,7 +361,7 @@ Widget _mostActionQuestion(){
         ),
       ),
     );
-}
+  }
 
 //   List<dynamic> getMostActionStore = [];
 //  {
@@ -325,45 +371,44 @@ Widget _mostActionQuestion(){
 //         "aksiyon_sayisi": 13
 //     },
 
-Widget _mostActionStore(){
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.store, size: 36),
-              SizedBox(width: 8),
-              Text(
-                'En Çok Aksiyon Alan Mağazalar',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: getMostActionStore.length,
-              itemBuilder: (context, index) {
-                var store = getMostActionStore[index];
-                return ListTile(
-                  title: Text("• "+store['magaza_adi']),
-                  subtitle: Text(
-                      ' Mağaza ID: ${store['magaza_id']}, Mağaza Müdürü: ${store['magaza_muduru']}, Aksiyon Sayısı: ${store['aksiyon_sayisi']}'),
-                );
-              },
+  Widget _mostActionStore() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.store, size: 36),
+                SizedBox(width: 8),
+                Text(
+                  'En Çok Aksiyon Alan Mağazalar',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+              ],
             ),
-          ),
-        ],
+            SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: getMostActionStore.length,
+                itemBuilder: (context, index) {
+                  var store = getMostActionStore[index];
+                  return ListTile(
+                    title: Text("• " + store['magaza_adi']),
+                    subtitle: Text(
+                        ' Mağaza No: ${store['magaza_id']}, Mağaza Müdürü: ${store['magaza_muduru']}, Aksiyon Sayısı: ${store['aksiyon_sayisi']}'),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-
-}
+    );
+  }
 
   // Widget _buildActions() {
   //   return Card(
@@ -431,50 +476,49 @@ Widget _mostActionStore(){
   //   );
   // }
 
-Widget _buildFrequentlyWrongQuestionsBox() {
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 36),
-              SizedBox(width: 8),
-              Text(
-                'Kronik Hale Gelen Sorular',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: frequentlyWrongQuestions.length,
-              itemBuilder: (context, index) {
-                var question = frequentlyWrongQuestions[index];
-                var questions = question['questions'] as List<dynamic>;
-                return Column(
-                  children: questions
-                      .map((q) => ListTile(
-                            title: Text("• "+q['soru_adi']),
-                            subtitle: Text(
-                                ' Soru ID: ${q['soru_id']}, Hata Sayısı: ${q['question_count']}'),
-                          ))
-                      .toList(),
-                );
-              },
+  Widget _buildFrequentlyWrongQuestionsBox() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 36),
+                SizedBox(width: 8),
+                Text(
+                  'Kronik Hale Gelen Sorular',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+              ],
             ),
-          ),
-        ],
+            SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: frequentlyWrongQuestions.length,
+                itemBuilder: (context, index) {
+                  var question = frequentlyWrongQuestions[index];
+                  var questions = question['questions'] as List<dynamic>;
+                  return Column(
+                    children: questions
+                        .map((q) => ListTile(
+                              title: Text("• " + q['soru_adi']),
+                              subtitle: Text(
+                                  ' Soru No: ${q['soru_id']}, Hata Sayısı: ${q['question_count']}'),
+                            ))
+                        .toList(),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildInspectionCompletionStatusBox() {
     return Card(
@@ -505,7 +549,7 @@ Widget _buildFrequentlyWrongQuestionsBox() {
                     '${inspectionCompletionStatus['completedCount']}/${inspectionCompletionStatus['totalCount']}',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  Icon(Icons.arrow_right , size: 36),
+                  Icon(Icons.arrow_right, size: 36),
                   Text(
                     '${inspectionCompletionStatus['completionPercentage']}%',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -522,7 +566,8 @@ Widget _buildFrequentlyWrongQuestionsBox() {
             SizedBox(height: 16),
             Center(
               child: Tooltip(
-                message: 'Başarı Oranlarını İstatistiğini Görmek İçin Tıklayınız',
+                message:
+                    'Başarı Oranlarını İstatistiğini Görmek İçin Tıklayınız',
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(
@@ -535,7 +580,6 @@ Widget _buildFrequentlyWrongQuestionsBox() {
                   child: Text('BAŞARI ORANLARINI GÖR'),
                 ),
               ),
-              
             ),
             SizedBox(height: 16),
             Center(

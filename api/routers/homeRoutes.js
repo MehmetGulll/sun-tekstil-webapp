@@ -41,10 +41,9 @@ router.get(
 
       const completionPercentage = ((completedCount / totalCount) * 100).toFixed( 2 );
 
-
-      return res
-        .status(200)
-        .send({ completedCount, totalCount, completionPercentage });
+      if(completionPercentage === "NaN") return res.status(200).send({ completedCount: 0, totalCount: 0, completionPercentage: 0 });
+      return res.status(200).send({ completedCount, totalCount, completionPercentage });
+    
     } catch (error) {
       console.error(error);
       return res.status(500).send(error);

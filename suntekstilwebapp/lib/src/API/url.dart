@@ -55,5 +55,6 @@ class ApiUrls {
   static const String getInspectionQuestions = "http://localhost:5000/getInspectionQuestions";
   static const String getMostActionStore = "http://localhost:5000/getMostActionStore";
   static const String getMostActionQuestion = "http://localhost:5000/getMostActionQuestion";
+  static const String panelLogin = "http://localhost:5000/panelLogin";
 
 }
