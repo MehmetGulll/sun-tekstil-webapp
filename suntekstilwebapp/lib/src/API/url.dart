@@ -56,5 +56,12 @@ class ApiUrls {
   static const String getMostActionStore = "http://localhost:5000/getMostActionStore";
   static const String getMostActionQuestion = "http://localhost:5000/getMostActionQuestion";
   static const String panelLogin = "http://localhost:5000/panelLogin";
+  static const String users = "http://localhost:5000/users";
+  static const String updateUserStatus = "http://localhost:5000/updateUserStatus";
+  static const String updateSelectedUser = "http://localhost:5000/updateSelectedUser";
+  static const String roles = "http://localhost:5000/roles";
+  static const String unvanlar = "http://localhost:5000/unvanlar";
+  static const String addUser = "http://localhost:5000/addUser";
+
 
 }
