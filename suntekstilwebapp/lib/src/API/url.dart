@@ -62,6 +62,8 @@ class ApiUrls {
   static const String roles = "http://localhost:5000/roles";
   static const String unvanlar = "http://localhost:5000/unvanlar";
   static const String addUser = "http://localhost:5000/addUser";
+  static const String forgotPassword = "http://localhost:5000/forgotPassword";
+  static const String updatePassword = "http://localhost:5000/updatePassword/:id";
 
 
 }

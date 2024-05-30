@@ -9,7 +9,6 @@ import 'package:suntekstilwebapp/src/Context/GlobalStates.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:toastification/toastification.dart';
-
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
@@ -19,6 +18,9 @@ class _LoginState extends State<Login> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   bool _obscureText = true;
+
+  final forgotUsernameController = TextEditingController();
+  final forgotEmailController = TextEditingController();
 
   void toast(BuildContext context, String title, String description,
       IconData icon, ToastificationType type) async {
@@ -77,6 +79,75 @@ class _LoginState extends State<Login> {
           ToastificationType.error);
     }
   }
+
+   Future<void> _forgotPassword() async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Şifremi Unuttum'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextFormField(
+                controller: forgotUsernameController,
+                decoration: InputDecoration(
+                  labelText: 'Kullanıcı Adı',
+                ),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: forgotEmailController,
+                decoration: InputDecoration(
+                  labelText: 'Eposta',
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () async {
+               final response = await http.post(Uri.parse(ApiUrls.forgotPassword),
+                  body: {
+                    'kullanici_adi': forgotUsernameController.text,
+                    'eposta': forgotEmailController.text
+                  },
+                );
+
+                if (response.statusCode == 200) {
+                  toast(
+                    context,
+                    'Başarılı',
+                    'Şifre sıfırlama epostası gönderildi.',
+                    Icons.check,
+                    ToastificationType.success,
+                  );
+                } else {
+                  toast(
+                    context,
+                    'Hata',
+                    'Kullanıcı adı veya eposta yanlış.',
+                    Icons.error,
+                    ToastificationType.error,
+                  );
+                }
+
+                Navigator.of(context).pop();
+              },
+              child: Text('Gönder'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,16 +244,14 @@ class _LoginState extends State<Login> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 175, 
+                    width: 215,
                     child: ElevatedButton(
                       onPressed: () => login(context),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.login), 
-                          SizedBox(
-                              width:
-                                  8),
+                          Icon(Icons.login),
+                          SizedBox(width: 8),
                           Text(
                             'Giriş',
                             style: TextStyle(
@@ -193,14 +262,29 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 20,
+                  SizedBox(width: 20),
+                  Container(
+                    width: 215,
+                    child: ElevatedButton(
+                      onPressed: _forgotPassword,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock_reset),
+                          SizedBox(width: 8),
+                          Text(
+                            'Şifremi Unuttum',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              )
+              SizedBox(height: 20),
             ],
           ),
         ),

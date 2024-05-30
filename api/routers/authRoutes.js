@@ -622,4 +622,63 @@ router.get("/unvanlar", authenticateToken, async (req, res) => {
   }
 });
 
+
+// update password from user id with url 
+router.post("/updatePassword/:id", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      sifre: Joi.string().min(5).required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { sifre } = value;
+    const { id } = req.params;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const user = await kullaniciModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).send("Kullanici bulunamadi!");
+    }
+
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+    if (!passwordRegex.test(sifre)) {
+      return res
+        .status(400)
+        .send(
+          "Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir!"
+        );
+    }
+
+    const hashedPassword = await bcrypt.hash(sifre, 10);
+
+    await kullaniciModel.update(
+      { sifre: hashedPassword },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    return res.status(200).send("Şifre başarıyla güncellendi.");
+  } catch (error) {
+    console.error("Update Password Error:", error);
+    return res.status(500).send(error);
+  }
+} );
+
+
 module.exports = router;

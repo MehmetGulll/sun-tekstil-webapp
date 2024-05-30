@@ -15,6 +15,7 @@ const {
   bolge,
 } = require("../helpers/sequelizemodels");
 const { sendMail } = require("../helpers/mailer");
+const bcrypt = require("bcrypt");
 
 // MAİL YONETIM SAĞ TARAF
 // Denetim Tipi ve Unvan ID yi kullanarak  unvanDenetimTipiLink tablosuna denetim_tipi ve unvan tablolarını birleştirir.
@@ -949,5 +950,77 @@ router.get("/getAllUsers", authenticateToken, async (req, res) => {
     return res.status(500).send(error);
   }
 });
+
+
+// send mail for forgot password to the user with check username and email match and find that user in the database and send mail to the user with a link to reset password 
+router.post("/forgotPassword", async (req, res) => {
+  try {
+    const schema = Joi.object({
+      kullanici_adi: Joi.string().required(),
+      eposta: Joi.string().email().required()
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const { kullanici_adi, eposta } = req.body;
+
+    const sequelize = await initializeSequelize();
+    const kullaniciModel = sequelize.define("kullanici", kullanici, {
+      timestamps: false,
+      freezeTableName: true,
+    });
+
+    const findUser = await kullaniciModel.findOne({
+      where: {
+        kullanici_adi: kullanici_adi,
+        eposta: eposta,
+      },
+    });
+
+    if (!findUser) return res.status(404).send("Kullanıcı bulunamadı.");
+    // random password with uppercase and lowercase letters and numbers
+    const randomPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    // update the user password and send it to the user with mail
+    const updatePassword = await kullaniciModel.update(
+      {
+        sifre: hashedPassword,
+      },
+      {
+        where: {
+          id: findUser.id,
+        },
+      }
+    );      
+
+    const textContent = `
+      <h1>Şifre Sıfırlama</h1>
+      <p>Merhaba ${findUser.ad} ${findUser.soyad},</p>
+      <>Yeni şifreniz aşağıdaki gibidir:</p>
+      <p>Şifreniz: ${randomPassword}</p>
+
+      <p>İyi çalışmalar dileriz. Şifrenizi kimselerle paylaşmayınız.</p>
+  `;
+
+
+    const mailOptions = {
+      from: {
+        name: "Şifre Sıfırlama",
+        address: "sunteks64039@gmail.com",
+      },
+      to: findUser.eposta,
+      subject: "Şifre Sıfırlama",
+      html: textContent, 
+    };
+
+    return res.status(200).send(await sendMail(mailOptions));
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).send(error);
+  } 
+}
+);
 
 module.exports = router;
