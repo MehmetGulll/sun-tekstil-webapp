@@ -998,7 +998,7 @@ router.post("/forgotPassword", async (req, res) => {
     const textContent = `
       <h1>Şifre Sıfırlama</h1>
       <p>Merhaba ${findUser.ad} ${findUser.soyad},</p>
-      <>Yeni şifreniz aşağıdaki gibidir:</p>
+      <p>Yeni şifreniz aşağıdaki gibidir:</p>
       <p>Şifreniz: ${randomPassword}</p>
 
       <p>İyi çalışmalar dileriz. Şifrenizi kimselerle paylaşmayınız.</p>
